@@ -54,7 +54,7 @@ Each session is a self-contained unit. Output of each session is committed and p
 
 - [ ] Enable pgvector extension in PostgreSQL
 - [ ] `User` model — id, email, passwordHash, role (TALENT/RECRUITER/ADMIN), emailVerified
-- [ ] `TalentProfile` model — all fields from SOW §3.1 (personal details, skills, certifications, career trajectory, availability, pricing, location prefs, visa eligibility, portfolio, verification status, profileEmbedding vector(1536))
+- [ ] `TalentProfile` model — all fields from SOW §3.1 (personal details, skills, certifications, career trajectory, availability, pricing, location prefs, visa eligibility, portfolio, verification status, culturalValues (JSON — work style, communication prefs, team dynamics), profileEmbedding vector(1536))
 - [ ] `Skill` model — id, name, displayName, category, embedding vector(1536)
 - [ ] `TalentSkill` join table — proficiency, yearsOfExperience
 - [ ] `Experience` model — role, company, startDate, endDate, description
@@ -68,6 +68,7 @@ Each session is a self-contained unit. Output of each session is committed and p
 - [ ] `Offer` model — interviewId, demandId, talentProfileId, rate, dates, terms, status
 - [ ] `AnalyticsEvent` model — eventType, actorId, targetId, metadata (JSON)
 - [ ] `Notification` model — userId, type, title, body, read, metadata
+- [ ] `PlacementFeedback` model — placementId, talentProfileId, recruiterId, rating (1-5), feedback text, skills demonstrated, completedSuccessfully, createdAt
 - [ ] Run `prisma migrate dev` — verify clean migration
 - [ ] Seed script with realistic data: 20 talent profiles, 5 companies, 10 demands, skills taxonomy (50+ skills)
 - [ ] Verify: seed runs, data queryable
@@ -93,6 +94,7 @@ Each session is a self-contained unit. Output of each session is committed and p
 - [ ] LinkedIn OAuth stub (config ready, mock provider for MVP)
 - [ ] Input validation on all auth endpoints (Zod)
 - [ ] Rate limiting on login/register endpoints
+- [ ] Phone/OTP authentication — **Phase 2** (documented in roadmap; MVP uses email + password)
 
 **Commit:** `feat: authentication system with RBAC (web + mobile + API)`
 
@@ -134,11 +136,13 @@ Each session is a self-contained unit. Output of each session is committed and p
 - [ ] `POST /generate-embedding` endpoint
 - [ ] Vector similarity search — cosine distance query via pgvector
 - [ ] Composite scoring algorithm:
-  - Skill match (40%) — vector similarity on skill sets
+  - Skill match (35%) — vector similarity on skill sets
   - Experience fit (20%) — seniority level alignment
-  - Availability (15%) — timeline compatibility
-  - Pricing fit (15%) — budget vs. rate overlap
+  - Availability (10%) — timeline compatibility
+  - Pricing fit (10%) — budget vs. rate overlap
   - Location match (10%) — location/remote alignment
+  - Cultural values fit (10%) — work style + communication alignment (SOW §3.2)
+  - Past placement feedback (5%) — historical ratings from previous engagements
 - [ ] Match explanation generator — LLM generates "Why this match" text
 - [ ] `POST /match-candidates` endpoint — input: demandId, output: ranked list with scores + breakdown + explanations
 - [ ] `POST /semantic-search` endpoint — free-text query against talent pool
@@ -337,6 +341,14 @@ Each session is a self-contained unit. Output of each session is committed and p
   - Create offer: hourly rate, start/end date, terms
   - Send offer → candidate notified
   - Track status: Draft, Sent, Accepted, Declined, Withdrawn
+- [ ] **Digital contract generation (SOW §3.16):**
+  - On accepted offer → generate PDF contract from template (role, rate, dates, terms)
+  - Recruiter + talent can download signed contract PDF
+  - Contract stored in Cloudflare R2
+- [ ] **Onboarding checklist (SOW §3.16):**
+  - On accepted offer → auto-create onboarding checklist (welcome email, access provisioning, orientation schedule)
+  - Recruiter tracks onboarding progress per hire
+  - Basic checklist UI with checkable items
 - [ ] **Pipeline view (Kanban-style, optional):**
   - Columns: AI Suggested → Reviewed → Interview → Offer → Hired
   - Drag and drop candidates between stages
@@ -363,7 +375,8 @@ Each session is a self-contained unit. Output of each session is committed and p
   - Deactivate / reactivate user
 - [ ] **Talent Verification Queue:**
   - List of talents with PENDING verification status
-  - Click → see full profile + uploaded documents
+  - Click → see full profile + uploaded identity documents + certifications
+  - Verify identity documents against profile data
   - Approve / Reject buttons with reason field
 - [ ] **Company Management:**
   - List of portfolio companies
@@ -373,7 +386,10 @@ Each session is a self-contained unit. Output of each session is committed and p
   - Queue of demands pending approval
   - Approve / Request Changes
 - [ ] **Concierge / Headhunter Management (SOW §3.7):**
-  - Placeholder page for managing headhunter accounts
+  - Headhunter role type + RBAC permissions
+  - Headhunter candidate submission form (submit external candidates for a demand)
+  - Admin can assign roles to headhunters for sourcing
+  - Submission tracking: submitted → reviewed → shortlisted / rejected
   - Ability to flag roles as "hard-to-fill" for concierge service
 
 **Commit:** `feat: admin console — user management, verification, governance`
@@ -425,6 +441,11 @@ Each session is a self-contained unit. Output of each session is committed and p
   - Edit: headline, summary, skills (add/remove), experience, certifications, education
   - Set availability, hourly rate, location preferences, visa eligibility
   - Profile completeness indicator (progress bar)
+- [ ] **Identity document upload (SOW §3.1):**
+  - Upload government ID / passport photo for verification
+  - Upload certifications or professional documents
+  - Status indicator: Pending Review / Verified / Rejected
+  - Documents stored securely in Cloudflare R2
 - [ ] **Profile screen (after onboarding):**
   - View own profile as others see it
   - Edit button → edit mode
@@ -560,7 +581,7 @@ Every SOW section mapped to a session. Nothing missed.
 | §3.4 | AI Role Description Assistant | Session 6 | ⬜ |
 | §3.5 | Talent Shortlisting System | Sessions 5, 7, 11 | ⬜ |
 | §3.6 | Smart Talent Search | Sessions 5, 8, 12 | ⬜ |
-| §3.7 | Concierge Talent Acquisition | Session 14 (placeholder) | ⬜ |
+| §3.7 | Concierge Talent Acquisition | Session 14 | ⬜ |
 | §3.8 | Interview & Hiring Workflow | Sessions 7, 13, 17 | ⬜ |
 | §3.9 | Talent Mobility Services | Session 14 (placeholder) | ⬜ Phase 2+ |
 | §3.10 | Demand Forecasting Engine | Session 15 (simplified) | ⬜ |
@@ -569,7 +590,7 @@ Every SOW section mapped to a session. Nothing missed.
 | §3.13 | Reporting & Analytics | Session 15 | ⬜ |
 | §3.14 | Pricing & Monetization | Session 15 (display only) | ⬜ Phase 2 for billing |
 | §3.15 | Notification System | Sessions 8, 17 | ⬜ |
-| §3.16 | Contracting & Onboarding | Session 13 (offers/contracts) | ⬜ |
+| §3.16 | Contracting & Onboarding | Sessions 13, 16 | ⬜ |
 | §4 | Admin Platform | Session 14 | ⬜ |
 | §5 | Integrations | Sessions 3, 8, 18 | ⬜ |
 | §6 | AI Capabilities | Sessions 4, 5, 6 | ⬜ |
