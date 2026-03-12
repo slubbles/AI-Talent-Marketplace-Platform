@@ -1,0 +1,13 @@
+[project]
+name = "ai-talent-marketplace-ai-engine"
+version = "0.1.0"
+description = "Internal FastAPI service for the AI Talent Marketplace Platform"
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi>=0.115.11,<0.116.0",
+  "uvicorn>=0.34.0,<0.35.0"
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"

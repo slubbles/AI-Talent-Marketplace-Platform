@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: atm-postgres
+    environment:
+      POSTGRES_DB: ai_talent_marketplace
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ai_talent_marketplace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    image: node:20-alpine
+    container_name: atm-api
+    working_dir: /workspace
+    command: sh -c "npm run dev:api"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_talent_marketplace
+      DIRECT_URL: postgresql://postgres:postgres@postgres:5432/ai_talent_marketplace
+      JWT_SECRET: change-me
+      AI_ENGINE_URL: http://ai-engine:8000
+      HOST: 0.0.0.0
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./:/workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ai-engine:
+    image: python:3.12-slim
+    container_name: atm-ai-engine
+    working_dir: /workspace/services/ai-engine
+    command: sh -c "pip install -e . && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/workspace
+
+  web:
+    image: node:20-alpine
+    container_name: atm-web
+    working_dir: /workspace
+    command: sh -c "npm run dev:web"
+    environment:
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: change-me
+      GRAPHQL_API_URL: http://api:4000/graphql
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./:/workspace
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:

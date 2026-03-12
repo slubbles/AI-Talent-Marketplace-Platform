@@ -1,0 +1,11 @@
+{
+  "name": "@atm/ai-engine",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build": "echo \"Python service build handled by uvicorn/FastAPI\"",
+    "dev": "node ./scripts/run-dev.mjs",
+    "lint": "python -m py_compile app/main.py",
+    "typecheck": "python -m py_compile app/main.py"
+  }
+}

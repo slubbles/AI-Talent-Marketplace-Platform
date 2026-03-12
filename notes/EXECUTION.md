@@ -2,7 +2,7 @@
 
 > Master task list extracted from SOW. Every objective mapped to a concrete task.
 > One session = one module. Check off as we go.
-> Reference: [SOW](AI%20Talent%20Marketplace%20Platform%20(SOW).md) | [FOUNDATION](FOUNDATION.md)
+> Reference: [SOW](../maingoalandreference/AI%20Talent%20Marketplace%20Platform%20(SOW).md) | [FOUNDATION](FOUNDATION.md)
 
 ---
 
@@ -30,19 +30,19 @@ Each session is a self-contained unit. Output of each session is committed and p
 **SOW Reference:** §2 Platform Architecture, §8 Technology Stack
 **Goal:** Anyone can clone, run one command, and have everything running.
 
-- [ ] Initialize Turborepo monorepo
-- [ ] Create `apps/web` — Next.js 14 (App Router) with TypeScript
-- [ ] Create `apps/mobile` — Expo SDK 50 with Expo Router
-- [ ] Create `apps/api` — Node.js with Apollo Server (GraphQL)
-- [ ] Create `services/ai-engine` — Python with FastAPI
-- [ ] Create `packages/shared` — shared TypeScript types + validation (Zod)
-- [ ] Create `packages/db` — Prisma schema (empty, ready for models)
-- [ ] Create `packages/ui` — shadcn/ui component library scaffold
-- [ ] `docker-compose.yml` — PostgreSQL 16 (with pgvector), API, AI engine
-- [ ] `.env.example` with all required variables documented
-- [ ] `turbo.json` with build/dev/lint pipeline
-- [ ] Verify: `docker compose up` → all services healthy
-- [ ] Verify: `npm run dev` → web on :3000, API on :4000, AI on :8000
+- [x] Initialize Turborepo monorepo
+- [x] Create `apps/web` — Next.js 14 (App Router) with TypeScript
+- [x] Create `apps/mobile` — Expo SDK 50 with Expo Router
+- [x] Create `apps/api` — Node.js with Apollo Server (GraphQL)
+- [x] Create `services/ai-engine` — Python with FastAPI
+- [x] Create `packages/shared` — shared TypeScript types + validation (Zod)
+- [x] Create `packages/db` — Prisma schema (empty, ready for models)
+- [x] Create `packages/ui` — shadcn/ui component library scaffold
+- [x] `docker-compose.yml` — PostgreSQL 16 (with pgvector), API, AI engine
+- [x] `.env.example` with all required variables documented
+- [x] `turbo.json` with build/dev/lint pipeline
+- [x] Verify: `docker compose up` → all services healthy
+- [x] Verify: `npm run dev` → web on :3000, API on :4000, AI on :8000
 
 **Commit:** `feat: monorepo scaffold with all apps and services`
 

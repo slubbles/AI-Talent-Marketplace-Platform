@@ -1,0 +1,26 @@
+{
+  "name": "ai-talent-marketplace-platform",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "npm@10.9.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "services/ai-engine"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel --filter=@atm/web --filter=@atm/api --filter=@atm/ai-engine",
+    "dev:web": "turbo run dev --filter=@atm/web",
+    "dev:api": "turbo run dev --filter=@atm/api",
+    "dev:mobile": "turbo run dev --filter=@atm/mobile",
+    "dev:ai": "turbo run dev --filter=@atm/ai-engine",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "db:generate": "turbo run db:generate --filter=@atm/db"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.0",
+    "typescript": "^5.8.2"
+  }
+}

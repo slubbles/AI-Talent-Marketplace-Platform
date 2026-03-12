@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "AI Talent Marketplace",
+    "slug": "ai-talent-marketplace",
+    "scheme": "aitalentmarketplace",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-router"
+    ]
+  }
+}

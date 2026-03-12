@@ -1,0 +1,7 @@
+pyproject.toml
+ai_talent_marketplace_ai_engine.egg-info/PKG-INFO
+ai_talent_marketplace_ai_engine.egg-info/SOURCES.txt
+ai_talent_marketplace_ai_engine.egg-info/dependency_links.txt
+ai_talent_marketplace_ai_engine.egg-info/requires.txt
+ai_talent_marketplace_ai_engine.egg-info/top_level.txt
+app/main.py

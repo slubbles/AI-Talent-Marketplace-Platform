@@ -14,10 +14,10 @@
 
 ## Source of Truth (Read These First)
 
-1. **FOUNDATION.md** — All architecture decisions, data model, tech stack, quality standards. LOCKED.
-2. **EXECUTION.md** — 19-session build plan. Every SOW objective mapped to a session.
+1. **notes/FOUNDATION.md** — All architecture decisions, data model, tech stack, quality standards. LOCKED.
+2. **notes/EXECUTION.md** — 19-session build plan. Every SOW objective mapped to a session.
 3. **PROGRESS.md** — Live progress tracker. Update after every completed task.
-4. **SOW** — `AI Talent Marketplace Platform (SOW).md` — Original requirements. Do NOT modify.
+4. **SOW** — `maingoalandreference/AI Talent Marketplace Platform (SOW).md` — Original requirements. Do NOT modify.
 
 ## Git Workflow
 
