@@ -2,13 +2,78 @@
 
 > Live progress on every session and deliverable.
 > Updated after each completed task.
-> Overall: **79%** (15 of 19 sessions complete)
+> Overall: **94%** (18 of 19 sessions complete)
 
 ## Current Focus
 
-- Session 15 — Analytics Platform: **100%**
-- Status: ✅ Complete
+- Session 18 — Integration, Testing + Deploy: **94%**
+- Session 19 — Documentation + Polish: **100%**
+- Status: 🔄 In progress
 - Branch: `1st-execution`
+
+## Session 19 Snapshot
+
+| Task | Status | % |
+|------|--------|---|
+| Replace placeholder root README with project overview, architecture, setup, validation, and deployment references | ✅ | 100 |
+| Architecture decision record covering monorepo, pgvector, OpenRouter, Next.js app split, Expo, and AI service boundaries | ✅ | 100 |
+| Database schema guide with ERD overview, entity descriptions, and Prisma workflow notes | ✅ | 100 |
+| Deployment guide for Vercel, Render, Expo EAS, environment mapping, and live verification checklist | ✅ | 100 |
+| Phase 2 and Phase 3 roadmap documentation | ✅ | 100 |
+| Final polish pass for production visuals, icons, empty states, loading states, and landing-page refinement | ✅ | 100 |
+| Route-level loading, error, and not-found states added for public, recruiter, and admin web surfaces | ✅ | 100 |
+| Generated web app icon and richer metadata for the Next.js surface | ✅ | 100 |
+| End-user demo script and screen-recording preparation | ✅ | 100 |
+| Public-facing case-study style project narrative | ✅ | 100 |
+
+## Session 18 Snapshot
+
+| Task | Status | % |
+|------|--------|---|
+| Repo-wide typecheck validation across API, web, mobile, shared, db, ui, and AI engine | ✅ | 100 |
+| AI engine workspace tests passing through the repo venv-aware npm script | ✅ | 100 |
+| Explicit API CORS allowlist with `/healthz` runtime probe | ✅ | 100 |
+| Auth rate limiting extended across register, login, and forgot-password flows | ✅ | 100 |
+| Repeatable local Session 18 smoke script for health, CORS, RBAC, talent profile creation, recruiter demand creation, and optional admin-backed workflow verification | ✅ | 100 |
+| Local runtime smoke verification for API and AI engine services | ✅ | 100 |
+| Local end-to-end business-flow verification across talent, recruiter, and admin surfaces | ✅ | 100 |
+| Deployment scaffolding for Vercel web, Render API/AI engine, and production start scripts | ✅ | 100 |
+| Deployment environment preflight validator and hosted env checklist | ✅ | 100 |
+| Hosted environment template files for web, API, AI engine, and mobile rollout | ✅ | 100 |
+| Private hosted env files safely ignored while keeping deploy templates tracked | ✅ | 100 |
+| Post-deploy hosted verification script for web, API, AI, GraphQL, and CORS | ✅ | 100 |
+| Expo EAS build profiles for preview and production | ✅ | 100 |
+| Hosted environment configuration and live URL verification | ⬜ | 0 |
+| Mobile app pointed at deployed API and Expo build verification | ⬜ | 0 |
+
+## Session 17 Snapshot
+
+| Task | Status | % |
+|------|--------|---|
+| Talent match feed with recruiter role cards, score badges, and pull-to-refresh | ✅ | 100 |
+| Role detail screen with description, score breakdown, AI explanation, and talent-side interest actions | ✅ | 100 |
+| My Applications mobile view with interested, shortlisted, interview, and offer tracking tabs | ✅ | 100 |
+| Interviews screen with role/company detail and accept or decline actions | ✅ | 100 |
+| Offers screen with compensation, dates, terms, and accept or decline actions | ✅ | 100 |
+| Expo Notifications setup with permission flow and local alert surfacing for new backend notifications | ✅ | 100 |
+| Talent availability quick-toggle wired to GraphQL updateAvailability | ✅ | 100 |
+| Backend support for talent-side match response and interview response state | ✅ | 100 |
+| Validation across shared, API, mobile, and web TypeScript packages | ✅ | 100 |
+
+## Session 16 Snapshot
+
+| Task | Status | % |
+|------|--------|---|
+| Expo Router protected talent app shell and onboarding navigation | ✅ | 100 |
+| Registration flow updated for first and last name capture | ✅ | 100 |
+| SecureStore-backed mobile auth token persistence | ✅ | 100 |
+| Apollo Client setup for the React Native app | ✅ | 100 |
+| Resume upload flow with AI parsing handoff and loading state | ✅ | 100 |
+| Profile review editor for skills, experience, certifications, education, pricing, and availability | ✅ | 100 |
+| Identity and certification document upload with verification status visibility | ✅ | 100 |
+| Post-onboarding profile screen with completeness and verification summary | ✅ | 100 |
+| Backend talent profile updates for identity documents and richer resume hydration | ✅ | 100 |
+| Workspace validation across shared, API, mobile, and web TypeScript packages | ✅ | 100 |
 
 ## Session 15 Snapshot
 

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
+import { EmptyStateCard } from "../empty-state-card";
 
 const demandQueueQuery = `#graphql
   query InterviewDemandQueue {
@@ -164,7 +165,15 @@ export default async function InterviewsPage({ searchParams }: InterviewsPagePro
       <section className="dashboard-panel-card">
         <div className="pipeline-list-grid">
           {visibleInterviews.length === 0 ? (
-            <p className="dashboard-empty-state">No interviews match this status yet.</p>
+            <EmptyStateCard
+              actions={[
+                { href: "/dashboard/shortlists", label: "Review shortlists" },
+                { href: "/dashboard/interviews", label: "Show all interviews", tone: "secondary" }
+              ]}
+              description="Interview rows appear here once shortlisted candidates are scheduled into recruiter sessions."
+              eyebrow="Interview queue"
+              title="No interviews in this status"
+            />
           ) : (
             visibleInterviews.map((interview) => (
               <article className="pipeline-card" key={interview.id}>

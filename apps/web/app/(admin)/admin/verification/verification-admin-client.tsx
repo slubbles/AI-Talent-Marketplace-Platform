@@ -3,6 +3,7 @@
 import { gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { createApolloClient } from "../../../../lib/apollo-client";
+import { EmptyStateCard } from "../../../dashboard/empty-state-card";
 
 type VerificationProfile = {
   id: string;
@@ -13,6 +14,7 @@ type VerificationProfile = {
   resumeUrl: string | null;
   locationPreferences: string[];
   workVisaEligibility: string[];
+  identityDocumentUrls: string[];
   industries: string[];
   verificationStatus: string;
   user: { email: string };
@@ -115,7 +117,13 @@ export function VerificationAdminClient({ accessToken, initialProfiles }: Verifi
 
       <div className="admin-card-grid">
         {profiles.length === 0 ? (
-          <p className="dashboard-empty-state">All pending profiles have been reviewed.</p>
+          <EmptyStateCard
+            accent="admin"
+            actions={[{ href: "/admin", label: "Back to admin overview", tone: "secondary" }]}
+            description="There are no pending talent profiles waiting for approval or rejection right now."
+            eyebrow="Talent verification"
+            title="All pending profiles have been reviewed"
+          />
         ) : (
           profiles.map((profile) => (
             <article className="role-list-card admin-verification-card" key={profile.id}>
@@ -156,17 +164,50 @@ export function VerificationAdminClient({ accessToken, initialProfiles }: Verifi
               </div>
 
               <div className="admin-subsection">
+                <strong>Identity documents</strong>
+                <div className="admin-list-grid compact">
+                  {profile.identityDocumentUrls.length === 0 ? (
+                    <EmptyStateCard
+                      accent="warning"
+                      description="This profile has not uploaded an identity document yet, so approval should wait until the record is complete."
+                      eyebrow="Identity review"
+                      title="No identity documents uploaded"
+                    />
+                  ) : (
+                    profile.identityDocumentUrls.map((url) => (
+                      <div className="dashboard-activity-item" key={url}>
+                        <div>
+                          <h4>Identity document</h4>
+                          <p>Uploaded for verification review</p>
+                        </div>
+                        <a href={url}>Open file</a>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              <div className="admin-subsection">
                 <strong>Certifications</strong>
                 <div className="admin-list-grid compact">
-                  {profile.certifications.map((certification) => (
-                    <div className="dashboard-activity-item" key={certification.id}>
-                      <div>
-                        <h4>{certification.name}</h4>
-                        <p>{certification.issuer}</p>
+                  {profile.certifications.length === 0 ? (
+                    <EmptyStateCard
+                      accent="admin"
+                      description="No certification records are attached to this profile yet. Review the resume and identity evidence instead."
+                      eyebrow="Certification review"
+                      title="No certifications uploaded"
+                    />
+                  ) : (
+                    profile.certifications.map((certification) => (
+                      <div className="dashboard-activity-item" key={certification.id}>
+                        <div>
+                          <h4>{certification.name}</h4>
+                          <p>{certification.issuer}</p>
+                        </div>
+                        {certification.credentialUrl ? <a href={certification.credentialUrl}>Credential</a> : null}
                       </div>
-                      {certification.credentialUrl ? <a href={certification.credentialUrl}>Credential</a> : null}
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
 

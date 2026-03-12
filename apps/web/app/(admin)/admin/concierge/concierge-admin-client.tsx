@@ -3,6 +3,7 @@
 import { gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { createApolloClient } from "../../../../lib/apollo-client";
+import { EmptyStateCard } from "../../../dashboard/empty-state-card";
 
 type DemandOption = {
   id: string;
@@ -213,7 +214,22 @@ export function ConciergeAdminClient({ accessToken, demands, headhunters, initia
         {message ? <p className="form-success">{message}</p> : null}
         {error ? <p className="form-error">{error}</p> : null}
         {headhunters.length === 0 ? (
-          <p className="dashboard-empty-state">No active headhunter users exist yet. Promote a user to HEADHUNTER from the Users page first.</p>
+          <EmptyStateCard
+            accent="admin"
+            actions={[{ href: "/admin/users", label: "Manage users" }]}
+            description="Promote at least one user to the HEADHUNTER role before creating concierge assignments."
+            eyebrow="Headhunter pool"
+            title="No active headhunter users exist yet"
+          />
+        ) : null}
+        {approvedDemands.length === 0 ? (
+          <EmptyStateCard
+            accent="warning"
+            actions={[{ href: "/admin/approvals", label: "Review role approvals", tone: "secondary" }]}
+            description="Concierge assignments only make sense once at least one demand has been approved for live sourcing."
+            eyebrow="Approved demand"
+            title="No approved demands are available"
+          />
         ) : null}
 
         <div className="admin-form-grid">
@@ -250,18 +266,27 @@ export function ConciergeAdminClient({ accessToken, demands, headhunters, initia
         </div>
 
         <div className="admin-list-grid">
-          {assignments.map((assignment) => (
-            <article className="dashboard-activity-item" key={assignment.id}>
-              <div>
-                <span className="dashboard-activity-type">ASSIGNED</span>
-                <h4>{assignment.demand.title}</h4>
-                <p>{assignment.headhunterUser.email}</p>
-              </div>
-              <div className="dashboard-activity-meta">
-                <span>{assignment.notes ?? "No notes"}</span>
-              </div>
-            </article>
-          ))}
+          {assignments.length === 0 ? (
+            <EmptyStateCard
+              accent="admin"
+              description="Create the first headhunter assignment to start tracking concierge coverage here."
+              eyebrow="Assignment log"
+              title="No headhunter assignments yet"
+            />
+          ) : (
+            assignments.map((assignment) => (
+              <article className="dashboard-activity-item" key={assignment.id}>
+                <div>
+                  <span className="dashboard-activity-type">ASSIGNED</span>
+                  <h4>{assignment.demand.title}</h4>
+                  <p>{assignment.headhunterUser.email}</p>
+                </div>
+                <div className="dashboard-activity-meta">
+                  <span>{assignment.notes ?? "No notes"}</span>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </section>
 
@@ -350,43 +375,52 @@ export function ConciergeAdminClient({ accessToken, demands, headhunters, initia
         </div>
 
         <div className="admin-card-grid">
-          {submissions.map((submission) => (
-            <article className="role-list-card" key={submission.id}>
-              <div className="role-list-card-header">
-                <div>
-                  <span className="role-status-badge">{submission.status}</span>
-                  <h4>
-                    {submission.firstName} {submission.lastName}
-                  </h4>
+          {submissions.length === 0 ? (
+            <EmptyStateCard
+              accent="admin"
+              description="Submitted external candidates will appear here once concierge sourcing starts contributing into the pipeline."
+              eyebrow="Submission tracking"
+              title="No external submissions yet"
+            />
+          ) : (
+            submissions.map((submission) => (
+              <article className="role-list-card" key={submission.id}>
+                <div className="role-list-card-header">
+                  <div>
+                    <span className="role-status-badge">{submission.status}</span>
+                    <h4>
+                      {submission.firstName} {submission.lastName}
+                    </h4>
+                  </div>
+                  <strong>{submission.demand.title}</strong>
                 </div>
-                <strong>{submission.demand.title}</strong>
-              </div>
 
-              <p>{submission.headline}</p>
-              <p>{submission.headhunterUser.email}</p>
+                <p>{submission.headline}</p>
+                <p>{submission.headhunterUser.email}</p>
 
-              <label>
-                Review notes
-                <textarea
-                  onChange={(event) => setReviewNotes((current) => ({ ...current, [submission.id]: event.target.value }))}
-                  rows={3}
-                  value={reviewNotes[submission.id] ?? submission.reviewNotes ?? ""}
-                />
-              </label>
+                <label>
+                  Review notes
+                  <textarea
+                    onChange={(event) => setReviewNotes((current) => ({ ...current, [submission.id]: event.target.value }))}
+                    rows={3}
+                    value={reviewNotes[submission.id] ?? submission.reviewNotes ?? ""}
+                  />
+                </label>
 
-              <div className="admin-inline-actions">
-                <button className="secondary-button" onClick={() => updateSubmissionStatus(submission.id, "REVIEWED")} type="button">
-                  Mark reviewed
-                </button>
-                <button className="primary-link" onClick={() => updateSubmissionStatus(submission.id, "SHORTLISTED")} type="button">
-                  Shortlist
-                </button>
-                <button className="secondary-button" onClick={() => updateSubmissionStatus(submission.id, "REJECTED")} type="button">
-                  Reject
-                </button>
-              </div>
-            </article>
-          ))}
+                <div className="admin-inline-actions">
+                  <button className="secondary-button" onClick={() => updateSubmissionStatus(submission.id, "REVIEWED")} type="button">
+                    Mark reviewed
+                  </button>
+                  <button className="primary-link" onClick={() => updateSubmissionStatus(submission.id, "SHORTLISTED")} type="button">
+                    Shortlist
+                  </button>
+                  <button className="secondary-button" onClick={() => updateSubmissionStatus(submission.id, "REJECTED")} type="button">
+                    Reject
+                  </button>
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </section>
     </div>

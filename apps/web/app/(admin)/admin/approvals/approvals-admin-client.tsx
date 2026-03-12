@@ -3,6 +3,7 @@
 import { gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { createApolloClient } from "../../../../lib/apollo-client";
+import { EmptyStateCard } from "../../../dashboard/empty-state-card";
 
 type DemandApprovalRecord = {
   id: string;
@@ -98,7 +99,13 @@ export function ApprovalsAdminClient({ accessToken, initialDemands }: ApprovalsA
 
       <div className="admin-card-grid">
         {demands.length === 0 ? (
-          <p className="dashboard-empty-state">No demands are waiting on admin approval.</p>
+          <EmptyStateCard
+            accent="admin"
+            actions={[{ href: "/admin/companies", label: "Review company demand", tone: "secondary" }]}
+            description="There are no recruiter demands in a pending approval state at the moment."
+            eyebrow="Role approvals"
+            title="No demands are waiting on approval"
+          />
         ) : (
           demands.map((demand) => (
             <article className="role-list-card admin-approval-card" key={demand.id}>

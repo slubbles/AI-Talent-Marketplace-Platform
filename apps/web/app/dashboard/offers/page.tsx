@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
+import { EmptyStateCard } from "../empty-state-card";
 
 const demandQueueQuery = `#graphql
   query OfferDemandQueue {
@@ -170,7 +171,15 @@ export default async function OffersPage({ searchParams }: OffersPageProps) {
       <section className="dashboard-panel-card">
         <div className="pipeline-list-grid">
           {visibleOffers.length === 0 ? (
-            <p className="dashboard-empty-state">No offers match this status yet.</p>
+            <EmptyStateCard
+              actions={[
+                { href: "/dashboard/interviews", label: "Review interviews" },
+                { href: "/dashboard/offers", label: "Show all offers", tone: "secondary" }
+              ]}
+              description="Offers populate after interviews move forward into compensation and term drafting."
+              eyebrow="Offer pipeline"
+              title="No offers in this status"
+            />
           ) : (
             visibleOffers.map((offer) => (
               <article className="pipeline-card" key={offer.id}>

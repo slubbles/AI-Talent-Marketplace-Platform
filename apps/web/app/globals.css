@@ -17,6 +17,13 @@ body {
     linear-gradient(135deg, #020617 0%, #0f172a 55%, #082f49 100%);
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
 a {
   color: inherit;
 }
@@ -35,6 +42,134 @@ a {
   padding: 32px;
   background: rgba(15, 23, 42, 0.85);
   box-shadow: 0 24px 80px rgba(2, 6, 23, 0.55);
+}
+
+.landing-panel {
+  display: grid;
+  gap: 28px;
+}
+
+.landing-hero {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+}
+
+.landing-hero-copy {
+  display: grid;
+  align-content: start;
+  gap: 18px;
+}
+
+.landing-lead {
+  margin: 0;
+  max-width: 60ch;
+  color: #dbeafe;
+  font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+  line-height: 1.75;
+}
+
+.landing-proof-card,
+.landing-next-card,
+.landing-metric-card {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.landing-proof-card {
+  align-content: start;
+  background:
+    radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 28%),
+    rgba(15, 23, 42, 0.92);
+}
+
+.landing-proof-card strong,
+.landing-next-card strong,
+.landing-metric-card strong {
+  font-size: clamp(1.4rem, 2vw, 2rem);
+  color: #fef3c7;
+}
+
+.landing-proof-card p,
+.landing-next-card p,
+.landing-metric-card p,
+.landing-section-heading p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.65;
+}
+
+.landing-proof-label,
+.landing-next-card span,
+.landing-metric-card span {
+  color: #7dd3fc;
+  font-size: 0.84rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.landing-proof-list {
+  display: grid;
+  gap: 10px;
+}
+
+.landing-proof-item {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 10px;
+  color: #e2e8f0;
+  line-height: 1.55;
+}
+
+.landing-proof-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 0.45rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #38bdf8, #f59e0b);
+}
+
+.landing-proof-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.landing-metric-card {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.88), rgba(15, 23, 42, 0.92));
+}
+
+.landing-section {
+  display: grid;
+  gap: 16px;
+}
+
+.landing-section-heading {
+  display: grid;
+  gap: 8px;
+}
+
+.landing-section-heading h2 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2vw, 1.6rem);
+}
+
+.landing-section-split {
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
+  align-items: start;
+}
+
+.landing-next-card {
+  background:
+    radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 30%),
+    rgba(8, 47, 73, 0.72);
+}
+
+.landing-tile {
+  min-height: 168px;
 }
 
 .eyebrow {
@@ -338,6 +473,94 @@ a {
   box-shadow: 0 20px 60px rgba(2, 6, 23, 0.34);
 }
 
+.route-state-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px 24px;
+}
+
+.route-state-card,
+.route-state-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.route-state-card {
+  width: min(640px, 100%);
+  padding: 32px;
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 24px 80px rgba(2, 6, 23, 0.5);
+}
+
+.route-state-card h1,
+.route-state-panel h2 {
+  margin: 0;
+}
+
+.route-state-card p,
+.route-state-panel p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.65;
+}
+
+.route-state-card-muted {
+  border-color: rgba(125, 211, 252, 0.2);
+}
+
+.route-state-card-danger {
+  border-color: rgba(252, 165, 165, 0.28);
+  background:
+    radial-gradient(circle at top right, rgba(239, 68, 68, 0.12), transparent 24%),
+    rgba(15, 23, 42, 0.92);
+}
+
+.route-state-kicker {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 32px;
+  align-items: center;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.12);
+  color: #7dd3fc;
+  font-size: 0.84rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.route-state-spinner {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  border: 4px solid rgba(125, 211, 252, 0.18);
+  border-top-color: #38bdf8;
+  animation: route-state-spin 0.9s linear infinite;
+}
+
+.route-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.route-state-button {
+  cursor: pointer;
+}
+
+@keyframes route-state-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .dashboard-hero {
   display: grid;
   gap: 14px;
@@ -427,6 +650,76 @@ a {
 .dashboard-activity-item h4,
 .dashboard-attention-item h4 {
   margin: 6px 0 8px;
+}
+
+.dashboard-empty-card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  background:
+    radial-gradient(circle at top right, rgba(56, 189, 248, 0.1), transparent 28%),
+    rgba(2, 6, 23, 0.5);
+}
+
+.dashboard-empty-card.is-admin {
+  background:
+    radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 28%),
+    rgba(2, 6, 23, 0.5);
+}
+
+.dashboard-empty-card.is-warning {
+  background:
+    radial-gradient(circle at top right, rgba(245, 158, 11, 0.12), transparent 28%),
+    rgba(2, 6, 23, 0.5);
+}
+
+.dashboard-empty-card-mark {
+  display: inline-flex;
+  width: 44px;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.dashboard-empty-card-mark span {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #38bdf8, #f59e0b);
+}
+
+.dashboard-empty-card-copy {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-empty-card-eyebrow {
+  color: #7dd3fc;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dashboard-empty-card-copy h4 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.dashboard-empty-card-copy p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.dashboard-empty-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .dashboard-activity-type {
@@ -1333,6 +1626,12 @@ a {
 }
 
 @media (max-width: 900px) {
+  .landing-hero,
+  .landing-proof-grid,
+  .landing-section-split {
+    grid-template-columns: 1fr;
+  }
+
   .demand-form-grid,
   .demand-ai-columns,
   .candidate-profile-grid,
@@ -1347,6 +1646,10 @@ a {
   }
 
   .search-layout {
+
+  .landing-panel {
+    gap: 22px;
+  }
     grid-template-columns: 1fr;
   }
 

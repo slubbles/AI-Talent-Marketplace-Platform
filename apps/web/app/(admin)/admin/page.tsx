@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
+import { EmptyStateCard } from "../../dashboard/empty-state-card";
 
 type AdminDashboardQuery = {
   adminDashboard: {
@@ -130,7 +131,13 @@ export default async function AdminDashboardPage() {
         </div>
         <div className="dashboard-activity-list admin-list-grid">
           {dashboard.pendingVerificationProfiles.length === 0 ? (
-            <p className="dashboard-empty-state">No pending talent profiles need review right now.</p>
+            <EmptyStateCard
+              accent="admin"
+              actions={[{ href: "/admin/verification", label: "Open verification queue", tone: "secondary" }]}
+              description="There are no newly pending talent profiles waiting on admin review right now."
+              eyebrow="Verification queue"
+              title="The review queue is clear"
+            />
           ) : (
             dashboard.pendingVerificationProfiles.map((profile) => (
               <article className="dashboard-activity-item" key={profile.id}>
@@ -160,34 +167,47 @@ export default async function AdminDashboardPage() {
           <a href="/admin/companies">Manage companies</a>
         </div>
         <div className="admin-company-metrics-grid">
-          {dashboard.companyMetrics.map((company) => (
-            <article className="role-list-card admin-company-metric-card" key={company.id}>
-              <div className="role-list-card-header">
-                <div>
-                  <span className="role-status-badge">{company.industry}</span>
-                  <h4>{company.name}</h4>
+          {dashboard.companyMetrics.length === 0 ? (
+            <EmptyStateCard
+              accent="admin"
+              actions={[
+                { href: "/admin/companies", label: "Open companies" },
+                { href: "/admin/users", label: "Manage recruiter users", tone: "secondary" }
+              ]}
+              description="Company oversight cards appear once recruiters are attached to organizations with live demand history."
+              eyebrow="Company watchlist"
+              title="No company pressure signals yet"
+            />
+          ) : (
+            dashboard.companyMetrics.map((company) => (
+              <article className="role-list-card admin-company-metric-card" key={company.id}>
+                <div className="role-list-card-header">
+                  <div>
+                    <span className="role-status-badge">{company.industry}</span>
+                    <h4>{company.name}</h4>
+                  </div>
                 </div>
-              </div>
-              <div className="role-list-meta-grid">
-                <div>
-                  <span>Active demands</span>
-                  <strong>{company.activeDemandCount}</strong>
+                <div className="role-list-meta-grid">
+                  <div>
+                    <span>Active demands</span>
+                    <strong>{company.activeDemandCount}</strong>
+                  </div>
+                  <div>
+                    <span>Pending approvals</span>
+                    <strong>{company.pendingApprovalsCount}</strong>
+                  </div>
+                  <div>
+                    <span>Hard-to-fill</span>
+                    <strong>{company.hardToFillCount}</strong>
+                  </div>
+                  <div>
+                    <span>Placements</span>
+                    <strong>{company.placementsCount}</strong>
+                  </div>
                 </div>
-                <div>
-                  <span>Pending approvals</span>
-                  <strong>{company.pendingApprovalsCount}</strong>
-                </div>
-                <div>
-                  <span>Hard-to-fill</span>
-                  <strong>{company.hardToFillCount}</strong>
-                </div>
-                <div>
-                  <span>Placements</span>
-                  <strong>{company.placementsCount}</strong>
-                </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))
+          )}
         </div>
       </section>
 

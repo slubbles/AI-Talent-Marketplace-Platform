@@ -4,6 +4,7 @@ import { gql } from "@apollo/client";
 import { availabilityWindows, seniorityLevels, smartSearchSkillModes, type SmartSearchSkillMode } from "@atm/shared";
 import { useEffect, useMemo, useState } from "react";
 import { CandidateProfileModal } from "../candidate-profile-modal";
+import { EmptyStateCard } from "../empty-state-card";
 import { createApolloClient } from "../../../lib/apollo-client";
 import type { TalentSearchResult } from "../shortlists/types";
 
@@ -415,9 +416,19 @@ export function SearchWorkbench({
           </div>
 
           {!query.trim() && !trajectory.trim() ? (
-            <p className="dashboard-empty-state">Search prompts and recommendations appear here once you run a talent query.</p>
+            <EmptyStateCard
+              actions={[{ href: "/dashboard/roles", label: "Review role context", tone: "secondary" }]}
+              description="Start with a prompt describing the talent profile you need, then layer in skill, rate, location, and availability filters."
+              eyebrow="Search results"
+              title="Run a recruiter search to see ranked talent"
+            />
           ) : results.length === 0 ? (
-            <p className="dashboard-empty-state">No profiles matched the current semantic search and filter combination.</p>
+            <EmptyStateCard
+              actions={[{ href: "/dashboard/search", label: "Reset search", tone: "secondary" }]}
+              description="Broaden the prompt or relax filters like rate, skills, or availability to expand the semantic search set."
+              eyebrow="Search results"
+              title="No profiles matched this query"
+            />
           ) : (
             <div className="search-result-grid">
               {results.map((result) => {
@@ -490,7 +501,15 @@ export function SearchWorkbench({
           </div>
 
           {recommendations.length === 0 ? (
-            <p className="dashboard-empty-state">Create or update recruiter roles to seed AI recommendations here.</p>
+            <EmptyStateCard
+              actions={[
+                { href: "/dashboard/roles/new", label: "Create role" },
+                { href: "/dashboard/roles", label: "Review roles", tone: "secondary" }
+              ]}
+              description="Recommendations are generated from your recent recruiter demand, so they appear once role history exists."
+              eyebrow="AI recommendations"
+              title="No recommendation seeds yet"
+            />
           ) : (
             <div className="recommendation-grid">
               {recommendations.map((recommendation) => (
@@ -506,7 +525,11 @@ export function SearchWorkbench({
                   </div>
                   <div className="search-recommendation-list">
                     {recommendation.results.length === 0 ? (
-                      <p className="dashboard-empty-state">No recommendation candidates surfaced yet.</p>
+                      <EmptyStateCard
+                        description="The recommendation prompt ran, but no candidates surfaced strongly enough yet for this role seed."
+                        eyebrow="Recommendation result"
+                        title="No candidates surfaced"
+                      />
                     ) : (
                       recommendation.results.slice(0, 3).map((result) => (
                         <button className="recommendation-result" key={result.id} onClick={() => setActiveCandidateId(result.id)} type="button">

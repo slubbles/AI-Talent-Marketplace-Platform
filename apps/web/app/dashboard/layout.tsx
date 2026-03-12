@@ -50,7 +50,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
         <div className="dashboard-sidebar-footer">
           <span className="dashboard-status-pill">Authenticated via NextAuth + API JWT</span>
-          <span className="dashboard-status-pill">Overall progress: 79%</span>
+          <span className="dashboard-status-pill">Overall progress: 94%</span>
         </div>
       </aside>
 

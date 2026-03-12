@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
+import { EmptyStateCard } from "../empty-state-card";
 import { ShortlistWorkbench } from "./shortlist-workbench";
 import type { ShortlistDemandSummary, ShortlistEntry } from "./types";
 
@@ -150,9 +151,15 @@ export default async function ShortlistsPage({ searchParams }: ShortlistsPagePro
   if (roles.length === 0) {
     return (
       <section className="dashboard-panel-card section-placeholder">
-        <span className="eyebrow">Shortlists</span>
-        <h2>No role shortlists yet</h2>
-        <p>Create a role and trigger AI matching to populate this review queue.</p>
+        <EmptyStateCard
+          actions={[
+            { href: "/dashboard/roles/new", label: "Create recruiter role" },
+            { href: "/dashboard/search", label: "Open talent search", tone: "secondary" }
+          ]}
+          description="Create a recruiter demand and trigger AI matching to turn this page into a real shortlist review queue."
+          eyebrow="Shortlists"
+          title="No role shortlists yet"
+        />
       </section>
     );
   }

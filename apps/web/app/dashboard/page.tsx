@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/auth";
 import { graphQLRequest } from "../../lib/graphql";
+import { EmptyStateCard } from "./empty-state-card";
 
 type RecruiterDashboardQuery = {
   recruiterDashboard: {
@@ -140,7 +141,15 @@ export default async function DashboardPage() {
         </div>
         <div className="dashboard-activity-list">
           {dashboard.recentActivity.length === 0 ? (
-            <p className="dashboard-empty-state">No activity yet. Post a role or generate a shortlist to populate this feed.</p>
+            <EmptyStateCard
+              actions={[
+                { href: "/dashboard/roles/new", label: "Post a role" },
+                { href: "/dashboard/shortlists", label: "Open shortlists", tone: "secondary" }
+              ]}
+              description="Post a recruiter demand or generate a shortlist to start filling the activity stream with real pipeline events."
+              eyebrow="Activity feed"
+              title="No recruiter activity yet"
+            />
           ) : (
             dashboard.recentActivity.map((activity) => (
               <article className="dashboard-activity-item" key={activity.id}>
@@ -168,7 +177,13 @@ export default async function DashboardPage() {
         </div>
         <div className="dashboard-attention-list">
           {dashboard.rolesNeedingAttention.length === 0 ? (
-            <p className="dashboard-empty-state">No active roles are currently blocked or stale.</p>
+            <EmptyStateCard
+              accent="warning"
+              actions={[{ href: "/dashboard/roles", label: "Review active roles", tone: "secondary" }]}
+              description="Your open demands are moving without any stale shortlist or follow-up issues right now."
+              eyebrow="Attention queue"
+              title="No blocked roles at the moment"
+            />
           ) : (
             dashboard.rolesNeedingAttention.map((item) => (
               <article className="dashboard-attention-item" key={item.id}>

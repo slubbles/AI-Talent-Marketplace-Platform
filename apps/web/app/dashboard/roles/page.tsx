@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
+import { EmptyStateCard } from "../empty-state-card";
 
 const rolesQuery = `#graphql
   query RecruiterRoles($filters: DemandFiltersInput) {
@@ -117,7 +118,15 @@ export default async function RolesPage({ searchParams }: RolesPageProps) {
 
       <div className="roles-list-grid">
         {roles.length === 0 ? (
-          <p className="dashboard-empty-state">No roles match this filter yet.</p>
+          <EmptyStateCard
+            actions={[
+              { href: "/dashboard/roles/new", label: "Create new role" },
+              { href: "/dashboard/roles", label: "Clear filters", tone: "secondary" }
+            ]}
+            description="There are no recruiter demands in this status bucket yet. Create a new role or switch back to the full queue."
+            eyebrow="Roles queue"
+            title="No roles match this filter"
+          />
         ) : (
           roles.map((role) => (
             <article className="role-list-card" key={role.id}>

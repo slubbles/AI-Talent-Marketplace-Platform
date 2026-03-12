@@ -15,6 +15,7 @@ type VerificationQuery = {
         resumeUrl: string | null;
         locationPreferences: string[];
         workVisaEligibility: string[];
+        identityDocumentUrls: string[];
         industries: string[];
         verificationStatus: string;
         user: { email: string };
@@ -47,6 +48,7 @@ const verificationQuery = `#graphql
           resumeUrl
           locationPreferences
           workVisaEligibility
+          identityDocumentUrls
           industries
           verificationStatus
           user {

@@ -3,6 +3,7 @@
 import { gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { createApolloClient } from "../../../../lib/apollo-client";
+import { EmptyStateCard } from "../../../dashboard/empty-state-card";
 
 type CompanyRecord = {
   id: string;
@@ -169,6 +170,16 @@ export function CompaniesAdminClient({ accessToken, initialCompanies, recruiters
         {message ? <p className="form-success">{message}</p> : null}
         {error ? <p className="form-error">{error}</p> : null}
 
+        {recruiters.length === 0 ? (
+          <EmptyStateCard
+            accent="admin"
+            actions={[{ href: "/admin/users", label: "Add recruiter users" }]}
+            description="At least one recruiter user needs to exist before a company can be assigned an owner."
+            eyebrow="Recruiter owners"
+            title="No recruiter users available"
+          />
+        ) : null}
+
         <div className="admin-form-grid">
           <label>
             Recruiter owner
@@ -224,63 +235,72 @@ export function CompaniesAdminClient({ accessToken, initialCompanies, recruiters
         </div>
 
         <div className="admin-card-grid">
-          {companies.map((company) => {
-            const metric = metrics.find((item) => item.id === company.id);
+          {companies.length === 0 ? (
+            <EmptyStateCard
+              accent="admin"
+              description="Company records and their demand metrics will appear here once the first portfolio company is created."
+              eyebrow="Company roster"
+              title="No companies have been added yet"
+            />
+          ) : (
+            companies.map((company) => {
+              const metric = metrics.find((item) => item.id === company.id);
 
-            return (
-              <article className="role-list-card admin-company-card" key={company.id}>
-                <div className="admin-form-grid compact">
-                  <label>
-                    Name
-                    <input onChange={(event) => updateCompanyLocal(company.id, { name: event.target.value })} value={company.name} />
-                  </label>
-                  <label>
-                    Industry
-                    <input onChange={(event) => updateCompanyLocal(company.id, { industry: event.target.value })} value={company.industry} />
-                  </label>
-                  <label>
-                    Size
-                    <select value={company.size} onChange={(event) => updateCompanyLocal(company.id, { size: event.target.value as CompanyRecord["size"] })}>
-                      {companySizes.map((size) => (
-                        <option key={size} value={size}>
-                          {size}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    Website
-                    <input onChange={(event) => updateCompanyLocal(company.id, { website: event.target.value })} value={company.website ?? ""} />
-                  </label>
-                </div>
+              return (
+                <article className="role-list-card admin-company-card" key={company.id}>
+                  <div className="admin-form-grid compact">
+                    <label>
+                      Name
+                      <input onChange={(event) => updateCompanyLocal(company.id, { name: event.target.value })} value={company.name} />
+                    </label>
+                    <label>
+                      Industry
+                      <input onChange={(event) => updateCompanyLocal(company.id, { industry: event.target.value })} value={company.industry} />
+                    </label>
+                    <label>
+                      Size
+                      <select value={company.size} onChange={(event) => updateCompanyLocal(company.id, { size: event.target.value as CompanyRecord["size"] })}>
+                        {companySizes.map((size) => (
+                          <option key={size} value={size}>
+                            {size}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label>
+                      Website
+                      <input onChange={(event) => updateCompanyLocal(company.id, { website: event.target.value })} value={company.website ?? ""} />
+                    </label>
+                  </div>
 
-                <div className="role-list-meta-grid">
-                  <div>
-                    <span>Active demands</span>
-                    <strong>{metric?.activeDemandCount ?? 0}</strong>
+                  <div className="role-list-meta-grid">
+                    <div>
+                      <span>Active demands</span>
+                      <strong>{metric?.activeDemandCount ?? 0}</strong>
+                    </div>
+                    <div>
+                      <span>Pending approvals</span>
+                      <strong>{metric?.pendingApprovalsCount ?? 0}</strong>
+                    </div>
+                    <div>
+                      <span>Hard-to-fill</span>
+                      <strong>{metric?.hardToFillCount ?? 0}</strong>
+                    </div>
+                    <div>
+                      <span>Placements</span>
+                      <strong>{metric?.placementsCount ?? 0}</strong>
+                    </div>
                   </div>
-                  <div>
-                    <span>Pending approvals</span>
-                    <strong>{metric?.pendingApprovalsCount ?? 0}</strong>
-                  </div>
-                  <div>
-                    <span>Hard-to-fill</span>
-                    <strong>{metric?.hardToFillCount ?? 0}</strong>
-                  </div>
-                  <div>
-                    <span>Placements</span>
-                    <strong>{metric?.placementsCount ?? 0}</strong>
-                  </div>
-                </div>
 
-                <div className="admin-inline-actions">
-                  <button className="primary-link" disabled={savingId === company.id} onClick={() => saveCompany(company)} type="button">
-                    {savingId === company.id ? "Saving..." : "Save company"}
-                  </button>
-                </div>
-              </article>
-            );
-          })}
+                  <div className="admin-inline-actions">
+                    <button className="primary-link" disabled={savingId === company.id} onClick={() => saveCompany(company)} type="button">
+                      {savingId === company.id ? "Saving..." : "Save company"}
+                    </button>
+                  </div>
+                </article>
+              );
+            })
+          )}
         </div>
       </section>
     </div>
