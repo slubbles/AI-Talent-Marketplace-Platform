@@ -1,7 +1,0 @@
-Metadata-Version: 2.4
-Name: ai-talent-marketplace-ai-engine
-Version: 0.1.0
-Summary: Internal FastAPI service for the AI Talent Marketplace Platform
-Requires-Python: >=3.12
-Requires-Dist: fastapi<0.116.0,>=0.115.11
-Requires-Dist: uvicorn<0.35.0,>=0.34.0
