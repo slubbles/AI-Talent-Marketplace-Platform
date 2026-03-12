@@ -1,12 +1,17 @@
 import { ApolloServer } from "@apollo/server";
-import { startStandaloneServer } from "@apollo/server/standalone";
+import { expressMiddleware } from "@apollo/server/express4";
 import { Prisma } from "@prisma/client";
+import cors from "cors";
+import type { CorsOptions } from "cors";
+import express from "express";
+import type { ErrorRequestHandler, RequestHandler } from "express";
 import {
   availabilityWindows,
   companySizes,
   demandApprovalStatuses,
   demandStatuses,
   externalCandidateSubmissionStatuses,
+  interviewResponseStatuses,
   interviewStatuses,
   forgotPasswordInputSchema,
   generateRoleDescriptionInputSchema,
@@ -69,6 +74,8 @@ import {
   listUsers,
   rejectCandidate,
   rejectTalent,
+  respondToInterview,
+  respondToMatch,
   reviewCandidate,
   scheduleInterview,
   shortlistCandidate,
@@ -180,6 +187,7 @@ const typeDefs = `#graphql
   ${graphqlEnum("ShortlistStatus", shortlistStatuses)}
   ${graphqlEnum("TalentInterestStatus", talentInterestStatuses)}
   ${graphqlEnum("InterviewStatus", interviewStatuses)}
+  ${graphqlEnum("InterviewResponseStatus", interviewResponseStatuses)}
   ${graphqlEnum("OfferStatus", offerStatuses)}
   ${graphqlEnum("CompanySize", companySizes)}
   ${graphqlEnum("NotificationType", notificationTypes)}
@@ -285,6 +293,7 @@ const typeDefs = `#graphql
     currency: String!
     locationPreferences: [String!]!
     workVisaEligibility: [String!]!
+    identityDocumentUrls: [String!]!
     portfolioUrls: [String!]!
     culturalValues: String
     verificationStatus: VerificationStatus!
@@ -399,6 +408,7 @@ const typeDefs = `#graphql
     duration: Int!
     meetingUrl: String
     status: InterviewStatus!
+    talentResponseStatus: InterviewResponseStatus!
     feedback: String
     rating: Int
     shortlist: Shortlist!
@@ -807,6 +817,7 @@ const typeDefs = `#graphql
     currency: String = "USD"
     locationPreferences: [String!]!
     workVisaEligibility: [String!]!
+    identityDocumentUrls: [String!]!
     portfolioUrls: [String!]!
     culturalValuesJson: String
     profileCompleteness: Int = 0
@@ -834,6 +845,7 @@ const typeDefs = `#graphql
     currency: String
     locationPreferences: [String!]
     workVisaEligibility: [String!]
+    identityDocumentUrls: [String!]
     portfolioUrls: [String!]
     culturalValuesJson: String
     profileCompleteness: Int
@@ -948,6 +960,16 @@ const typeDefs = `#graphql
     interviewId: ID!
     feedback: String!
     rating: Int!
+  }
+
+  input RespondToMatchInput {
+    shortlistId: ID!
+    talentStatus: TalentInterestStatus!
+  }
+
+  input RespondToInterviewInput {
+    interviewId: ID!
+    talentResponseStatus: InterviewResponseStatus!
   }
 
   input CreateOfferInput {
@@ -1130,10 +1152,12 @@ const typeDefs = `#graphql
     shortlistCandidate(input: ShortlistActionInput!): Shortlist!
     reviewCandidate(input: ShortlistActionInput!): Shortlist!
     rejectCandidate(input: ShortlistActionInput!): Shortlist!
+    respondToMatch(input: RespondToMatchInput!): Shortlist!
     scheduleInterview(input: ScheduleInterviewInput!): Interview!
     updateInterview(input: UpdateInterviewInput!): Interview!
     cancelInterview(id: ID!): Interview!
     submitFeedback(input: SubmitInterviewFeedbackInput!): Interview!
+    respondToInterview(input: RespondToInterviewInput!): Interview!
     createOffer(input: CreateOfferInput!): Offer!
     updateOffer(input: UpdateOfferInput!): Offer!
     acceptOffer(id: ID!): Offer!
@@ -1327,8 +1351,9 @@ const resolvers = {
         tokens: signAuthTokens(authUser)
       };
     },
-    forgotPassword: async (_parent: unknown, args: AuthArgs<unknown>) => {
+    forgotPassword: async (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) => {
       const input = forgotPasswordInputSchema.parse(args.input);
+      enforceRateLimit("forgotPassword", `${context.ipAddress}:${input.email.toLowerCase()}`);
       const user = await prisma.user.findUnique({
         where: { email: input.email.toLowerCase() }
       });
@@ -1405,6 +1430,8 @@ const resolvers = {
       reviewCandidate(args.input, context.currentUser),
     rejectCandidate: (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) =>
       rejectCandidate(args.input, context.currentUser),
+    respondToMatch: (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) =>
+      respondToMatch(args.input, context.currentUser),
     scheduleInterview: (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) =>
       scheduleInterview(args.input, context.currentUser),
     updateInterview: (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) =>
@@ -1412,6 +1439,8 @@ const resolvers = {
     cancelInterview: (_parent: unknown, args: { id: string }, context: ApiContext) => cancelInterview(args.id, context.currentUser),
     submitFeedback: (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) =>
       submitInterviewFeedback(args.input, context.currentUser),
+    respondToInterview: (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) =>
+      respondToInterview(args.input, context.currentUser),
     createOffer: (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) => createOffer(args.input, context.currentUser),
     updateOffer: (_parent: unknown, args: AuthArgs<unknown>, context: ApiContext) => updateOffer(args.input, context.currentUser),
     acceptOffer: (_parent: unknown, args: { id: string }, context: ApiContext) => acceptOffer(args.id, context.currentUser),
@@ -1530,56 +1559,113 @@ const server = new ApolloServer({
 
 const port = Number(process.env.PORT ?? 4000);
 const host = process.env.HOST ?? "0.0.0.0";
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS ?? [
+  process.env.NEXTAUTH_URL ?? "http://localhost:3000",
+  "http://localhost:8081"
+].join(","))
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions: CorsOptions = {
+  credentials: true,
+  methods: ["GET", "POST", "OPTIONS"],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error("Origin not allowed by CORS."));
+  }
+};
+
+const corsErrorHandler: ErrorRequestHandler = (error, _req, res, next) => {
+  if (error instanceof Error && error.message === "Origin not allowed by CORS.") {
+    res.status(403).json({
+      error: "Origin not allowed by CORS."
+    });
+    return;
+  }
+
+  next(error);
+};
+
+const buildApiContext = async (headers: {
+  authorization?: string;
+  "x-forwarded-for"?: string | string[];
+}) => {
+  const bearerToken = getBearerToken(headers.authorization);
+  const ipAddress = getIpAddress(headers["x-forwarded-for"]);
+
+  if (!bearerToken) {
+    return {
+      currentUser: null,
+      ipAddress
+    } satisfies ApiContext;
+  }
+
+  try {
+    const payload = verifyAccessToken(bearerToken);
+
+    if (payload.tokenType !== "access") {
+      return {
+        currentUser: null,
+        ipAddress
+      } satisfies ApiContext;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: payload.sub }
+    });
+
+    if (user && !user.isActive) {
+      return {
+        currentUser: null,
+        ipAddress
+      } satisfies ApiContext;
+    }
+
+    return {
+      currentUser: user ? buildAuthUser(user) : null,
+      ipAddress
+    } satisfies ApiContext;
+  } catch {
+    return {
+      currentUser: null,
+      ipAddress
+    } satisfies ApiContext;
+  }
+};
 
 const bootstrap = async () => {
-  const { url } = await startStandaloneServer(server, {
-    context: async ({ req }) => {
-      const bearerToken = getBearerToken(req.headers.authorization);
-      const ipAddress = getIpAddress(req.headers["x-forwarded-for"]);
+  await server.start();
 
-      if (!bearerToken) {
-        return {
-          currentUser: null,
-          ipAddress
-        } satisfies ApiContext;
-      }
+  const app = express();
 
-      try {
-        const payload = verifyAccessToken(bearerToken);
+  app.use(
+    cors(corsOptions)
+  );
+  app.use(corsErrorHandler);
+  app.use(express.json({ limit: "10mb" }));
 
-        if (payload.tokenType !== "access") {
-          return {
-            currentUser: null,
-            ipAddress
-          } satisfies ApiContext;
-        }
-
-        const user = await prisma.user.findUnique({
-          where: { id: payload.sub }
-        });
-
-        if (user && !user.isActive) {
-          return {
-            currentUser: null,
-            ipAddress
-          } satisfies ApiContext;
-        }
-
-        return {
-          currentUser: user ? buildAuthUser(user) : null,
-          ipAddress
-        } satisfies ApiContext;
-      } catch {
-        return {
-          currentUser: null,
-          ipAddress
-        } satisfies ApiContext;
-      }
-    },
-    listen: { port, host }
+  app.get("/healthz", (_req, res) => {
+    res.json({ status: "ok", service: "api" });
   });
 
-  console.log(`GraphQL API ready at ${url}`);
+  const graphqlMiddleware = expressMiddleware(server, {
+    context: async ({ req }) => buildApiContext(req.headers)
+  }) as unknown as RequestHandler;
+
+  app.use("/graphql", graphqlMiddleware);
+
+  const httpServer = app.listen(port, host);
+
+  await new Promise<void>((resolve) => {
+    httpServer.on("listening", () => resolve());
+  });
+
+  console.log(`GraphQL API ready at http://${host}:${port}/graphql`);
 };
 
 bootstrap().catch((error: unknown) => {

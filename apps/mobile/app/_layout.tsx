@@ -2,7 +2,10 @@ import { useEffect } from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, View } from "react-native";
+import { MobileApolloProvider } from "./providers/apollo-provider";
 import { AuthProvider, useAuth } from "./providers/auth-provider";
+import { TalentProfileProvider } from "./providers/talent-profile-provider";
+import { TalentWorkflowProvider } from "./providers/talent-workflow-provider";
 
 function MobileAuthNavigator() {
   const router = useRouter();
@@ -51,8 +54,14 @@ function MobileAuthNavigator() {
 export default function RootLayout() {
   return (
     <AuthProvider>
-      <StatusBar style="light" />
-      <MobileAuthNavigator />
+      <MobileApolloProvider>
+        <TalentProfileProvider>
+          <TalentWorkflowProvider>
+            <StatusBar style="light" />
+            <MobileAuthNavigator />
+          </TalentWorkflowProvider>
+        </TalentProfileProvider>
+      </MobileApolloProvider>
     </AuthProvider>
   );
 }

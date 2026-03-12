@@ -5,6 +5,8 @@ import { useAuth } from "../providers/auth-provider";
 
 export default function RegisterScreen() {
   const { register } = useAuth();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -12,7 +14,7 @@ export default function RegisterScreen() {
   const onSubmit = async () => {
     try {
       setError(null);
-      await register(email, password);
+      await register(email, password, firstName, lastName);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Could not create account.");
     }
@@ -23,6 +25,8 @@ export default function RegisterScreen() {
       <Text style={styles.eyebrow}>Talent registration</Text>
       <Text style={styles.title}>Create account</Text>
       <Text style={styles.copy}>Phase 1 uses email/password. Phone OTP remains explicitly deferred to Phase 2.</Text>
+      <TextInput style={styles.input} value={firstName} onChangeText={setFirstName} placeholder="First name" placeholderTextColor="#64748b" />
+      <TextInput style={styles.input} value={lastName} onChangeText={setLastName} placeholder="Last name" placeholderTextColor="#64748b" />
       <TextInput style={styles.input} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
       <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
       {error ? <Text style={styles.error}>{error}</Text> : null}

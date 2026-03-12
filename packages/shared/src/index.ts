@@ -10,6 +10,7 @@ export const envSchema = z.object({
   NEXTAUTH_URL: z.string().url().optional(),
   NEXT_PUBLIC_GRAPHQL_API_URL: z.string().url().optional(),
   EXPO_PUBLIC_GRAPHQL_API_URL: z.string().url().optional(),
+  CORS_ALLOWED_ORIGINS: z.string().min(1).optional(),
   LINKEDIN_CLIENT_ID: z.string().min(1).optional(),
   LINKEDIN_CLIENT_SECRET: z.string().min(1).optional()
 });
@@ -30,6 +31,7 @@ export const demandApprovalStatuses = ["PENDING", "APPROVED", "CHANGES_REQUESTED
 export const shortlistStatuses = ["AI_SUGGESTED", "RECRUITER_REVIEWED", "SHORTLISTED", "REJECTED"] as const;
 export const talentInterestStatuses = ["PENDING", "INTERESTED", "DECLINED"] as const;
 export const interviewStatuses = ["SCHEDULED", "COMPLETED", "CANCELLED", "NO_SHOW"] as const;
+export const interviewResponseStatuses = ["PENDING", "ACCEPTED", "DECLINED"] as const;
 export const offerStatuses = ["DRAFT", "SENT", "ACCEPTED", "DECLINED", "WITHDRAWN"] as const;
 export const companySizes = ["STARTUP", "SMB", "ENTERPRISE"] as const;
 export const notificationTypes = ["MATCH_READY", "INTERVIEW_UPDATE", "OFFER_UPDATE", "SYSTEM"] as const;
@@ -99,6 +101,7 @@ export const createTalentProfileInputSchema = z.object({
   currency: z.string().min(3).max(3).default("USD"),
   locationPreferences: z.array(z.string().min(1)).default([]),
   workVisaEligibility: z.array(z.string().min(1)).default([]),
+  identityDocumentUrls: z.array(z.string().url()).default([]),
   portfolioUrls: z.array(z.string().url()).default([]),
   culturalValuesJson: jsonStringSchema,
   profileCompleteness: z.number().int().min(0).max(100).default(0),
@@ -288,6 +291,11 @@ export const shortlistActionInputSchema = z.object({
   shortlistId: uuidSchema
 });
 
+export const respondToMatchInputSchema = z.object({
+  shortlistId: uuidSchema,
+  talentStatus: z.enum(["INTERESTED", "DECLINED"])
+});
+
 export const scheduleInterviewInputSchema = z.object({
   shortlistId: uuidSchema,
   scheduledAt: z.string().datetime(),
@@ -307,6 +315,11 @@ export const submitInterviewFeedbackInputSchema = z.object({
   interviewId: uuidSchema,
   feedback: z.string().min(1),
   rating: z.number().int().min(1).max(5)
+});
+
+export const respondToInterviewInputSchema = z.object({
+  interviewId: uuidSchema,
+  talentResponseStatus: z.enum(["ACCEPTED", "DECLINED"])
 });
 
 export const createOfferInputSchema = z.object({
@@ -343,6 +356,7 @@ export type DemandApprovalStatus = (typeof demandApprovalStatuses)[number];
 export type ShortlistStatus = (typeof shortlistStatuses)[number];
 export type TalentInterestStatus = (typeof talentInterestStatuses)[number];
 export type InterviewStatus = (typeof interviewStatuses)[number];
+export type InterviewResponseStatus = (typeof interviewResponseStatuses)[number];
 export type OfferStatus = (typeof offerStatuses)[number];
 export type CompanySize = (typeof companySizes)[number];
 export type NotificationType = (typeof notificationTypes)[number];
@@ -428,9 +442,11 @@ export type CreateExternalCandidateSubmissionInput = z.infer<typeof createExtern
 export type UpdateExternalCandidateSubmissionStatusInput = z.infer<typeof updateExternalCandidateSubmissionStatusInputSchema>;
 export type GenerateShortlistInput = z.infer<typeof generateShortlistInputSchema>;
 export type ShortlistActionInput = z.infer<typeof shortlistActionInputSchema>;
+export type RespondToMatchInput = z.infer<typeof respondToMatchInputSchema>;
 export type ScheduleInterviewInput = z.infer<typeof scheduleInterviewInputSchema>;
 export type UpdateInterviewInput = z.infer<typeof updateInterviewInputSchema>;
 export type SubmitInterviewFeedbackInput = z.infer<typeof submitInterviewFeedbackInputSchema>;
+export type RespondToInterviewInput = z.infer<typeof respondToInterviewInputSchema>;
 export type CreateOfferInput = z.infer<typeof createOfferInputSchema>;
 export type UpdateOfferInput = z.infer<typeof updateOfferInputSchema>;
 export type StoreGeneratedDocumentInput = z.infer<typeof storeGeneratedDocumentInputSchema>;

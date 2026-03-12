@@ -91,6 +91,12 @@ enum InterviewStatus {
   NO_SHOW
 }
 
+enum InterviewResponseStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
 enum OfferStatus {
   DRAFT
   SENT
@@ -169,6 +175,7 @@ model TalentProfile {
   currency            String               @default("USD") @db.VarChar(3)
   locationPreferences String[]
   workVisaEligibility String[]
+  identityDocumentUrls String[]
   portfolioUrls       String[]
   culturalValues      Json?
   verificationStatus  VerificationStatus   @default(PENDING)
@@ -356,6 +363,7 @@ model Interview {
   duration     Int
   meetingUrl   String?
   status       InterviewStatus @default(SCHEDULED)
+  talentResponseStatus InterviewResponseStatus @default(PENDING)
   feedback     String?         @db.Text
   rating       Int?
   shortlist    Shortlist       @relation(fields: [shortlistId], references: [id], onDelete: Cascade)

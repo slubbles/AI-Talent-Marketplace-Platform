@@ -15,6 +15,8 @@ import {
   notificationsQueryInputSchema,
   paginationInputSchema,
   rejectTalentInputSchema,
+  respondToInterviewInputSchema,
+  respondToMatchInputSchema,
   scheduleInterviewInputSchema,
   shortlistActionInputSchema,
   skillCategories,
@@ -111,6 +113,26 @@ const displayNameFromNormalized = (value: string) =>
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+
+const splitFullName = (value: string | null | undefined) => {
+  if (!value) {
+    return { firstName: undefined, lastName: undefined };
+  }
+
+  const parts = value.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return { firstName: undefined, lastName: undefined };
+  }
+
+  if (parts.length === 1) {
+    return { firstName: parts[0], lastName: undefined };
+  }
+
+  return {
+    firstName: parts[0],
+    lastName: parts.slice(1).join(" ")
+  };
+};
 
 const requireUser = (currentUser: AuthUser | null) => {
   if (!currentUser) {
@@ -304,11 +326,12 @@ const listRecruiterIdsForTalent = async (talentProfileId: string) => {
 };
 
 const syncParsedResumeToProfile = async (
-  profile: { id: string; headline: string; summary: string; industries: string[]; careerTrajectory: string | null },
+  profile: { id: string; firstName: string; lastName: string; headline: string; summary: string; industries: string[]; careerTrajectory: string | null },
   resumeUrl: string,
   parsedResume: ParsedResumeResponse
 ) => {
   const resolvedSkillIds: string[] = [];
+  const resolvedName = splitFullName(parsedResume.full_name);
 
   for (const skill of parsedResume.skills) {
     const normalizedName = normalizeSkillName(skill.name || skill.display_name);
@@ -327,6 +350,8 @@ const syncParsedResumeToProfile = async (
   await prisma.talentProfile.update({
     where: { id: profile.id },
     data: {
+      firstName: resolvedName.firstName ?? profile.firstName,
+      lastName: resolvedName.lastName ?? profile.lastName,
       resumeUrl,
       resumeParsedData: parsedResume as unknown as Prisma.JsonObject,
       headline: parsedResume.headline ?? profile.headline,
@@ -345,6 +370,48 @@ const syncParsedResumeToProfile = async (
         skillId: resolvedSkillIds[index],
         proficiency: skill.proficiency,
         yearsOfExperience: 3
+      }))
+    });
+  }
+
+  await prisma.experience.deleteMany({ where: { talentProfileId: profile.id } });
+  if (parsedResume.experience.length > 0) {
+    await prisma.experience.createMany({
+      data: parsedResume.experience.map((experience) => ({
+        talentProfileId: profile.id,
+        title: experience.role,
+        companyName: experience.company ?? "Unknown company",
+        location: null,
+        startDate: toDate(experience.start_date) ?? new Date(),
+        endDate: experience.end_date && !/present|current/i.test(experience.end_date) ? toDate(experience.end_date) : null,
+        isCurrent: Boolean(experience.end_date && /present|current/i.test(experience.end_date)),
+        description: experience.description ?? experience.role
+      }))
+    });
+  }
+
+  await prisma.certification.deleteMany({ where: { talentProfileId: profile.id } });
+  if (parsedResume.certifications.length > 0) {
+    await prisma.certification.createMany({
+      data: parsedResume.certifications.map((certification) => ({
+        talentProfileId: profile.id,
+        name: certification.name,
+        issuer: certification.issuer ?? "Unknown issuer",
+        issueDate: toDate(certification.issue_date) ?? undefined
+      }))
+    });
+  }
+
+  await prisma.education.deleteMany({ where: { talentProfileId: profile.id } });
+  if (parsedResume.education.length > 0) {
+    await prisma.education.createMany({
+      data: parsedResume.education.map((education) => ({
+        talentProfileId: profile.id,
+        institution: education.institution,
+        degree: education.degree ?? "Degree not specified",
+        fieldOfStudy: education.field_of_study ?? undefined,
+        startDate: toDate(education.start_date) ?? undefined,
+        endDate: toDate(education.end_date) ?? undefined
       }))
     });
   }
@@ -520,6 +587,7 @@ export const createTalentProfile = async (inputValue: unknown, currentUser: Auth
       currency: input.currency,
       locationPreferences: input.locationPreferences,
       workVisaEligibility: input.workVisaEligibility,
+      identityDocumentUrls: input.identityDocumentUrls,
       portfolioUrls: input.portfolioUrls,
       culturalValues: parseJson(input.culturalValuesJson),
       profileCompleteness: input.profileCompleteness
@@ -556,6 +624,7 @@ export const updateTalentProfile = async (inputValue: unknown, currentUser: Auth
       currency: input.currency,
       locationPreferences: input.locationPreferences,
       workVisaEligibility: input.workVisaEligibility,
+      identityDocumentUrls: input.identityDocumentUrls,
       portfolioUrls: input.portfolioUrls,
       culturalValues: input.culturalValuesJson ? parseJson(input.culturalValuesJson) : undefined,
       profileCompleteness: input.profileCompleteness
@@ -1023,6 +1092,53 @@ export const rejectCandidate = async (inputValue: unknown, currentUser: AuthUser
   return prisma.shortlist.update({ where: { id: input.shortlistId }, data: { status: "REJECTED" }, include: shortlistInclude });
 };
 
+export const respondToMatch = async (inputValue: unknown, currentUser: AuthUser | null) => {
+  const user = requireRole(currentUser, ["TALENT"]);
+  const input = respondToMatchInputSchema.parse(inputValue);
+  const shortlist = await prisma.shortlist.findUnique({
+    where: { id: input.shortlistId },
+    include: {
+      demand: true,
+      talentProfile: {
+        include: {
+          user: true
+        }
+      }
+    }
+  });
+
+  if (!shortlist) {
+    throw badInput("Shortlist record not found.");
+  }
+
+  if (shortlist.talentProfile.userId !== user.id) {
+    throw forbidden();
+  }
+
+  const updatedShortlist = await prisma.shortlist.update({
+    where: { id: input.shortlistId },
+    data: { talentStatus: input.talentStatus },
+    include: shortlistInclude
+  });
+
+  await createNotification({
+    userId: shortlist.demand.recruiterId,
+    type: "SYSTEM",
+    title: `${shortlist.talentProfile.firstName} ${shortlist.talentProfile.lastName} responded to ${shortlist.demand.title}`,
+    body:
+      input.talentStatus === "INTERESTED"
+        ? "The talent marked this opportunity as interested."
+        : "The talent declined this opportunity.",
+    metadata: {
+      shortlistId: shortlist.id,
+      demandId: shortlist.demandId,
+      talentStatus: input.talentStatus
+    }
+  });
+
+  return updatedShortlist;
+};
+
 const assertInterviewAccess = async (interviewId: string, currentUser: AuthUser) => {
   const interview = await prisma.interview.findUnique({
     where: { id: interviewId },
@@ -1145,6 +1261,39 @@ export const submitInterviewFeedback = async (inputValue: unknown, currentUser: 
     },
     include: { shortlist: { include: shortlistInclude }, offer: true }
   });
+};
+
+export const respondToInterview = async (inputValue: unknown, currentUser: AuthUser | null) => {
+  const user = requireRole(currentUser, ["TALENT"]);
+  const input = respondToInterviewInputSchema.parse(inputValue);
+  const interview = await assertInterviewAccess(input.interviewId, user);
+
+  const updatedInterview = await prisma.interview.update({
+    where: { id: input.interviewId },
+    data: {
+      talentResponseStatus: input.talentResponseStatus,
+      status: input.talentResponseStatus === "DECLINED" ? "CANCELLED" : undefined
+    },
+    include: { shortlist: { include: shortlistInclude }, offer: true }
+  });
+
+  await createNotification({
+    userId: interview.shortlist.demand.recruiterId,
+    type: "INTERVIEW_UPDATE",
+    title: `Interview response for ${interview.shortlist.demand.title}`,
+    body:
+      input.talentResponseStatus === "ACCEPTED"
+        ? "The talent accepted the interview request."
+        : "The talent declined the interview request.",
+    metadata: {
+      interviewId: interview.id,
+      shortlistId: interview.shortlistId,
+      demandId: interview.shortlist.demandId,
+      talentResponseStatus: input.talentResponseStatus
+    }
+  });
+
+  return updatedInterview;
 };
 
 const assertOfferAccess = async (offerId: string, currentUser: AuthUser) => {
