@@ -1,0 +1,22 @@
+Dr. Elena Ramirez
+Head of Data & AI
+elena.ramirez@example.com | +34 91 555 0199
+Location: Madrid, Spain
+
+Summary
+Leader with 12 years of experience across AI SaaS, healthtech, and e-commerce organizations.
+Built NLP and machine learning teams, led platform strategy, and hired senior engineers and data scientists.
+
+Skills
+Python, Machine Learning, NLP, Snowflake, dbt, Airflow, Leadership, Communication
+
+Work Experience
+Head of Data & AI at Nova Health | 2021 - Present | Directed applied AI roadmap, hiring, and platform architecture for healthtech analytics.
+Director of Machine Learning at Commerce Atlas | 2017 - 2021 | Led recommendation systems and experimentation programs for e-commerce growth.
+Senior Data Scientist at Signal Works | 2013 - 2017 | Built NLP classification pipelines and stakeholder reporting.
+
+Education
+PhD, Computer Science, Universidad Politecnica de Madrid
+
+Certifications
+Google Cloud Professional Data Engineer | Google | 2022

@@ -1,0 +1,20 @@
+Marcus Lee
+Backend Engineer
+marcus.lee@example.com | +44 20 7946 0958
+Location: London, UK
+
+Profile
+Backend engineer with 4 years of experience building APIs and data workflows for fintech and marketplace products.
+
+Skills
+Python, FastAPI, PostgreSQL, GraphQL, Docker, AWS
+
+Professional Experience
+Backend Engineer at Ledger Stream | 2022 - Present | Built FastAPI services, payment integrations, and PostgreSQL-backed workflows for a fintech platform.
+Software Engineer at Market Loop | 2020 - 2022 | Shipped GraphQL APIs and Dockerized services for marketplace search.
+
+Education
+BSc, Software Engineering, King's College London
+
+Certifications
+AWS Certified Developer Associate | Amazon | 2023

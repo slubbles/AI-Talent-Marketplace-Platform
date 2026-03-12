@@ -6,6 +6,7 @@
     "build": "echo \"Python service build handled by uvicorn/FastAPI\"",
     "dev": "node ./scripts/run-dev.mjs",
     "lint": "python -m py_compile app/main.py",
+    "test": "python -m pytest tests",
     "typecheck": "python -m py_compile app/main.py"
   }
 }

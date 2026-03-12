@@ -1,0 +1,21 @@
+Ava Thompson
+Junior Frontend Developer
+ava.thompson@example.com | +1 415 555 0101
+Location: Remote, Austin
+
+Summary
+Junior frontend engineer with 1 year of internship and freelance experience building SaaS dashboards.
+Focused on React, TypeScript, and accessible UI implementation.
+
+Skills
+JavaScript, TypeScript, React, Next.js, Communication
+
+Experience
+Frontend Intern at Pixel Forge | Jun 2024 - Present | Built reusable React components for a B2B SaaS analytics product.
+Freelance Web Developer at Independent | Jan 2024 - May 2024 | Delivered landing pages for local retail clients.
+
+Education
+Bachelor of Science, Computer Science, University of Texas
+
+Certifications
+Meta Front-End Developer Certificate | Meta | 2024

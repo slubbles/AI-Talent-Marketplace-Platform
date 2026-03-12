@@ -20,3 +20,4 @@ __pycache__/
 apps/web/.next/
 apps/mobile/.expo/
 packages/db/generated/
+apps/api/.uploads/

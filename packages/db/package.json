@@ -5,9 +5,14 @@
   "scripts": {
     "build": "echo \"Database package build is handled by Prisma\"",
     "db:generate": "prisma generate",
-    "dev": "echo \"Use prisma migrate commands in later sessions\"",
+    "db:migrate": "prisma migrate dev --schema prisma/schema.prisma",
+    "db:seed": "node prisma/seed.js",
+    "dev": "echo \"Use prisma migrate and seed commands during schema sessions\"",
     "lint": "prisma validate",
     "typecheck": "prisma validate"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   },
   "dependencies": {
     "@prisma/client": "^6.4.1"

@@ -1,11 +1,18 @@
+import Link from "next/link";
+import type { Route } from "next";
+
 const surfaces = [
   {
     title: "Recruiter Web",
-    copy: "Next.js 14 App Router scaffolded for recruiter and admin route groups."
+    copy: "The recruiter web now supports role creation, shortlisting, semantic search, interview operations, offer drafting, accepted-offer onboarding, and live analytics for hiring performance."
+  },
+  {
+    title: "Admin Console",
+    copy: "Admin routes now handle user activation, talent verification, company oversight, role approvals, concierge/headhunter sourcing workflows, and platform analytics."
   },
   {
     title: "GraphQL API",
-    copy: "Apollo Server will power all CRUD, matching, notifications, and RBAC flows."
+    copy: "Apollo now exposes recruiter dashboard data, admin governance queries, analytics aggregations, approval workflows, concierge/headhunter submissions, and generated document storage for contract artifacts."
   },
   {
     title: "AI Engine",
@@ -21,12 +28,22 @@ export default function HomePage() {
   return (
     <main className="shell">
       <section className="panel">
-        <span className="eyebrow">Session 1 scaffold complete</span>
+        <span className="eyebrow">Session 15 analytics platform complete</span>
         <h1>AI Talent Marketplace Platform</h1>
         <p>
-          The monorepo is now structured for web, mobile, API, shared packages, database,
-          and the internal AI engine.
+          The platform now covers recruiter operations from demand creation through offer management, adds a dedicated admin console for governance and concierge sourcing, and ships recruiter plus admin analytics dashboards for reporting and demand forecasting.
         </p>
+        <div className="dashboard-actions">
+          <Link className="primary-link" href={"/dashboard" as Route}>
+            Open recruiter dashboard
+          </Link>
+          <Link className="secondary-link" href={"/admin" as Route}>
+            Open admin console
+          </Link>
+          <Link className="secondary-link" href={"/register" as Route}>
+            Create recruiter account
+          </Link>
+        </div>
         <div className="grid">
           {surfaces.map((surface) => (
             <article className="tile" key={surface.title}>

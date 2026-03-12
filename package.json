@@ -17,7 +17,9 @@
     "dev:ai": "turbo run dev --filter=@atm/ai-engine",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
-    "db:generate": "turbo run db:generate --filter=@atm/db"
+    "db:generate": "turbo run db:generate --filter=@atm/db",
+    "db:migrate": "npm run db:migrate --workspace @atm/db",
+    "db:seed": "npm run db:seed --workspace @atm/db"
   },
   "devDependencies": {
     "turbo": "^2.5.0",

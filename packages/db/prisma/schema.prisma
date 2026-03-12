@@ -12,14 +12,464 @@ enum UserRole {
   TALENT
   RECRUITER
   ADMIN
+  HEADHUNTER
+}
+
+enum SeniorityLevel {
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  EXECUTIVE
+}
+
+enum AvailabilityWindow {
+  IMMEDIATE
+  TWO_WEEKS
+  ONE_MONTH
+  THREE_MONTHS
+  NOT_AVAILABLE
+}
+
+enum VerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum SkillCategory {
+  TECHNICAL
+  SOFT
+  DOMAIN
+  TOOL
+}
+
+enum SkillProficiency {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  EXPERT
+}
+
+enum RemotePolicy {
+  ONSITE
+  HYBRID
+  REMOTE
+}
+
+enum DemandStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  FILLED
+  CANCELLED
+}
+
+enum DemandApprovalStatus {
+  PENDING
+  APPROVED
+  CHANGES_REQUESTED
+}
+
+enum ShortlistStatus {
+  AI_SUGGESTED
+  RECRUITER_REVIEWED
+  SHORTLISTED
+  REJECTED
+}
+
+enum TalentInterestStatus {
+  PENDING
+  INTERESTED
+  DECLINED
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum OfferStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+  WITHDRAWN
+}
+
+enum CompanySize {
+  STARTUP
+  SMB
+  ENTERPRISE
+}
+
+enum AnalyticsEventType {
+  PROFILE_VIEW
+  SHORTLIST_GENERATED
+  INTERVIEW_SCHEDULED
+  OFFER_SENT
+  HIRE_COMPLETED
+}
+
+enum NotificationType {
+  MATCH_READY
+  INTERVIEW_UPDATE
+  OFFER_UPDATE
+  SYSTEM
+}
+
+enum ExternalCandidateSubmissionStatus {
+  SUBMITTED
+  REVIEWED
+  SHORTLISTED
+  REJECTED
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
-  passwordHash  String
-  role          UserRole
-  emailVerified Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id               String            @id @default(uuid()) @db.Uuid
+  email            String            @unique
+  passwordHash     String
+  role             UserRole
+  emailVerified    Boolean           @default(false)
+  isActive         Boolean           @default(true)
+  talentProfile    TalentProfile?
+  recruiterCompanies Company[]       @relation("RecruiterCompanies")
+  recruiterDemands Demand[]          @relation("RecruiterDemands")
+  analyticsEvents  AnalyticsEvent[]  @relation("AnalyticsActor")
+  notifications    Notification[]
+  placementFeedbacks PlacementFeedback[] @relation("PlacementFeedbackRecruiter")
+  assignedHeadhunterLinks HeadhunterAssignment[] @relation("HeadhunterAssignedBy")
+  headhunterAssignments HeadhunterAssignment[] @relation("HeadhunterUserAssignments")
+  headhunterSubmissions ExternalCandidateSubmission[] @relation("SubmissionHeadhunter")
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  @@index([role, isActive])
+}
+
+model TalentProfile {
+  id                  String               @id @default(uuid()) @db.Uuid
+  userId              String               @unique @db.Uuid
+  firstName           String
+  lastName            String
+  headline            String
+  summary             String               @db.Text
+  avatarUrl           String?
+  resumeUrl           String?
+  resumeParsedData    Json?
+  industries          String[]
+  seniorityLevel      SeniorityLevel
+  careerTrajectory    String?
+  availability        AvailabilityWindow
+  availableFrom       DateTime?            @db.Date
+  hourlyRateMin       Decimal?             @db.Decimal(10, 2)
+  hourlyRateMax       Decimal?             @db.Decimal(10, 2)
+  currency            String               @default("USD") @db.VarChar(3)
+  locationPreferences String[]
+  workVisaEligibility String[]
+  portfolioUrls       String[]
+  culturalValues      Json?
+  verificationStatus  VerificationStatus   @default(PENDING)
+  verificationNotes   String?              @db.Text
+  verifiedAt          DateTime?
+  profileEmbedding    Unsupported("vector(1536)")?
+  profileCompleteness Int                  @default(0)
+  user                User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skills              TalentSkill[]
+  experiences         Experience[]
+  certifications      Certification[]
+  educationEntries    Education[]
+  shortlists          Shortlist[]
+  offers              Offer[]
+  placementFeedbacks  PlacementFeedback[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([verificationStatus])
+  @@index([seniorityLevel])
+}
+
+model Skill {
+  id           String          @id @default(uuid()) @db.Uuid
+  name         String          @unique
+  displayName  String
+  category     SkillCategory
+  embedding    Unsupported("vector(1536)")?
+  talentSkills TalentSkill[]
+  demandSkills DemandSkill[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model TalentSkill {
+  id                String           @id @default(uuid()) @db.Uuid
+  talentProfileId   String           @db.Uuid
+  skillId           String           @db.Uuid
+  proficiency       SkillProficiency
+  yearsOfExperience Int              @default(0)
+  talentProfile     TalentProfile    @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+  skill             Skill            @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+
+  @@unique([talentProfileId, skillId])
+}
+
+model Experience {
+  id              String        @id @default(uuid()) @db.Uuid
+  talentProfileId String        @db.Uuid
+  title           String
+  companyName     String
+  location        String?
+  startDate       DateTime      @db.Date
+  endDate         DateTime?     @db.Date
+  isCurrent       Boolean       @default(false)
+  description     String        @db.Text
+  talentProfile   TalentProfile @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([talentProfileId, startDate])
+}
+
+model Certification {
+  id              String        @id @default(uuid()) @db.Uuid
+  talentProfileId String        @db.Uuid
+  name            String
+  issuer          String
+  issueDate       DateTime?     @db.Date
+  expirationDate  DateTime?     @db.Date
+  credentialId    String?
+  credentialUrl   String?
+  talentProfile   TalentProfile @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Education {
+  id              String        @id @default(uuid()) @db.Uuid
+  talentProfileId String        @db.Uuid
+  institution     String
+  degree          String
+  fieldOfStudy    String?
+  startDate       DateTime?     @db.Date
+  endDate         DateTime?     @db.Date
+  description     String?       @db.Text
+  talentProfile   TalentProfile @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Company {
+  id         String      @id @default(uuid()) @db.Uuid
+  recruiterId String     @db.Uuid
+  name       String
+  industry   String
+  size       CompanySize
+  logoUrl    String?
+  website    String?
+  recruiter  User        @relation("RecruiterCompanies", fields: [recruiterId], references: [id], onDelete: Cascade)
+  demands    Demand[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([recruiterId])
+}
+
+model Demand {
+  id                     String               @id @default(uuid()) @db.Uuid
+  recruiterId            String               @db.Uuid
+  companyId              String               @db.Uuid
+  title                  String
+  description            String               @db.Text
+  aiGeneratedDescription String?              @db.Text
+  experienceLevel        SeniorityLevel
+  location               String
+  remotePolicy           RemotePolicy
+  startDate              DateTime?            @db.Date
+  contractDuration       String?
+  budgetMin              Decimal?             @db.Decimal(10, 2)
+  budgetMax              Decimal?             @db.Decimal(10, 2)
+  currency               String               @default("USD") @db.VarChar(3)
+  projectRequirements    String?              @db.Text
+  status                 DemandStatus         @default(DRAFT)
+  approvalStatus         DemandApprovalStatus @default(PENDING)
+  approvalNotes          String?              @db.Text
+  approvedAt             DateTime?
+  hardToFill             Boolean              @default(false)
+  demandEmbedding        Unsupported("vector(1536)")?
+  recruiter              User                 @relation("RecruiterDemands", fields: [recruiterId], references: [id], onDelete: Cascade)
+  company                Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  requiredSkills         DemandSkill[]
+  shortlists             Shortlist[]
+  offers                 Offer[]
+  placementFeedbacks     PlacementFeedback[]
+  headhunterAssignments  HeadhunterAssignment[]
+  externalSubmissions    ExternalCandidateSubmission[]
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+
+  @@index([recruiterId, status])
+  @@index([companyId])
+  @@index([approvalStatus])
+  @@index([hardToFill])
+}
+
+model DemandSkill {
+  id                String      @id @default(uuid()) @db.Uuid
+  demandId          String      @db.Uuid
+  skillId           String      @db.Uuid
+  isRequired        Boolean     @default(true)
+  minimumYears      Int?
+  demand            Demand      @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  skill             Skill       @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  @@unique([demandId, skillId])
+}
+
+model Shortlist {
+  id                String               @id @default(uuid()) @db.Uuid
+  demandId          String               @db.Uuid
+  talentProfileId   String               @db.Uuid
+  matchScore        Decimal              @db.Decimal(5, 2)
+  scoreBreakdown    Json
+  aiExplanation     String               @db.Text
+  status            ShortlistStatus      @default(AI_SUGGESTED)
+  talentStatus      TalentInterestStatus @default(PENDING)
+  demand            Demand               @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  talentProfile     TalentProfile        @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+  interviews        Interview[]
+  createdAt         DateTime             @default(now())
+
+  @@unique([demandId, talentProfileId])
+  @@index([status, talentStatus])
+}
+
+model Interview {
+  id           String          @id @default(uuid()) @db.Uuid
+  shortlistId  String          @db.Uuid
+  scheduledAt  DateTime
+  duration     Int
+  meetingUrl   String?
+  status       InterviewStatus @default(SCHEDULED)
+  feedback     String?         @db.Text
+  rating       Int?
+  shortlist    Shortlist       @relation(fields: [shortlistId], references: [id], onDelete: Cascade)
+  offer        Offer?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  @@index([scheduledAt])
+}
+
+model Offer {
+  id              String      @id @default(uuid()) @db.Uuid
+  interviewId     String      @unique @db.Uuid
+  demandId        String      @db.Uuid
+  talentProfileId String      @db.Uuid
+  hourlyRate      Decimal     @db.Decimal(10, 2)
+  startDate       DateTime    @db.Date
+  endDate         DateTime?   @db.Date
+  terms           String      @db.Text
+  status          OfferStatus @default(DRAFT)
+  interview       Interview   @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  demand          Demand      @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  talentProfile   TalentProfile @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([demandId, talentProfileId])
+}
+
+model AnalyticsEvent {
+  id         String             @id @default(uuid()) @db.Uuid
+  eventType  AnalyticsEventType
+  actorId    String?            @db.Uuid
+  targetId   String             @db.Uuid
+  metadata   Json?
+  actor      User?              @relation("AnalyticsActor", fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt  DateTime           @default(now())
+
+  @@index([eventType, createdAt])
+  @@index([targetId])
+}
+
+model Notification {
+  id         String           @id @default(uuid()) @db.Uuid
+  userId     String           @db.Uuid
+  type       NotificationType
+  title      String
+  body       String           @db.Text
+  read       Boolean          @default(false)
+  metadata   Json?
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@index([userId, read])
+}
+
+model PlacementFeedback {
+  id                    String        @id @default(uuid()) @db.Uuid
+  talentProfileId       String        @db.Uuid
+  recruiterId           String        @db.Uuid
+  demandId              String        @db.Uuid
+  rating                Int
+  feedback              String        @db.Text
+  skillsDemonstrated    String[]
+  completedSuccessfully Boolean
+  talentProfile         TalentProfile @relation(fields: [talentProfileId], references: [id], onDelete: Cascade)
+  recruiter             User          @relation("PlacementFeedbackRecruiter", fields: [recruiterId], references: [id], onDelete: Cascade)
+  demand                Demand        @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@index([talentProfileId, demandId])
+  @@index([recruiterId])
+}
+
+model HeadhunterAssignment {
+  id               String   @id @default(uuid()) @db.Uuid
+  demandId         String   @db.Uuid
+  headhunterUserId String   @db.Uuid
+  assignedByAdminId String  @db.Uuid
+  notes            String?  @db.Text
+  demand           Demand   @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  headhunterUser   User     @relation("HeadhunterUserAssignments", fields: [headhunterUserId], references: [id], onDelete: Cascade)
+  assignedByAdmin  User     @relation("HeadhunterAssignedBy", fields: [assignedByAdminId], references: [id], onDelete: Cascade)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([demandId, headhunterUserId])
+  @@index([headhunterUserId])
+}
+
+model ExternalCandidateSubmission {
+  id                String                           @id @default(uuid()) @db.Uuid
+  demandId          String                           @db.Uuid
+  headhunterUserId  String                           @db.Uuid
+  firstName         String
+  lastName          String
+  email             String
+  headline          String
+  summary           String                           @db.Text
+  location          String
+  availability      AvailabilityWindow
+  hourlyRate        Decimal?                         @db.Decimal(10, 2)
+  notes             String?                          @db.Text
+  resumeUrl         String?
+  status            ExternalCandidateSubmissionStatus @default(SUBMITTED)
+  reviewNotes       String?                          @db.Text
+  reviewedAt        DateTime?
+  demand            Demand                           @relation(fields: [demandId], references: [id], onDelete: Cascade)
+  headhunterUser    User                             @relation("SubmissionHeadhunter", fields: [headhunterUserId], references: [id], onDelete: Cascade)
+  createdAt         DateTime                         @default(now())
+  updatedAt         DateTime                         @updatedAt
+
+  @@index([demandId, status])
+  @@index([headhunterUserId, createdAt])
 }
