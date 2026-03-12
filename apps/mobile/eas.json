@@ -1,0 +1,23 @@
+{
+  "cli": {
+    "version": ">= 12.6.0"
+  },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_GRAPHQL_API_URL": "https://api.example.com/graphql"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_GRAPHQL_API_URL": "https://api.example.com/graphql"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

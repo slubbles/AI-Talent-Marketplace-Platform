@@ -11,7 +11,11 @@ coverage/
  **/.env
 .env.local
 .env.*.local
+.env.production*
+.env.render*
+.env.expo*
 !.env.example
+!.env.production*.example
 .venv/
 __pycache__/
 *.pyc

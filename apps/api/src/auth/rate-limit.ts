@@ -5,16 +5,27 @@ type RateLimitRecord = {
 
 const registerStore = new Map<string, RateLimitRecord>();
 const loginStore = new Map<string, RateLimitRecord>();
+const forgotPasswordStore = new Map<string, RateLimitRecord>();
 
-const getStore = (scope: "register" | "login") =>
-  scope === "register" ? registerStore : loginStore;
+const getStore = (scope: "register" | "login" | "forgotPassword") => {
+  if (scope === "register") {
+    return registerStore;
+  }
+
+  if (scope === "login") {
+    return loginStore;
+  }
+
+  return forgotPasswordStore;
+};
 
 const limits = {
   register: { max: 5, windowMs: 15 * 60 * 1000 },
-  login: { max: 10, windowMs: 15 * 60 * 1000 }
+  login: { max: 10, windowMs: 15 * 60 * 1000 },
+  forgotPassword: { max: 5, windowMs: 15 * 60 * 1000 }
 } as const;
 
-export const enforceRateLimit = (scope: "register" | "login", key: string) => {
+export const enforceRateLimit = (scope: "register" | "login" | "forgotPassword", key: string) => {
   const store = getStore(scope);
   const policy = limits[scope];
   const now = Date.now();
