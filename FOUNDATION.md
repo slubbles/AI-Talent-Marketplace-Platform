@@ -172,6 +172,7 @@ TalentProfile
 ├── locationPreferences (string[] — e.g. ["Remote", "Dubai", "Amsterdam"])
 ├── workVisaEligibility (string[] — e.g. ["UAE", "EU", "US"])
 ├── portfolioUrls (string[])
+├── culturalValues (JSON — work style, communication prefs, team dynamics)
 ├── verificationStatus: PENDING | VERIFIED | REJECTED
 ├── profileEmbedding (vector(1536)) ← pgvector
 ├── profileCompleteness (int, 0-100)
@@ -228,11 +229,13 @@ Shortlist
 ├── talentProfileId (FK → TalentProfile)
 ├── matchScore (decimal, 0-100)
 ├── scoreBreakdown (JSON)
-│   ├── skillMatch (0-100)
-│   ├── experienceFit (0-100)
-│   ├── availabilityFit (0-100)
-│   ├── pricingFit (0-100)
-│   └── locationFit (0-100)
+│   ├── skillMatch (0-100, 35%)
+│   ├── experienceFit (0-100, 20%)
+│   ├── availabilityFit (0-100, 10%)
+│   ├── pricingFit (0-100, 10%)
+│   ├── locationFit (0-100, 10%)
+│   ├── culturalFit (0-100, 10%)
+│   └── feedbackScore (0-100, 5%)
 ├── aiExplanation (text — "Why this match")
 ├── status: AI_SUGGESTED | RECRUITER_REVIEWED | SHORTLISTED | REJECTED
 ├── talentStatus: PENDING | INTERESTED | DECLINED
@@ -266,7 +269,22 @@ Offer
 └── createdAt
 ```
 
-### 5.7 Company
+### 5.7 Placement Feedback
+
+```
+PlacementFeedback
+├── id (uuid)
+├── talentProfileId (FK → TalentProfile)
+├── recruiterId (FK → User)
+├── demandId (FK → Demand)
+├── rating (int, 1-5)
+├── feedback (text)
+├── skillsDemonstrated (string[])
+├── completedSuccessfully (boolean)
+└── createdAt
+```
+
+### 5.8 Company
 
 ```
 Company
@@ -279,7 +297,7 @@ Company
 └── createdAt
 ```
 
-### 5.8 Analytics Events
+### 5.9 Analytics Events
 
 ```
 AnalyticsEvent
