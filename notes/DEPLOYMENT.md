@@ -27,11 +27,92 @@ Preflight validation command:
 npm run deploy:check -- all .env
 ```
 
+`npm run deploy:check` now enforces OpenRouter platform policy for API/AI target validation as well:
+
+- `OPENROUTER_BASE_URL` must be `https://openrouter.ai/api/v1`
+- `OPENROUTER_EMBEDDING_MODEL` must be `text-embedding-3-small`
+
+The preflight validator also treats localhost URLs, template database URLs, and `*.example.com` values as placeholders to prevent accidental rollout with non-production values.
+
+Deployment readiness status (web/api/ai/mobile):
+
+```bash
+npm run deploy:status
+```
+
+Guided remediation report (grouped by web/api/ai/mobile target and hosting surface):
+
+```bash
+npm run deploy:remediate
+```
+
+JSON mode for CI/automation:
+
+```bash
+npm run deploy:remediate:json
+```
+
+This report now also includes cross-target mismatch checks and duplicate-key conflict diagnostics across split env files.
+It also checks Expo EAS preview/production GraphQL URL alignment and placeholder status from `apps/mobile/eas.json`.
+It warns/fails when private production env files are tracked by git.
+It now enforces platform policy checks for API and AI envs:
+
+- `OPENROUTER_BASE_URL` must be `https://openrouter.ai/api/v1`
+- `OPENROUTER_EMBEDDING_MODEL` must be `text-embedding-3-small`
+
+`npm run deploy:status` and `npm run deploy:verify` now enforce the same OpenRouter policy expectations for consistency across readiness and hosted verification.
+
+The readiness report now also checks cross-target consistency when non-placeholder values are present:
+
+- web GraphQL URL vs API GraphQL URL
+- mobile GraphQL URL vs API mobile GraphQL URL
+- API CORS allowlist includes the web origin
+- API vs AI OpenRouter alignment (`OPENROUTER_BASE_URL`, `OPENROUTER_MODEL`, `OPENROUTER_EMBEDDING_MODEL`)
+
+Create missing private deployment env files from tracked templates:
+
+```bash
+npm run deploy:prepare
+```
+
 Post-deploy verification command:
 
 ```bash
-npm run deploy:verify -- .env.production.api
+npm run deploy:verify -- .env.production.web .env.production.api .env.production.ai
 ```
+
+When duplicate keys appear across those files, verification fails early if values conflict.
+Placeholder failures now report `KEY@env-file` entries so you can fix exact files quickly.
+
+Mobile hosted verification command:
+
+```bash
+npm run deploy:verify:mobile -- .env.production.mobile
+```
+
+Unified hosted verification command:
+
+```bash
+npm run deploy:verify:all
+```
+
+This command now runs a remediation gate (`deploy:remediate`) before hosted endpoint checks, so unresolved env/profile issues are surfaced first.
+
+This command first checks that these private local files exist:
+
+- `.env.production.web`
+- `.env.production.api`
+- `.env.production.ai`
+- `.env.production.mobile`
+
+If any are missing, it stops immediately with a clear actionable error.
+It also fails if any of these private env files are tracked by git, to prevent accidental secret commits.
+
+Typical flow:
+
+1. `npm run deploy:prepare`
+2. Fill real values into `.env.production.web`, `.env.production.api`, `.env.production.ai`, and `.env.production.mobile`
+3. `npm run deploy:verify:all`
 
 Target-specific examples:
 
@@ -164,12 +245,24 @@ Before building, replace the placeholder API URL in `apps/mobile/eas.json` with 
 
 Run `npm run deploy:check -- mobile .env.production.mobile` before creating preview or production builds.
 
+Then verify the mobile target and EAS profile URLs match and are reachable:
+
+```bash
+npm run deploy:verify:mobile -- .env.production.mobile
+```
+
+For one-shot verification of hosted web/API/AI plus mobile endpoint alignment:
+
+```bash
+npm run deploy:verify:all
+```
+
 ## Live verification checklist
 
 Automated baseline check:
 
 ```bash
-npm run deploy:verify -- .env.production.api
+npm run deploy:verify -- .env.production.web .env.production.api .env.production.ai
 ```
 
 After deployment, verify the core loop in order:

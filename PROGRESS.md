@@ -42,6 +42,27 @@
 | Hosted environment template files for web, API, AI engine, and mobile rollout | ✅ | 100 |
 | Private hosted env files safely ignored while keeping deploy templates tracked | ✅ | 100 |
 | Post-deploy hosted verification script for web, API, AI, GraphQL, and CORS | ✅ | 100 |
+| Mobile hosted verification script for GraphQL endpoint + EAS profile URL alignment (`deploy:verify:mobile`) | ✅ | 100 |
+| Unified deploy precheck for required private env files (web/api/ai/mobile) before hosted verification (`check-deploy-env-files`) | ✅ | 100 |
+| Deploy precheck now blocks tracked private env files to prevent secret commits | ✅ | 100 |
+| Deploy env scaffold helper to create missing private files from templates for web/api/ai/mobile (`deploy:prepare`) | ✅ | 100 |
+| Fast-fail placeholder detection in hosted verification (`verify-deploy`) including template DB/CORS/localhost guardrails | ✅ | 100 |
+| Split-env hosted stack verification consumes web+api+ai files directly in one run (`deploy:verify`) | ✅ | 100 |
+| Hosted verifier now reports placeholder failures with exact `KEY@file` diagnostics for fast remediation | ✅ | 100 |
+| Deployment readiness status summary across web/api/ai/mobile (`deploy:status`) | ✅ | 100 |
+| Guided deploy remediation report grouped by target + hosting surface (`deploy:remediate`) | ✅ | 100 |
+| Remediation report now includes cross-target mismatch + duplicate-key conflict diagnostics | ✅ | 100 |
+| Remediation report now validates Expo EAS profile URL alignment + placeholder state | ✅ | 100 |
+| Remediation report now validates private production env files are not git-tracked | ✅ | 100 |
+| Remediation report supports JSON output for CI/automation (`deploy:remediate:json`) | ✅ | 100 |
+| Remediation report enforces OpenRouter platform policy checks (base URL + embedding model) for API/AI targets | ✅ | 100 |
+| Deploy readiness and hosted verifier now enforce OpenRouter platform policy checks consistently (`deploy:status`, `deploy:verify`) | ✅ | 100 |
+| OpenRouter cross-target consistency checks added for API vs AI config alignment (`BASE_URL`, `MODEL`, `EMBEDDING_MODEL`) | ✅ | 100 |
+| Preflight deploy validator now enforces OpenRouter policy for API/AI targets (`deploy:check`) | ✅ | 100 |
+| Preflight deploy validator placeholder detection now catches localhost/template-DB/example-domain values (`deploy:check`) | ✅ | 100 |
+| Unified hosted verification now gates through remediation checks before network probes (`deploy:verify:all`) | ✅ | 100 |
+| Rollout checklist synchronized with remediation-gated verify-all and private-env tracking guardrails | ✅ | 100 |
+| Cross-target deployment consistency checks for web/api/mobile URL + CORS alignment | ✅ | 100 |
 | Expo EAS build profiles for preview and production | ✅ | 100 |
 | Hosted environment configuration and live URL verification | ⬜ | 0 |
 | Mobile app pointed at deployed API and Expo build verification | ⬜ | 0 |
@@ -283,6 +304,7 @@
 
 ## Blockers
 
-- None currently.
+- Hosted production env files still contain placeholder values for web/api/ai/mobile targets.
+- Live hosted URLs and secrets are required to complete the final two Session 18 deployment verification tasks.
 
-*Last updated: March 12, 2026*
+*Last updated: March 13, 2026*

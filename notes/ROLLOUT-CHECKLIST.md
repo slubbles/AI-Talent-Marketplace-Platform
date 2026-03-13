@@ -24,6 +24,16 @@ npm run deploy:check -- ai .env.production.ai
 npm run deploy:check -- mobile .env.production.mobile
 ```
 
+Policy note for API/AI preflight checks:
+- `OPENROUTER_BASE_URL` must be `https://openrouter.ai/api/v1`
+- `OPENROUTER_EMBEDDING_MODEL` must be `text-embedding-3-small`
+
+Helper command to create missing private env files from templates:
+
+```bash
+npm run deploy:prepare
+```
+
 ## 2. Deploy web on Vercel
 
 - import the repo
@@ -56,7 +66,7 @@ npm run deploy:check -- mobile .env.production.mobile
 - open hosted API `/healthz`
 - open hosted AI `/health`
 - confirm GraphQL responds at `/graphql`
-- run `npm run deploy:verify -- .env.production.api`
+- run `npm run deploy:verify -- .env.production.web .env.production.api .env.production.ai`
 
 ## 6. Verify auth and RBAC
 
@@ -83,9 +93,23 @@ npm run deploy:check -- mobile .env.production.mobile
 - update Expo env values
 - run preview build
 - verify mobile login and GraphQL connectivity against hosted API
+- run `npm run deploy:verify:mobile -- .env.production.mobile` to confirm mobile GraphQL URL and EAS profile URLs are aligned and reachable
 
 ## 9. Record outcomes
 
 - capture deployed URLs
 - capture any platform-specific settings that were required
 - note any remaining defects or follow-up items in `PROGRESS.md`
+
+Final one-shot hosted verification command:
+
+```bash
+npm run deploy:verify:all
+```
+
+Expected behavior:
+- it prechecks `.env.production.web`, `.env.production.api`, `.env.production.ai`, and `.env.production.mobile`
+- it fails if any private production env file is tracked by git
+- it runs remediation checks before hosted endpoint probes
+- then verifies hosted web/API/AI health and CORS
+- then verifies mobile GraphQL endpoint alignment and reachability

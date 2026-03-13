@@ -18,6 +18,7 @@
 2. **notes/EXECUTION.md** — 19-session build plan. Every SOW objective mapped to a session.
 3. **PROGRESS.md** — Live progress tracker. Update after every completed task.
 4. **SOW** — `maingoalandreference/AI Talent Marketplace Platform (SOW).md` — Original requirements. Do NOT modify.
+5. **.github/execution-continuation.md** — User-aligned execution protocol for continuing from current state to full-vision completion.
 
 ## Git Workflow
 

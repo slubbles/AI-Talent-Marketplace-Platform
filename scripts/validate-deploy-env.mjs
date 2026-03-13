@@ -3,10 +3,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const expectedOpenRouterBaseUrl = "https://openrouter.ai/api/v1";
+const expectedEmbeddingModel = "text-embedding-3-small";
 
 const placeholderPatterns = [
   /^change-me$/i,
   /^https:\/\/api\.example\.com\/graphql$/i,
+  /^https:\/\/.*\.example\.com(?:\/|$)/i,
   /^https:\/\/example\.r2\.dev$/i,
   /^stub-/i
 ];
@@ -89,7 +92,31 @@ const parseEnvFile = (content) => {
   return values;
 };
 
-const isPlaceholderValue = (value) => placeholderPatterns.some((pattern) => pattern.test(value));
+const isTemplateDatabaseUrl = (value) => /^postgres(?:ql)?:\/\/user:password@host(?::\d+)?\//i.test(value);
+
+const isLocalhostUrl = (value) => /^https?:\/\/(localhost|127\.0\.0\.1)(?::\d+)?(\/|$)/i.test(value);
+
+const splitCsv = (value) =>
+  value
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+const isPlaceholderValue = (value) => {
+  const candidates = value.includes(",") ? splitCsv(value) : [value];
+
+  return candidates.some((candidate) => {
+    if (placeholderPatterns.some((pattern) => pattern.test(candidate))) {
+      return true;
+    }
+
+    if (isTemplateDatabaseUrl(candidate) || isLocalhostUrl(candidate)) {
+      return true;
+    }
+
+    return false;
+  });
+};
 
 const getTargets = (requestedTarget) => {
   if (requestedTarget === "all") {
@@ -122,6 +149,7 @@ const validateTarget = (target, values) => {
   const config = targetConfigs[target];
   const missing = [];
   const placeholders = [];
+  const policyViolations = [];
   const warnings = [];
 
   for (const key of config.required) {
@@ -158,6 +186,48 @@ const validateTarget = (target, values) => {
     if (values.NEXTAUTH_URL && !corsOrigins.includes(values.NEXTAUTH_URL)) {
       warnings.push("NEXTAUTH_URL is not included in CORS_ALLOWED_ORIGINS.");
     }
+
+    if (
+      values.OPENROUTER_BASE_URL &&
+      !isPlaceholderValue(values.OPENROUTER_BASE_URL) &&
+      values.OPENROUTER_BASE_URL !== expectedOpenRouterBaseUrl
+    ) {
+      policyViolations.push(
+        `OPENROUTER_BASE_URL should be ${expectedOpenRouterBaseUrl} (found ${values.OPENROUTER_BASE_URL}).`
+      );
+    }
+
+    if (
+      values.OPENROUTER_EMBEDDING_MODEL &&
+      !isPlaceholderValue(values.OPENROUTER_EMBEDDING_MODEL) &&
+      values.OPENROUTER_EMBEDDING_MODEL !== expectedEmbeddingModel
+    ) {
+      policyViolations.push(
+        `OPENROUTER_EMBEDDING_MODEL should be ${expectedEmbeddingModel} (found ${values.OPENROUTER_EMBEDDING_MODEL}).`
+      );
+    }
+  }
+
+  if (target === "ai") {
+    if (
+      values.OPENROUTER_BASE_URL &&
+      !isPlaceholderValue(values.OPENROUTER_BASE_URL) &&
+      values.OPENROUTER_BASE_URL !== expectedOpenRouterBaseUrl
+    ) {
+      policyViolations.push(
+        `OPENROUTER_BASE_URL should be ${expectedOpenRouterBaseUrl} (found ${values.OPENROUTER_BASE_URL}).`
+      );
+    }
+
+    if (
+      values.OPENROUTER_EMBEDDING_MODEL &&
+      !isPlaceholderValue(values.OPENROUTER_EMBEDDING_MODEL) &&
+      values.OPENROUTER_EMBEDDING_MODEL !== expectedEmbeddingModel
+    ) {
+      policyViolations.push(
+        `OPENROUTER_EMBEDDING_MODEL should be ${expectedEmbeddingModel} (found ${values.OPENROUTER_EMBEDDING_MODEL}).`
+      );
+    }
   }
 
   if (target === "web") {
@@ -173,7 +243,7 @@ const validateTarget = (target, values) => {
     }
   }
 
-  return { missing, placeholders, warnings };
+  return { missing, placeholders, policyViolations, warnings };
 };
 
 const main = () => {
@@ -192,7 +262,7 @@ const main = () => {
 
   for (const currentTarget of targets) {
     const result = validateTarget(currentTarget, values);
-    const failed = result.missing.length > 0 || result.placeholders.length > 0;
+    const failed = result.missing.length > 0 || result.placeholders.length > 0 || result.policyViolations.length > 0;
     hasFailure ||= failed;
 
     console.log(`\n[${currentTarget}] ${failed ? "FAILED" : "OK"}`);
@@ -203,6 +273,10 @@ const main = () => {
 
     if (result.placeholders.length > 0) {
       console.log(`  Placeholder values: ${result.placeholders.join(", ")}`);
+    }
+
+    for (const violation of result.policyViolations) {
+      console.log(`  Policy violation: ${violation}`);
     }
 
     for (const warning of result.warnings) {

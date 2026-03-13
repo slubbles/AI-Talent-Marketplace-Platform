@@ -1,19 +1,28 @@
+const resolveGraphQlUrl = (): string => {
+  const configuredUrl = process.env.EXPO_PUBLIC_GRAPHQL_API_URL ?? "http://localhost:4000/graphql";
+
+  if (!__DEV__ && /localhost|127\.0\.0\.1/i.test(configuredUrl)) {
+    throw new Error(
+      "EXPO_PUBLIC_GRAPHQL_API_URL points to localhost in a non-development build. Configure the hosted GraphQL URL before building mobile preview/production."
+    );
+  }
+
+  return configuredUrl;
+};
+
 export async function graphQLRequest<TData>(
   query: string,
   variables?: Record<string, unknown>,
   accessToken?: string
 ): Promise<TData> {
-  const response = await fetch(
-    process.env.EXPO_PUBLIC_GRAPHQL_API_URL ?? "http://localhost:4000/graphql",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {})
-      },
-      body: JSON.stringify({ query, variables })
-    }
-  );
+  const response = await fetch(resolveGraphQlUrl(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {})
+    },
+    body: JSON.stringify({ query, variables })
+  });
 
   const payload = (await response.json()) as {
     data?: TData;
