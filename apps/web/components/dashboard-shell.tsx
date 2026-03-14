@@ -72,7 +72,7 @@ export function DashboardShell({ children, userEmail, userRole }: DashboardShell
       {/* Sidebar */}
       <aside className="w-[240px] border-r border-[#27272A] bg-[#0A0A0A] flex flex-col fixed h-full z-20">
         <div className="h-14 flex items-center px-6 border-b border-[#27272A]">
-          <span className="text-[#EFFE5E] font-extrabold text-xl tracking-tight">TalentAI</span>
+          <span className="text-[#EFFE5E] font-extrabold text-xl tracking-tight drop-shadow-[0_0_10px_rgba(239,254,94,0.3)]">TalentAI</span>
         </div>
 
         <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
@@ -138,9 +138,10 @@ export function DashboardShell({ children, userEmail, userRole }: DashboardShell
               <input
                 readOnly
                 onClick={() => setCmdOpen(true)}
-                placeholder="Search... ⌘K"
-                className="bg-[#1A1A1A] border border-[#27272A] rounded-md pl-9 pr-4 py-1.5 text-xs w-64 text-[#A1A1AA] cursor-pointer"
+                placeholder="Search..."
+                className="bg-[#1A1A1A] border border-[#27272A] rounded-md pl-9 pr-14 py-1.5 text-xs w-64 text-[#A1A1AA] cursor-pointer hover:border-[#3f3f46] transition-colors"
               />
+              <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#52525B] bg-[#27272A] px-1.5 py-0.5 rounded font-mono">⌘K</kbd>
             </div>
             <div className="relative">
               <button

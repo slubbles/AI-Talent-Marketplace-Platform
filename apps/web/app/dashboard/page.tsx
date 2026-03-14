@@ -2,6 +2,7 @@ import Link from "next/link";
 import { graphQLRequest } from "../../lib/graphql";
 import { TrendingUp, Plus, Search, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageTransition, FadeIn } from "@/components/page-transition";
 
 import { getSession } from "../../lib/session";
 type RecruiterDashboardQuery = {
@@ -103,13 +104,16 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-0">
+    <PageTransition>
+      <FadeIn>
       <div className="mb-6">
         <h1 className="text-3xl font-extrabold mb-1">Dashboard</h1>
         <p className="text-[#A1A1AA] text-sm">Overview of your recruiting pipeline.</p>
       </div>
+      </FadeIn>
 
       {/* KPI Row */}
+      <FadeIn>
       <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg flex flex-row w-full">
         {kpis.map((kpi, i) => (
           <div
@@ -121,8 +125,10 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+      </FadeIn>
 
       {/* Quick Action Bar */}
+      <FadeIn>
       <div className="flex gap-3 mt-6">
         <Button asChild>
           <Link href="/dashboard/roles/new"><Plus className="h-4 w-4" /> Create Role</Link>
@@ -134,8 +140,10 @@ export default async function DashboardPage() {
           <Link href="/dashboard/shortlists"><ListChecks className="h-4 w-4" /> Review Shortlists</Link>
         </Button>
       </div>
+      </FadeIn>
 
       {/* Two-column layout */}
+      <FadeIn>
       <div className="flex gap-6 mt-8">
         {/* Left — Roles Requiring Attention */}
         <div className="flex-[2] min-w-0">
@@ -200,6 +208,7 @@ export default async function DashboardPage() {
           )}
         </div>
       </div>
-    </div>
+      </FadeIn>
+    </PageTransition>
   );
 }

@@ -249,7 +249,12 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: "rgba(15, 23, 42, 0.92)",
     borderWidth: 1,
-    borderColor: "rgba(148, 163, 184, 0.15)"
+    borderColor: "rgba(148, 163, 184, 0.15)",
+    shadowColor: "#38bdf8",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   metricLabel: {
     color: "#7dd3fc",

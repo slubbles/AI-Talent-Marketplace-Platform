@@ -29,6 +29,10 @@ export default function LoginScreen() {
       <Pressable onPress={onSubmit} style={styles.primaryButton}>
         <Text style={styles.primaryButtonLabel}>Sign in</Text>
       </Pressable>
+      <Pressable style={styles.linkedInButton} disabled>
+        <Text style={styles.linkedInLabel}>Sign in with LinkedIn</Text>
+        <Text style={styles.comingSoon}>(Coming Soon)</Text>
+      </Pressable>
       <View style={styles.links}>
         <Link href="/register" style={styles.link}>Create talent account</Link>
         <Link href="/forgot-password" style={styles.link}>Forgot password</Link>
@@ -96,5 +100,27 @@ const styles = StyleSheet.create({
   error: {
     color: "#fca5a5",
     marginBottom: 8
-  }
+  },
+  linkedInButton: {
+    minHeight: 48,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "rgba(148, 163, 184, 0.24)",
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+    opacity: 0.5,
+    flexDirection: "row",
+    gap: 8,
+  },
+  linkedInLabel: {
+    color: "#94a3b8",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  comingSoon: {
+    color: "#64748b",
+    fontSize: 12,
+  },
 });

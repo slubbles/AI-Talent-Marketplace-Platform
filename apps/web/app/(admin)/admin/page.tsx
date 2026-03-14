@@ -1,5 +1,6 @@
 import { graphQLRequest } from "../../../lib/graphql";
 import Link from "next/link";
+import { PageTransition, FadeIn } from "@/components/page-transition";
 
 import { getSession } from "../../../lib/session";
 type AdminDashboardQuery = {
@@ -92,7 +93,8 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <PageTransition>
+      <FadeIn>
       <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
         <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Admin dashboard</p>
         <h2 className="text-xl font-bold text-white mt-1">Platform health and governance</h2>
@@ -105,19 +107,23 @@ export default async function AdminDashboardPage() {
           <Link className="text-sm text-[#A1A1AA] hover:text-white" href="/admin/approvals">Open role approvals</Link>
         </div>
       </div>
+      </FadeIn>
 
-      <div className="grid grid-cols-4 gap-4">
+      <FadeIn>
+      <div className="grid grid-cols-4 gap-4 mt-6">
         {metrics.map((metric) => (
-          <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5" key={metric.label}>
+          <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5 hover:border-[#3a3a3a] transition-colors" key={metric.label}>
             <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">{metric.label}</span>
             <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{metric.value}</p>
             <p className="text-xs text-[#52525B] mt-1">{metric.detail}</p>
           </div>
         ))}
       </div>
+      </FadeIn>
 
       {/* Verification queue */}
-      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+      <FadeIn>
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 mt-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Verification queue</p>
@@ -145,9 +151,11 @@ export default async function AdminDashboardPage() {
           </div>
         )}
       </div>
+      </FadeIn>
 
       {/* Company watchlist */}
-      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+      <FadeIn>
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 mt-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Company watchlist</p>
@@ -160,7 +168,7 @@ export default async function AdminDashboardPage() {
         ) : (
           <div className="grid grid-cols-2 gap-4">
             {dashboard.companyMetrics.map((company) => (
-              <div className="bg-[#111111] border border-[#27272A] rounded-lg p-4" key={company.id}>
+              <div className="bg-[#111111] border border-[#27272A] rounded-lg p-4 hover:border-[#3a3a3a] transition-colors" key={company.id}>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-950 text-blue-400">{company.industry}</span>
                   <h4 className="text-sm font-medium text-white">{company.name}</h4>
@@ -176,9 +184,11 @@ export default async function AdminDashboardPage() {
           </div>
         )}
       </div>
+      </FadeIn>
 
       {/* Concierge signal */}
-      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+      <FadeIn>
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 mt-6">
         <div className="flex items-center justify-between mb-2">
           <div>
             <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Concierge signal</p>
@@ -190,6 +200,7 @@ export default async function AdminDashboardPage() {
           {dashboard.hardToFillDemandCount} active demand{dashboard.hardToFillDemandCount === 1 ? "" : "s"} are currently flagged for concierge sourcing.
         </p>
       </div>
-    </div>
+      </FadeIn>
+    </PageTransition>
   );
 }

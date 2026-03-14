@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Sparkles, Search, FileText, CalendarDays, ShieldCheck, BarChart3 } from "lucide-react";
+import { ArrowRight, Sparkles, Search, FileText, CalendarDays, ShieldCheck, BarChart3, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const stats = [
@@ -48,8 +48,11 @@ export default function HomePage() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-40 pb-20 px-6">
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+      <section className="pt-40 pb-20 px-6 relative overflow-hidden">
+        {/* Background gradient mesh */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(239,254,94,0.06),transparent_50%),radial-gradient(ellipse_at_bottom_right,rgba(56,189,248,0.04),transparent_50%)]" />
+        <div className="absolute top-20 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center relative z-10">
           <div>
             <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.1] mb-6">
               Hire the Right <br />
@@ -72,19 +75,43 @@ export default function HomePage() {
           <div className="relative">
             <div className="aspect-video bg-card border border-border rounded-2xl overflow-hidden shadow-lg relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="space-y-3 w-3/4">
-                  <div className="h-4 bg-secondary rounded w-3/4" />
-                  <div className="h-4 bg-secondary rounded w-1/2" />
-                  <div className="h-8 bg-primary/20 rounded w-full mt-4" />
-                  <div className="grid grid-cols-3 gap-2 mt-4">
-                    {[1,2,3].map(i => (
-                      <div key={i} className="h-16 bg-secondary rounded border border-border" />
-                    ))}
-                  </div>
+              <div className="absolute inset-0 flex flex-col p-6">
+                {/* Mock dashboard header */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-3 h-3 rounded-full bg-red-500/60" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-500/60" />
+                  <div className="w-3 h-3 rounded-full bg-green-500/60" />
+                  <div className="flex-1 h-6 bg-secondary rounded-md ml-4" />
+                </div>
+                {/* Mock KPI row */}
+                <div className="grid grid-cols-3 gap-3 mb-4">
+                  {["12 Active", "93% Match", "4.2h Avg"].map((label, i) => (
+                    <div key={i} className="bg-secondary/60 border border-border rounded-md p-3">
+                      <div className="text-[10px] text-text-muted mb-1">KPI</div>
+                      <div className={`text-sm font-bold ${i === 0 ? "text-primary" : "text-foreground"}`}>{label}</div>
+                    </div>
+                  ))}
+                </div>
+                {/* Mock candidate cards */}
+                <div className="grid grid-cols-2 gap-3 flex-1">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bg-secondary/40 border border-border rounded-md p-3 flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-primary/20" />
+                        <div className="h-3 bg-secondary rounded flex-1" />
+                      </div>
+                      <div className="h-2 bg-secondary rounded w-3/4" />
+                      <div className="flex gap-1 mt-auto">
+                        <span className="px-1.5 py-0.5 bg-primary/10 rounded text-[8px] text-primary font-bold">92</span>
+                        <span className="px-1.5 py-0.5 bg-secondary rounded text-[8px] text-text-muted">React</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
+            {/* Floating glow */}
+            <div className="absolute -bottom-4 -right-4 w-48 h-48 bg-primary/10 rounded-full blur-2xl" />
           </div>
         </div>
       </section>
@@ -119,7 +146,8 @@ export default function HomePage() {
 
       {/* Features Grid */}
       <section className="py-24 px-6 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-extrabold mb-12 text-center">Everything Your Hiring Team Needs</h2>
+        <h2 className="text-3xl font-extrabold mb-4 text-center">Everything Your Hiring Team Needs</h2>
+        <p className="text-text-secondary text-center mb-12 max-w-xl mx-auto">From role creation to signed offers — one platform with AI at every step.</p>
         <div className="grid md:grid-cols-3 gap-6">
           {features.map((feat, i) => (
             <div
@@ -131,6 +159,28 @@ export default function HomePage() {
               <p className="text-text-secondary text-sm leading-relaxed">{feat.desc}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(239,254,94,0.06),transparent_70%)]" />
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <h2 className="text-4xl font-extrabold mb-4">Ready to Transform Your Hiring?</h2>
+          <p className="text-text-secondary text-lg mb-8">Join forward-thinking companies using AI to build exceptional teams.</p>
+          <div className="flex justify-center gap-4">
+            <Button size="xl" variant="hero" asChild>
+              <Link href="/register">Start Free Trial <ArrowRight className="h-5 w-5" /></Link>
+            </Button>
+            <Button size="xl" variant="hero-outline" asChild>
+              <Link href="/login">Sign In</Link>
+            </Button>
+          </div>
+          <div className="flex justify-center gap-6 mt-8 text-sm text-text-muted">
+            <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-primary" /> No credit card required</span>
+            <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-primary" /> 14-day free trial</span>
+            <span className="flex items-center gap-1.5"><CheckCircle className="h-4 w-4 text-primary" /> Cancel anytime</span>
+          </div>
         </div>
       </section>
 

@@ -140,17 +140,17 @@ export default async function InterviewsPage({ searchParams }: InterviewsPagePro
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
           <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Scheduled</span>
-          <p className="text-2xl font-bold text-white mt-1">{interviews.filter((item) => item.status === "SCHEDULED").length}</p>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{interviews.filter((item) => item.status === "SCHEDULED").length}</p>
           <p className="text-xs text-[#52525B] mt-1">Upcoming sessions waiting on recruiter or candidate action.</p>
         </div>
         <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
           <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Completed</span>
-          <p className="text-2xl font-bold text-white mt-1">{interviews.filter((item) => item.status === "COMPLETED").length}</p>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{interviews.filter((item) => item.status === "COMPLETED").length}</p>
           <p className="text-xs text-[#52525B] mt-1">Sessions with feedback submitted or marked complete.</p>
         </div>
         <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
           <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Offers linked</span>
-          <p className="text-2xl font-bold text-white mt-1">{interviews.filter((item) => item.offer).length}</p>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{interviews.filter((item) => item.offer).length}</p>
           <p className="text-xs text-[#52525B] mt-1">Interviews that already advanced into the offer stage.</p>
         </div>
       </div>

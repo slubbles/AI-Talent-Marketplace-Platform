@@ -147,17 +147,17 @@ export default async function OffersPage({ searchParams }: OffersPageProps) {
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
           <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Drafts</span>
-          <p className="text-2xl font-bold text-white mt-1">{offers.filter((item) => item.status === "DRAFT").length}</p>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{offers.filter((item) => item.status === "DRAFT").length}</p>
           <p className="text-xs text-[#52525B] mt-1">Offers that still need recruiter review before sending.</p>
         </div>
         <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
           <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Sent</span>
-          <p className="text-2xl font-bold text-white mt-1">{offers.filter((item) => item.status === "SENT").length}</p>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{offers.filter((item) => item.status === "SENT").length}</p>
           <p className="text-xs text-[#52525B] mt-1">Offers visible to talent and waiting on a decision.</p>
         </div>
         <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
           <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Accepted</span>
-          <p className="text-2xl font-bold text-white mt-1">{offers.filter((item) => item.status === "ACCEPTED").length}</p>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{offers.filter((item) => item.status === "ACCEPTED").length}</p>
           <p className="text-xs text-[#52525B] mt-1">Offers ready for contract generation and onboarding.</p>
         </div>
       </div>

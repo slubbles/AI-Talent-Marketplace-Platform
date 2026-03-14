@@ -245,8 +245,8 @@ export function SearchWorkbench({
   return (
     <div>
       {/* Search Bar */}
-      <div className="relative flex items-center bg-[#1A1A1A] border border-[#27272A] rounded-lg h-[52px] px-4 focus-within:border-primary transition-colors mb-1">
-        <Search className="h-5 w-5 text-[#52525B] shrink-0" />
+      <div className="relative flex items-center bg-[#1A1A1A] border border-[#27272A] rounded-lg h-[52px] px-4 focus-within:border-[#EFFE5E] focus-within:shadow-[0_0_24px_rgba(239,254,94,0.15)] transition-all mb-1">
+        <Sparkles className="h-5 w-5 text-[#EFFE5E] shrink-0" />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -370,9 +370,12 @@ export function SearchWorkbench({
             </div>
 
             {!query.trim() && !trajectory.trim() ? (
-              <div className="text-center py-12">
-                <Search className="h-12 w-12 text-[#52525B] mx-auto mb-4" />
-                <p className="text-[#A1A1AA] text-sm">Run a search to see ranked talent profiles.</p>
+              <div className="text-center py-16">
+                <div className="mx-auto w-16 h-16 rounded-2xl bg-[rgba(239,254,94,0.08)] border border-[#27272A] flex items-center justify-center mb-4">
+                  <Sparkles className="h-8 w-8 text-[#EFFE5E]" />
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">AI-Powered Talent Search</h3>
+                <p className="text-[#A1A1AA] text-sm max-w-md mx-auto">Describe the talent you need in plain language. Our AI understands skills, context, and intent to surface the best matches.</p>
               </div>
             ) : results.length === 0 ? (
               <div className="text-center py-12">

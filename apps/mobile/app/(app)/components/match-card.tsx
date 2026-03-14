@@ -18,6 +18,7 @@ const formatCurrencyRange = (match: WorkflowMatch) => {
 
 export function MatchCard({ match }: { match: WorkflowMatch }) {
   const topSkills = match.demand.requiredSkills.slice(0, 3).map((skill) => skill.skill.displayName);
+  const isHighMatch = match.matchScore >= 80;
 
   return (
     <Link asChild href={`/matches/${match.id}`}>
@@ -27,8 +28,8 @@ export function MatchCard({ match }: { match: WorkflowMatch }) {
             <Text style={styles.title}>{match.demand.title}</Text>
             <Text style={styles.company}>{match.demand.company.name}</Text>
           </View>
-          <View style={styles.scoreBadge}>
-            <Text style={styles.scoreLabel}>{Math.round(match.matchScore)}%</Text>
+          <View style={[styles.scoreBadge, isHighMatch && styles.scoreBadgeHigh]}>
+            <Text style={[styles.scoreLabel, isHighMatch && styles.scoreLabelHigh]}>{Math.round(match.matchScore)}%</Text>
           </View>
         </View>
 
@@ -90,9 +91,20 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     alignItems: "center"
   },
+  scoreBadgeHigh: {
+    backgroundColor: "rgba(56, 189, 248, 0.3)",
+    shadowColor: "#38bdf8",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 4,
+  },
   scoreLabel: {
     color: "#bae6fd",
     fontWeight: "700"
+  },
+  scoreLabelHigh: {
+    color: "#e0f2fe",
   },
   meta: {
     color: "#cbd5e1",
