@@ -178,6 +178,95 @@ Available components in `apps/web/components/ui/`:
 - **Hover effects:** Scale transforms (`hover:scale-[1.02]`), glow borders (`hover:border-[#EFFE5E]/30`)
 - **Loading states:** Pulse animations, skeleton loaders with `bg-[#27272A] animate-pulse`
 
+#### Framer Motion Patterns
+
+**PageTransition (staggered children):**
+```tsx
+// components/page-transition.tsx
+const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06 } } };
+const itemVariants = { hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0, transition: { duration: 0.25 } } };
+
+<motion.div variants={containerVariants} initial="hidden" animate="visible">
+  <motion.div variants={itemVariants}>...</motion.div>
+</motion.div>
+```
+
+**FadeIn (individual element):**
+```tsx
+<motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}>
+```
+
+**AnimatePresence (modals, panels):**
+```tsx
+// Used by NotificationPanel, CommandPalette — for elements that mount/unmount
+<AnimatePresence>
+  {isOpen && (
+    <motion.div initial={{ opacity: 0, x: 300 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 300 }} transition={{ type: "spring", damping: 25, stiffness: 300 }}>
+```
+
+**Form entrance (sequential):**
+```tsx
+// Login, Register pages — each field slides up in sequence
+<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1, duration: 0.3 }}>
+```
+
+**Analytics stagger (chart cards):**
+```tsx
+// Analytics pages — cards animate in with stagger
+{cards.map((card, i) => (
+  <motion.div key={i} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.05, duration: 0.3 }}>
+))}
+```
+
+**Tailwind utility animations:**
+```
+animate-pulse    → skeleton loaders, loading placeholders
+animate-spin     → loading spinners (Loader2 icon)
+transition-all   → hover state transitions (borders, backgrounds)
+hover:scale-[1.02] → card hover lift effect
+```
+
+### Charts (Recharts)
+
+All charts use Recharts with a dark theme consistent with the design system.
+
+#### Chart Color Palette
+
+| Color | Hex | Usage |
+|-------|-----|-------|
+| Sky | `#38bdf8` | Primary series (main metric) |
+| Amber | `#f59e0b` | Secondary series, warnings |
+| Emerald | `#34d399` | Success/growth metrics |
+| Violet | `#a78bfa` | Tertiary series |
+| Rose | `#fb7185` | Decline/negative metrics |
+| Orange | `#f97316` | Quaternary series |
+
+#### Chart Theming
+
+```tsx
+// Dark tooltip
+<Tooltip
+  contentStyle={{ backgroundColor: "#0A0A0A", border: "1px solid #27272A", borderRadius: "8px" }}
+  labelStyle={{ color: "#FFFFFF", fontWeight: 600 }}
+  itemStyle={{ color: "#A1A1AA" }}
+/>
+
+// Grid lines
+<CartesianGrid strokeDasharray="3 3" stroke="#27272A" />
+
+// Axes
+<XAxis stroke="#71717A" tick={{ fill: "#71717A", fontSize: 12 }} />
+<YAxis stroke="#71717A" tick={{ fill: "#71717A", fontSize: 12 }} />
+
+// Area fills — use gradients
+<defs>
+  <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.3} />
+    <stop offset="95%" stopColor="#38bdf8" stopOpacity={0} />
+  </linearGradient>
+</defs>
+```
+
 ---
 
 ## Mobile Application (Expo SDK 50 + React Native 0.73)
@@ -303,5 +392,80 @@ Insights:   Analytics
 ```
 Overview:   Dashboard
 Governance: Users, Verification, Approvals, Concierge
-Platform:   Companies, Analytics, Billing
+Platform:   Companies, Analytics, Billing, Mobility
 ```
+
+---
+
+## Email Templates (Transactional)
+
+All emails share a branded HTML layout defined in `apps/api/src/services/email.ts`. The design mirrors the web dark theme for a cohesive experience.
+
+### Email Color Tokens
+
+| Token | Hex | Usage |
+|-------|-----|-------|
+| Body background | `#000000` | Email body (true black) |
+| Card background | `#0A0A0A` | Main content card |
+| Nested surface | `#1A1A1A` | Info boxes within card |
+| Border | `#27272A` | Card border, dividers |
+| Primary text | `#FFFFFF` | Headings, key info |
+| Secondary text | `#A1A1AA` | Body paragraphs |
+| Tertiary text | `#71717A` | Footer, labels |
+| Accent / CTA | `#EFFE5E` | Button bg, highlights |
+| CTA text | `#000000` | Black text on lime button |
+| Success | `#22C55E` | Active/accepted badges |
+
+### Email Structure
+
+```
+┌─ Body (#000000) ─────────────────────────┐
+│                                           │
+│  ┌─ Brand Header ──────────────────────┐  │
+│  │  [A] AI Talent Marketplace          │  │
+│  └─────────────────────────────────────┘  │
+│                                           │
+│  ┌─ Card (#0A0A0A, border #27272A) ───┐  │
+│  │  🎯 Icon Badge (lime/10 bg)        │  │
+│  │  Heading (22px, 800, white)        │  │
+│  │  Body text (14px, 400, #A1A1AA)    │  │
+│  │  ─── divider (#27272A) ───         │  │
+│  │  ┌─ Info Box (#1A1A1A) ─────────┐  │  │
+│  │  │  Label: Value rows           │  │  │
+│  │  └──────────────────────────────┘  │  │
+│  │  [ CTA Button (#EFFE5E) ]         │  │
+│  └────────────────────────────────────┘  │
+│                                           │
+│  Footer (12px, #71717A, centered)        │
+│                                           │
+└───────────────────────────────────────────┘
+```
+
+### Email Typography
+
+- **Font stack:** `'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif`
+- **Heading:** 22px, font-weight 800, #FFFFFF
+- **Body:** 14px, font-weight 400, #A1A1AA, line-height 22px
+- **Labels:** 13px, #71717A
+- **Footer:** 12px, #71717A / 11px, #52525B
+
+### Email Components
+
+| Component | Pattern |
+|-----------|---------|
+| Icon Badge | 48px circle, `rgba(239,254,94,0.1)` bg, emoji centered, `#27272A` border |
+| CTA Button | Lime `#EFFE5E` bg, 10px radius, 14px bold black text, 14px/32px padding |
+| Info Row | Two-column table — left: label (#71717A), right: value (#FFFFFF bold) |
+| Divider | 1px `#27272A` top border, 24px vertical margin |
+| Info Box | `#1A1A1A` bg, 10px radius, 20px padding — for grouped data |
+| Highlight | Inline `<span>` with `#EFFE5E` color, font-weight 600 |
+
+### Available Email Templates
+
+| Template | Recipient | Trigger |
+|----------|-----------|---------|
+| Welcome | All roles | Account creation |
+| Interview Scheduled | Talent | Interview booked |
+| Offer Received | Talent | Offer created |
+| Match Alert | Talent | AI match found |
+| Availability Update | Recruiter | Talent status change |
