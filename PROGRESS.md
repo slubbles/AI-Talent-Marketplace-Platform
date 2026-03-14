@@ -2,13 +2,14 @@
 
 > Live progress on every session and deliverable.
 > Updated after each completed task.
-> Overall: **95%** (18 of 19 sessions complete + UI merge build passing)
+> Overall: **96%** (18 of 19 sessions complete + UI merge on 1st-execution, build passing)
 
 ## Current Focus
 
-- UI Merge Build Fix Pass: **100%**
+- UI Merge Build Fix Pass: **100%** — merged into `1st-execution`
 - Session 18 — Integration, Testing + Deploy: **94%**
-- Status: 🔄 In progress
+- Status: 🔄 In progress (remaining: hosted deployment + mobile→live API)
+- Render blueprint schema updated (`env` → `runtime`)
 - Branch: `1st-execution`
 
 ## UI Merge Build Fix Snapshot
