@@ -1,10 +1,9 @@
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
 import { SearchWorkbench } from "./search-workbench";
 import type { TalentSearchResult } from "../shortlists/types";
 
+import { getSession } from "../../../lib/session";
 const talentSearchQuery = `#graphql
   query TalentSearchPage($query: String!, $filters: SmartTalentSearchFiltersInput, $after: String) {
     smartTalentSearch(query: $query, filters: $filters, pagination: { first: 12, after: $after }) {
@@ -142,7 +141,7 @@ const getParamValue = (value: string | string[] | undefined) => {
 };
 
 export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
   if (!session?.accessToken) {
     redirect("/login");

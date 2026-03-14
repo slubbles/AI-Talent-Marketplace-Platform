@@ -4,9 +4,16 @@ import { gql } from "@apollo/client";
 import { availabilityWindows, seniorityLevels, smartSearchSkillModes, type SmartSearchSkillMode } from "@atm/shared";
 import { useEffect, useMemo, useState } from "react";
 import { CandidateProfileModal } from "../candidate-profile-modal";
-import { EmptyStateCard } from "../empty-state-card";
 import { createApolloClient } from "../../../lib/apollo-client";
 import type { TalentSearchResult } from "../shortlists/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Search, X, Sparkles } from "lucide-react";
 
 type SearchFiltersState = {
   skills: string[];
@@ -84,15 +91,9 @@ const formatRate = (minimum: number | null | undefined, maximum: number | null |
 };
 
 const scoreTone = (score: number) => {
-  if (score >= 80) {
-    return "is-strong";
-  }
-
-  if (score >= 60) {
-    return "is-medium";
-  }
-
-  return "is-weak";
+  if (score >= 80) return "text-primary bg-[#1a1c00]";
+  if (score >= 60) return "text-amber-400 bg-amber-950";
+  return "text-red-400 bg-red-950";
 };
 
 const buildSearchParams = (state: {
@@ -242,310 +243,213 @@ export function SearchWorkbench({
   };
 
   return (
-    <div className="search-layout">
-      <section className="dashboard-panel-card search-sidebar">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Talent search</span>
-            <h3>Semantic search workspace</h3>
-          </div>
-        </div>
+    <div>
+      {/* Search Bar */}
+      <div className="relative flex items-center bg-[#1A1A1A] border border-[#27272A] rounded-lg h-[52px] px-4 focus-within:border-primary transition-colors mb-1">
+        <Search className="h-5 w-5 text-[#52525B] shrink-0" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && navigateToSearch()}
+          placeholder="e.g. Senior ML engineer with fintech experience, available immediately"
+          className="flex-1 bg-transparent border-none outline-none text-white text-sm px-3 placeholder:text-[#52525B]"
+        />
+        <Button onClick={() => navigateToSearch()} size="sm">Run Search</Button>
+      </div>
+      <p className="text-xs text-[#52525B] mb-6">Describe what you need in plain language. AI understands context, skills, and intent.</p>
 
-        <div className="search-form-grid">
-          <label className="demand-form-field-wide">
-            <span>Search prompt</span>
-            <textarea
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="e.g., ML engineer with fintech experience, available immediately"
-              rows={4}
-              value={query}
-            />
-          </label>
+      <div className="flex gap-6">
+        {/* Filter sidebar */}
+        <div className="w-64 shrink-0">
+          <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-4 space-y-4">
+            <h3 className="text-sm font-semibold text-[#A1A1AA] uppercase tracking-wide">Refine Results</h3>
 
-          <label className="demand-form-field-wide">
-            <span>Career progression / trajectory</span>
-            <input
-              onChange={(event) => setTrajectory(event.target.value)}
-              placeholder="e.g., moved from startup IC to platform lead"
-              type="text"
-              value={trajectory}
-            />
-          </label>
-
-          <label className="demand-form-field-wide">
-            <span>Skills</span>
-            <input
-              onChange={(event) => setSkillSearch(event.target.value)}
-              placeholder="Search and add skills"
-              type="text"
-              value={skillSearch}
-            />
-          </label>
-
-          {skillOptions.length > 0 ? (
-            <div className="skill-result-list">
-              {skillOptions.map((skill) => (
-                <button className="skill-result-item" key={skill.id} onClick={() => addSkill(skill.displayName)} type="button">
-                  <strong>{skill.displayName}</strong>
-                  <span>{skill.category}</span>
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          {filters.skills.length > 0 ? (
-            <div className="selected-skill-list">
-              {filters.skills.map((skill) => (
-                <button className="selected-skill-chip" key={skill} onClick={() => removeSkill(skill)} type="button">
-                  {skill}
-                </button>
-              ))}
-            </div>
-          ) : null}
-
-          <label>
-            <span>Skill match mode</span>
-            <select
-              onChange={(event) => setFilters((current) => ({ ...current, skillMode: event.target.value as SmartSearchSkillMode }))}
-              value={filters.skillMode}
-            >
-              {smartSearchSkillModes.map((mode) => (
-                <option key={mode} value={mode}>
-                  {mode}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Industry</span>
-            <input onChange={(event) => setFilters((current) => ({ ...current, industry: event.target.value }))} type="text" value={filters.industry} />
-          </label>
-
-          <label>
-            <span>Experience level</span>
-            <select
-              onChange={(event) => setFilters((current) => ({ ...current, seniorityLevel: event.target.value }))}
-              value={filters.seniorityLevel}
-            >
-              <option value="">All levels</option>
-              {seniorityLevels.map((level) => (
-                <option key={level} value={level}>
-                  {formatEnumLabel(level)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Availability</span>
-            <select
-              onChange={(event) => setFilters((current) => ({ ...current, availability: event.target.value }))}
-              value={filters.availability}
-            >
-              <option value="">Any time</option>
-              {availabilityWindows.map((windowValue) => (
-                <option key={windowValue} value={windowValue}>
-                  {formatEnumLabel(windowValue)}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Location</span>
-            <input onChange={(event) => setFilters((current) => ({ ...current, location: event.target.value }))} type="text" value={filters.location} />
-          </label>
-
-          <label>
-            <span>Min hourly rate</span>
-            <input onChange={(event) => setFilters((current) => ({ ...current, minHourlyRate: event.target.value }))} type="number" value={filters.minHourlyRate} />
-          </label>
-
-          <label>
-            <span>Max hourly rate</span>
-            <input onChange={(event) => setFilters((current) => ({ ...current, maxHourlyRate: event.target.value }))} type="number" value={filters.maxHourlyRate} />
-          </label>
-        </div>
-
-        <div className="dashboard-actions">
-          <button onClick={() => navigateToSearch()} type="button">Search talent</button>
-          <button
-            className="secondary-button"
-            onClick={() => {
-              setQuery("");
-              setTrajectory("");
-              setFilters({
-                skills: [],
-                skillMode: "AND",
-                industry: "",
-                seniorityLevel: "",
-                availability: "",
-                location: "",
-                minHourlyRate: "",
-                maxHourlyRate: ""
-              });
-              window.location.href = "/dashboard/search";
-            }}
-            type="button"
-          >
-            Reset filters
-          </button>
-        </div>
-      </section>
-
-      <div className="search-results-column">
-        <section className="dashboard-panel-card search-results-panel">
-          <div className="dashboard-section-heading">
             <div>
-              <span className="eyebrow">Results</span>
-              <h3>{query.trim() || trajectory.trim() ? "Semantic search results" : "Start with a recruiter search prompt"}</h3>
+              <Label className="text-xs text-[#52525B]">Career Trajectory</Label>
+              <Input placeholder="e.g., startup IC to platform lead" value={trajectory} onChange={(e) => setTrajectory(e.target.value)} />
             </div>
-            <div className="search-pagination-actions">
-              {initialAfter ? (
-                <button className="secondary-button" onClick={() => navigateToSearch(undefined)} type="button">
-                  First page
-                </button>
-              ) : null}
-              {pageInfo.hasNextPage && pageInfo.endCursor ? (
-                <button className="secondary-button" onClick={() => navigateToSearch(pageInfo.endCursor ?? undefined)} type="button">
-                  Next page
-                </button>
-              ) : null}
+
+            <div>
+              <Label className="text-xs text-[#52525B]">Skills</Label>
+              <Input placeholder="Search skills..." value={skillSearch} onChange={(e) => setSkillSearch(e.target.value)} />
+              {skillOptions.length > 0 && (
+                <div className="mt-1 bg-[#0A0A0A] border border-[#27272A] rounded-md max-h-36 overflow-y-auto">
+                  {skillOptions.map((skill) => (
+                    <button key={skill.id} onClick={() => addSkill(skill.displayName)} className="w-full text-left px-3 py-1.5 text-xs hover:bg-[#222222] flex justify-between">
+                      <strong>{skill.displayName}</strong>
+                      <span className="text-[#52525B]">{skill.category}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {filters.skills.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {filters.skills.map((skill) => (
+                    <span key={skill} className="inline-flex items-center gap-1 border border-primary text-primary text-xs px-2 py-0.5 rounded-full">
+                      {skill}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeSkill(skill)} />
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div>
+              <Label className="text-xs text-[#52525B]">Skill Match Mode</Label>
+              <Select value={filters.skillMode} onValueChange={(v) => setFilters((c) => ({ ...c, skillMode: v as SmartSearchSkillMode }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {smartSearchSkillModes.map((mode) => <SelectItem key={mode} value={mode}>{mode}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-[#52525B]">Industry</Label>
+              <Input value={filters.industry} onChange={(e) => setFilters((c) => ({ ...c, industry: e.target.value }))} />
+            </div>
+
+            <div>
+              <Label className="text-xs text-[#52525B]">Experience Level</Label>
+              <Select value={filters.seniorityLevel || "__all__"} onValueChange={(v) => setFilters((c) => ({ ...c, seniorityLevel: v === "__all__" ? "" : v }))}>
+                <SelectTrigger><SelectValue placeholder="All levels" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">All levels</SelectItem>
+                  {seniorityLevels.map((l) => <SelectItem key={l} value={l}>{formatEnumLabel(l)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-[#52525B]">Availability</Label>
+              <Select value={filters.availability || "__any__"} onValueChange={(v) => setFilters((c) => ({ ...c, availability: v === "__any__" ? "" : v }))}>
+                <SelectTrigger><SelectValue placeholder="Any time" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__any__">Any time</SelectItem>
+                  {availabilityWindows.map((w) => <SelectItem key={w} value={w}>{formatEnumLabel(w)}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-xs text-[#52525B]">Location</Label>
+              <Input value={filters.location} onChange={(e) => setFilters((c) => ({ ...c, location: e.target.value }))} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label className="text-xs text-[#52525B]">Min Rate</Label>
+                <Input type="number" value={filters.minHourlyRate} onChange={(e) => setFilters((c) => ({ ...c, minHourlyRate: e.target.value }))} />
+              </div>
+              <div>
+                <Label className="text-xs text-[#52525B]">Max Rate</Label>
+                <Input type="number" value={filters.maxHourlyRate} onChange={(e) => setFilters((c) => ({ ...c, maxHourlyRate: e.target.value }))} />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-2 border-t border-[#27272A]">
+              <Button size="sm" onClick={() => navigateToSearch()} className="flex-1">Search</Button>
+              <Button size="sm" variant="ghost" onClick={() => {
+                setQuery(""); setTrajectory("");
+                setFilters({ skills: [], skillMode: "AND", industry: "", seniorityLevel: "", availability: "", location: "", minHourlyRate: "", maxHourlyRate: "" });
+                window.location.href = "/dashboard/search";
+              }}>Reset</Button>
             </div>
           </div>
+        </div>
 
-          {!query.trim() && !trajectory.trim() ? (
-            <EmptyStateCard
-              actions={[{ href: "/dashboard/roles", label: "Review role context", tone: "secondary" }]}
-              description="Start with a prompt describing the talent profile you need, then layer in skill, rate, location, and availability filters."
-              eyebrow="Search results"
-              title="Run a recruiter search to see ranked talent"
-            />
-          ) : results.length === 0 ? (
-            <EmptyStateCard
-              actions={[{ href: "/dashboard/search", label: "Reset search", tone: "secondary" }]}
-              description="Broaden the prompt or relax filters like rate, skills, or availability to expand the semantic search set."
-              eyebrow="Search results"
-              title="No profiles matched this query"
-            />
-          ) : (
-            <div className="search-result-grid">
-              {results.map((result) => {
-                const topSkills = topSkillsForResult(result, filters.skills);
+        {/* Results */}
+        <div className="flex-1 min-w-0 space-y-6">
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold">{query.trim() || trajectory.trim() ? "Search Results" : "Start with a search prompt"}</h2>
+              <div className="flex gap-2">
+                {initialAfter && <Button variant="ghost" size="sm" onClick={() => navigateToSearch(undefined)}>First Page</Button>}
+                {pageInfo.hasNextPage && pageInfo.endCursor && <Button variant="ghost" size="sm" onClick={() => navigateToSearch(pageInfo.endCursor ?? undefined)}>Next Page</Button>}
+              </div>
+            </div>
 
-                return (
-                  <article className="search-result-card" key={result.id}>
-                    <div className="shortlist-card-top">
-                      <span className={`shortlist-score-pill ${scoreTone(result.relevanceScore)}`}>{result.relevanceScore.toFixed(0)}</span>
-                      <span className="dashboard-status-pill">{formatEnumLabel(result.talentProfile.seniorityLevel ?? "MID")}</span>
-                    </div>
-                    <div>
-                      <h4>
-                        {result.talentProfile.firstName} {result.talentProfile.lastName}
-                      </h4>
-                      <p>{result.headline ?? result.talentProfile.headline}</p>
-                    </div>
-                    <p>{result.summary ?? result.talentProfile.summary}</p>
-                    <div className="shortlist-meta-grid">
-                      <div>
-                        <span>Availability</span>
-                        <strong>{formatEnumLabel(result.talentProfile.availability)}</strong>
+            {!query.trim() && !trajectory.trim() ? (
+              <div className="text-center py-12">
+                <Search className="h-12 w-12 text-[#52525B] mx-auto mb-4" />
+                <p className="text-[#A1A1AA] text-sm">Run a search to see ranked talent profiles.</p>
+              </div>
+            ) : results.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-[#A1A1AA] text-sm">No profiles matched this query. Try broadening your filters.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {results.map((result) => {
+                  const topSkills = topSkillsForResult(result, filters.skills);
+                  return (
+                    <article key={result.id} className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-4 space-y-3 hover:border-[#3a3a3a] transition-colors">
+                      <div className="flex items-center justify-between">
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${scoreTone(result.relevanceScore)}`}>{result.relevanceScore.toFixed(0)}</span>
+                        <span className="text-xs px-2 py-0.5 bg-[#1A1A1A] border border-[#27272A] rounded text-[#A1A1AA]">{formatEnumLabel(result.talentProfile.seniorityLevel ?? "MID")}</span>
                       </div>
                       <div>
-                        <span>Rate</span>
-                        <strong>{formatRate(result.talentProfile.hourlyRateMin, result.talentProfile.hourlyRateMax, result.talentProfile.currency)}</strong>
+                        <h4 className="font-semibold">{result.talentProfile.firstName} {result.talentProfile.lastName}</h4>
+                        <p className="text-xs text-[#A1A1AA]">{result.headline ?? result.talentProfile.headline}</p>
                       </div>
-                      <div>
-                        <span>Locations</span>
-                        <strong>{result.talentProfile.locationPreferences.slice(0, 2).join(", ") || "Flexible"}</strong>
+                      <p className="text-xs text-[#A1A1AA] line-clamp-2">{result.summary ?? result.talentProfile.summary}</p>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div><span className="text-[#52525B]">Availability</span><p className="font-medium">{formatEnumLabel(result.talentProfile.availability)}</p></div>
+                        <div><span className="text-[#52525B]">Rate</span><p className="font-medium">{formatRate(result.talentProfile.hourlyRateMin, result.talentProfile.hourlyRateMax, result.talentProfile.currency)}</p></div>
+                        <div><span className="text-[#52525B]">Locations</span><p className="font-medium">{result.talentProfile.locationPreferences.slice(0, 2).join(", ") || "Flexible"}</p></div>
                       </div>
-                    </div>
-                    {result.talentProfile.industries && result.talentProfile.industries.length > 0 ? (
-                      <div className="selected-skill-list">
-                        {result.talentProfile.industries.slice(0, 3).map((industry) => (
-                          <span className="selected-skill-chip is-static" key={`${result.id}-${industry}`}>
-                            {industry}
-                          </span>
+                      <div className="flex flex-wrap gap-1">
+                        {topSkills.map((skill) => (
+                          <span key={`${result.id}-${skill}`} className="px-2 py-0.5 bg-[#1A1A1A] border border-[#27272A] rounded text-xs text-[#A1A1AA]">{skill}</span>
                         ))}
                       </div>
-                    ) : null}
-                    <div className="selected-skill-list">
-                      {topSkills.map((skill) => (
-                        <span className="selected-skill-chip is-static" key={`${result.id}-${skill}`}>
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="dashboard-actions">
-                      <button className="secondary-button" onClick={() => setActiveCandidateId(result.id)} type="button">
-                        Open profile
-                      </button>
-                      <a className="secondary-link" href="/dashboard/shortlists">
-                        Review shortlists
-                      </a>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
-          )}
-        </section>
-
-        <section className="dashboard-panel-card recommendation-panel">
-          <div className="dashboard-section-heading">
-            <div>
-              <span className="eyebrow">AI recommendations</span>
-              <h3>Based on your recent roles</h3>
-            </div>
+                      <div className="flex gap-2 pt-2 border-t border-[#27272A]">
+                        <Button variant="ghost" size="sm" className="text-xs" onClick={() => setActiveCandidateId(result.id)}>Open Profile</Button>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {recommendations.length === 0 ? (
-            <EmptyStateCard
-              actions={[
-                { href: "/dashboard/roles/new", label: "Create role" },
-                { href: "/dashboard/roles", label: "Review roles", tone: "secondary" }
-              ]}
-              description="Recommendations are generated from your recent recruiter demand, so they appear once role history exists."
-              eyebrow="AI recommendations"
-              title="No recommendation seeds yet"
-            />
-          ) : (
-            <div className="recommendation-grid">
-              {recommendations.map((recommendation) => (
-                <article className="recommendation-card" key={recommendation.roleId}>
-                  <div className="role-list-card-header">
-                    <div>
-                      <h4>{recommendation.roleTitle}</h4>
-                      <p>{recommendation.prompt}</p>
+          {/* Recommendations */}
+          <div>
+            <h2 className="font-semibold mb-3">
+              <Sparkles className="h-4 w-4 inline mr-1 text-[#52525B]" />
+              AI Recommendations Based on Your Roles
+            </h2>
+            {recommendations.length === 0 ? (
+              <p className="text-[#A1A1AA] text-sm">No recommendation seeds yet. Create roles to see AI-curated talent.</p>
+            ) : (
+              <div className="space-y-4">
+                {recommendations.map((rec) => (
+                  <div key={rec.roleId} className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-semibold text-sm">{rec.roleTitle}</h4>
+                        <p className="text-xs text-[#52525B]">{rec.prompt}</p>
+                      </div>
+                      <Button variant="ghost" size="sm" className="text-xs" onClick={() => navigateToSearch(undefined, rec.prompt)}>Explore</Button>
                     </div>
-                    <button className="secondary-button" onClick={() => navigateToSearch(undefined, recommendation.prompt)} type="button">
-                      Explore matches
-                    </button>
-                  </div>
-                  <div className="search-recommendation-list">
-                    {recommendation.results.length === 0 ? (
-                      <EmptyStateCard
-                        description="The recommendation prompt ran, but no candidates surfaced strongly enough yet for this role seed."
-                        eyebrow="Recommendation result"
-                        title="No candidates surfaced"
-                      />
+                    {rec.results.length === 0 ? (
+                      <p className="text-xs text-[#52525B]">No candidates surfaced for this role seed.</p>
                     ) : (
-                      recommendation.results.slice(0, 3).map((result) => (
-                        <button className="recommendation-result" key={result.id} onClick={() => setActiveCandidateId(result.id)} type="button">
-                          <strong>
-                            {result.talentProfile.firstName} {result.talentProfile.lastName}
-                          </strong>
-                          <span>{result.talentProfile.headline}</span>
-                        </button>
-                      ))
+                      <div className="flex gap-2">
+                        {rec.results.slice(0, 3).map((r) => (
+                          <button key={r.id} onClick={() => setActiveCandidateId(r.id)} className="flex-1 bg-[#1A1A1A] border border-[#27272A] rounded-md p-2 text-left hover:bg-[#222222] transition-colors">
+                            <p className="text-xs font-medium">{r.talentProfile.firstName} {r.talentProfile.lastName}</p>
+                            <p className="text-xs text-[#52525B]">{r.talentProfile.headline}</p>
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
-                </article>
-              ))}
-            </div>
-          )}
-        </section>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {activeCandidate ? <CandidateProfileModal candidate={activeCandidate} onClose={() => setActiveCandidateId(null)} /> : null}

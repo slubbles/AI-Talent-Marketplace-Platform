@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { graphQLRequest } from "../../../../lib/graphql";
 import { ApprovalsAdminClient } from "./approvals-admin-client";
 
+import { getSession } from "../../../../lib/session";
 type ApprovalsQuery = {
   demands: {
     edges: Array<{
@@ -64,7 +63,7 @@ const approvalsQuery = `#graphql
 `;
 
 export default async function AdminApprovalsPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   const data = await graphQLRequest<ApprovalsQuery>(approvalsQuery, undefined, session?.accessToken);
 
   return <ApprovalsAdminClient accessToken={session?.accessToken ?? ""} initialDemands={data.demands.edges.map((edge) => edge.node)} />;

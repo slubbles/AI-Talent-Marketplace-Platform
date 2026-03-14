@@ -1,10 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../../lib/auth";
 import { graphQLRequest } from "../../../../../lib/graphql";
 import { InterviewDetailClient } from "./interview-detail-client";
 import type { CandidateProfile } from "../../../shortlists/types";
 
+import { getSession } from "../../../../../lib/session";
 const interviewDetailQuery = `#graphql
   query InterviewDetailDemand($demandId: ID!, $id: ID!) {
     demand(id: $demandId) {
@@ -108,7 +107,7 @@ type PageProps = {
 };
 
 export default async function InterviewDetailPage({ params }: PageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
   if (!session?.accessToken) {
     redirect("/login");

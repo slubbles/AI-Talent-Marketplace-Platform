@@ -4,6 +4,14 @@ import { gql } from "@apollo/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { createApolloClient } from "../../../lib/apollo-client";
+import { Sparkles, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 
 type CompanyOption = {
   id: string;
@@ -345,223 +353,227 @@ export function DemandForm({ accessToken, companies, initialDemand, mode }: Dema
   };
 
   return (
-    <div className="demand-form-layout">
-      <form className="dashboard-panel-card demand-form-card" onSubmit={onSubmit}>
-        <div className="dashboard-section-heading">
+    <div>
+      <h1 className="text-2xl font-bold mb-6">{mode === "create" ? "Create New Role" : "Edit Role"}</h1>
+
+      <div className="flex gap-8">
+        {/* Left: Form */}
+        <form className="flex-[3] space-y-8" onSubmit={onSubmit}>
+          {/* Section 1 — Role Basics */}
           <div>
-            <span className="eyebrow">{mode === "create" ? "Post role" : "Edit role"}</span>
-            <h3>{mode === "create" ? "Create a recruiter demand" : "Update recruiter demand"}</h3>
-          </div>
-        </div>
-
-        <div className="demand-form-grid">
-          <label>
-            <span>Company</span>
-            <select value={companyId} onChange={(event) => setCompanyId(event.target.value)}>
-              {companies.map((company) => (
-                <option key={company.id} value={company.id}>
-                  {company.name} • {company.industry}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Role title</span>
-            <input onChange={(event) => setTitle(event.target.value)} required value={title} />
-          </label>
-
-          <label className="demand-form-field-wide">
-            <span>Raw description</span>
-            <textarea onChange={(event) => setRawDescription(event.target.value)} required rows={7} value={rawDescription} />
-          </label>
-
-          <label className="demand-form-field-wide">
-            <span>AI-enhanced description</span>
-            <textarea onChange={(event) => setAiGeneratedDescription(event.target.value)} rows={7} value={aiGeneratedDescription} />
-          </label>
-
-          <label>
-            <span>Experience level</span>
-            <select onChange={(event) => setExperienceLevel(event.target.value)} value={experienceLevel}>
-              {seniorityLevels.map((level) => (
-                <option key={level} value={level}>
-                  {level}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Location</span>
-            <input onChange={(event) => setLocation(event.target.value)} required value={location} />
-          </label>
-
-          <label>
-            <span>Remote policy</span>
-            <select onChange={(event) => setRemotePolicy(event.target.value)} value={remotePolicy}>
-              {remotePolicies.map((policy) => (
-                <option key={policy} value={policy}>
-                  {policy}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Status</span>
-            <select onChange={(event) => setStatus(event.target.value)} value={status}>
-              {demandStatuses.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label>
-            <span>Start date</span>
-            <input onChange={(event) => setStartDate(event.target.value)} type="date" value={startDate} />
-          </label>
-
-          <label>
-            <span>Contract duration</span>
-            <input onChange={(event) => setContractDuration(event.target.value)} value={contractDuration} />
-          </label>
-
-          <label>
-            <span>Budget min</span>
-            <input min="0" onChange={(event) => setBudgetMin(event.target.value)} step="1" type="number" value={budgetMin} />
-          </label>
-
-          <label>
-            <span>Budget max</span>
-            <input min="0" onChange={(event) => setBudgetMax(event.target.value)} step="1" type="number" value={budgetMax} />
-          </label>
-
-          <label>
-            <span>Currency</span>
-            <input maxLength={3} onChange={(event) => setCurrency(event.target.value.toUpperCase())} value={currency} />
-          </label>
-
-          <label className="demand-form-field-wide">
-            <span>Project requirements</span>
-            <textarea onChange={(event) => setProjectRequirements(event.target.value)} rows={5} value={projectRequirements} />
-          </label>
-
-          <div className="demand-form-field-wide demand-skill-picker">
-            <label>
-              <span>Required skills</span>
-              <input
-                onChange={(event) => setSkillSearch(event.target.value)}
-                placeholder="Search skills like FastAPI, GraphQL, or Product Design"
-                value={skillSearch}
-              />
-            </label>
-            {isSearchingSkills ? <span className="form-inline-note">Searching skills…</span> : null}
-            {skillResults.length > 0 ? (
-              <div className="skill-result-list">
-                {skillResults.map((skill) => (
-                  <button className="skill-result-item" key={skill.id} onClick={() => addSkill(skill)} type="button">
-                    <strong>{skill.displayName}</strong>
-                    <span>{skill.category}</span>
-                  </button>
-                ))}
+            <h3 className="text-sm font-semibold text-[#A1A1AA] uppercase tracking-wide mb-3">Role Basics</h3>
+            <div className="space-y-4">
+              <div>
+                <Label>Role Title</Label>
+                <Input placeholder="e.g. Senior Frontend Engineer" value={title} onChange={(e) => setTitle(e.target.value)} required />
               </div>
-            ) : null}
-            <div className="selected-skill-list">
-              {selectedSkills.map((skill) => (
-                <button className="selected-skill-chip" key={skill.id} onClick={() => removeSkill(skill.id)} type="button">
-                  {skill.displayName}
-                </button>
-              ))}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Company</Label>
+                  <Select value={companyId} onValueChange={setCompanyId}>
+                    <SelectTrigger><SelectValue placeholder="Select company" /></SelectTrigger>
+                    <SelectContent>
+                      {companies.map((c) => <SelectItem key={c.id} value={c.id}>{c.name} · {c.industry}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Experience Level</Label>
+                  <Select value={experienceLevel} onValueChange={setExperienceLevel}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {seniorityLevels.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Location</Label>
+                  <Input placeholder="e.g. San Francisco, CA" value={location} onChange={(e) => setLocation(e.target.value)} required />
+                </div>
+                <div>
+                  <Label>Remote Policy</Label>
+                  <Select value={remotePolicy} onValueChange={setRemotePolicy}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {remotePolicies.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {demandStatuses.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
-        </div>
 
-        {error ? <p className="form-error">{error}</p> : null}
-        {successMessage ? <p className="form-success">{successMessage}</p> : null}
-
-        <div className="dashboard-actions">
-          <button disabled={isGenerating} onClick={onGenerate} type="button">
-            {isGenerating ? "Generating AI draft…" : "AI Enhance"}
-          </button>
-          <button className="secondary-button" disabled={isSubmitting} type="submit">
-            {isSubmitting ? "Saving role…" : mode === "create" ? "Create role and shortlist" : "Save changes"}
-          </button>
-        </div>
-      </form>
-
-      <section className="dashboard-panel-card demand-ai-panel">
-        <div className="dashboard-section-heading">
+          {/* Section 2 — Skills & Requirements */}
           <div>
-            <span className="eyebrow">AI assistant</span>
-            <h3>Role enhancement output</h3>
+            <h3 className="text-sm font-semibold text-[#A1A1AA] uppercase tracking-wide mb-3">Skills & Requirements</h3>
+            <div className="space-y-4">
+              <div>
+                <Label>Required Skills</Label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {selectedSkills.map((s) => (
+                    <span key={s.id} className="flex items-center gap-1 px-2 py-1 bg-[#1A1A1A] border border-primary rounded text-xs text-white">
+                      {s.displayName}
+                      <button type="button" onClick={() => removeSkill(s.id)}>
+                        <X className="h-3 w-3 text-[#52525B] hover:text-white" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="relative">
+                  <Input
+                    placeholder="Search skills like FastAPI, GraphQL, or Product Design"
+                    value={skillSearch}
+                    onChange={(e) => setSkillSearch(e.target.value)}
+                  />
+                  {isSearchingSkills && <p className="text-xs text-[#52525B] mt-1">Searching skills…</p>}
+                  {skillResults.length > 0 && (
+                    <div className="absolute z-10 top-full mt-1 w-full bg-[#0A0A0A] border border-[#27272A] rounded-md shadow-md max-h-48 overflow-y-auto">
+                      {skillResults.map((s) => (
+                        <button
+                          key={s.id}
+                          type="button"
+                          className="w-full text-left px-3 py-2 text-sm hover:bg-[#222222] transition-colors flex justify-between"
+                          onClick={() => addSkill(s)}
+                        >
+                          <strong>{s.displayName}</strong>
+                          <span className="text-[#52525B]">{s.category}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div>
+                <Label>Raw Description</Label>
+                <Textarea placeholder="Describe what you need in your own words. AI will use this to generate a polished description." rows={5} className="bg-[#1A1A1A]" value={rawDescription} onChange={(e) => setRawDescription(e.target.value)} required />
+              </div>
+              <div>
+                <Label>AI-Enhanced Description</Label>
+                <Textarea rows={5} className="bg-[#1A1A1A]" value={aiGeneratedDescription} onChange={(e) => setAiGeneratedDescription(e.target.value)} />
+              </div>
+              <div>
+                <Label>Project Requirements</Label>
+                <Textarea placeholder="Key qualifications and responsibilities..." rows={5} className="bg-[#1A1A1A]" value={projectRequirements} onChange={(e) => setProjectRequirements(e.target.value)} />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 3 — Timeline & Budget */}
+          <div>
+            <h3 className="text-sm font-semibold text-[#A1A1AA] uppercase tracking-wide mb-3">Timeline & Budget</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Start Date</Label>
+                  <Input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Contract Duration</Label>
+                  <Input placeholder="e.g. 6 months" value={contractDuration} onChange={(e) => setContractDuration(e.target.value)} />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div>
+                  <Label>Budget Min</Label>
+                  <Input type="number" min="0" placeholder="100" value={budgetMin} onChange={(e) => setBudgetMin(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Budget Max</Label>
+                  <Input type="number" min="0" placeholder="180" value={budgetMax} onChange={(e) => setBudgetMax(e.target.value)} />
+                </div>
+                <div>
+                  <Label>Currency</Label>
+                  <Input maxLength={3} value={currency} onChange={(e) => setCurrency(e.target.value.toUpperCase())} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Error / Success */}
+          {error && <p className="text-sm text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2">{error}</p>}
+          {successMessage && <p className="text-sm text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2">{successMessage}</p>}
+
+          {/* Actions */}
+          <div className="flex justify-between pt-4 border-t border-[#27272A]">
+            <Button type="button" variant="ghost" disabled={isGenerating} onClick={onGenerate}>
+              <Sparkles className="h-4 w-4" /> {isGenerating ? "Generating…" : "AI Enhance"}
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Saving…" : mode === "create" ? "Create Role & Shortlist" : "Save Changes"}
+            </Button>
+          </div>
+        </form>
+
+        {/* Right: AI Panel */}
+        <div className="flex-[2]">
+          <div className="sticky top-6 bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+            {suggestion ? (
+              <div className="space-y-4">
+                <h3 className="text-lg font-bold">{suggestion.title}</h3>
+                <p className="text-sm text-[#A1A1AA] leading-relaxed">{suggestion.summary}</p>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-[#1A1A1A] rounded-md p-3">
+                    <span className="text-xs text-[#52525B]">Recommended level</span>
+                    <p className="text-sm font-semibold">{suggestion.experienceLevel}</p>
+                  </div>
+                  <div className="bg-[#1A1A1A] rounded-md p-3">
+                    <span className="text-xs text-[#52525B]">Suggested band</span>
+                    <p className="text-sm font-semibold">{suggestion.salaryBand.currency} {suggestion.salaryBand.min}k–{suggestion.salaryBand.max}k</p>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Responsibilities</h4>
+                  <ul className="text-sm text-[#A1A1AA] space-y-1 list-disc list-inside">
+                    {suggestion.responsibilities.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Requirements</h4>
+                  <ul className="text-sm text-[#A1A1AA] space-y-1 list-disc list-inside">
+                    {suggestion.requirements.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Nice to Have</h4>
+                  <ul className="text-sm text-[#A1A1AA] space-y-1 list-disc list-inside">
+                    {suggestion.niceToHaves.map((item) => <li key={item}>{item}</li>)}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Suggested Skills</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {suggestion.recommendedSkills.map((skill) => (
+                      <span key={skill} className="px-2 py-1 bg-[#1A1A1A] border border-[#27272A] rounded text-xs text-[#A1A1AA]">{skill}</span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-[#52525B] mt-2">{suggestion.salaryBand.rationale}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center">
+                <Sparkles className="h-12 w-12 text-[#52525B] mx-auto mb-4" />
+                <h3 className="text-lg font-semibold mb-2">AI Role Assistant</h3>
+                <p className="text-sm text-[#A1A1AA] mb-4">
+                  Fill in the role details and click &apos;AI Enhance&apos; to generate a polished job description, recommended seniority, and salary band.
+                </p>
+              </div>
+            )}
           </div>
         </div>
-
-        {suggestion ? (
-          <div className="demand-ai-content">
-            <div className="demand-ai-block">
-              <strong>{suggestion.title}</strong>
-              <p>{suggestion.summary}</p>
-            </div>
-            <div className="demand-ai-meta-grid">
-              <div>
-                <span>Recommended level</span>
-                <strong>{suggestion.experienceLevel}</strong>
-              </div>
-              <div>
-                <span>Suggested band</span>
-                <strong>
-                  {suggestion.salaryBand.currency} {suggestion.salaryBand.min}k - {suggestion.salaryBand.max}k
-                </strong>
-              </div>
-            </div>
-            <div className="demand-ai-columns">
-              <div>
-                <h4>Responsibilities</h4>
-                <ul>
-                  {suggestion.responsibilities.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-              <div>
-                <h4>Requirements</h4>
-                <ul>
-                  {suggestion.requirements.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-            <div className="demand-ai-block">
-              <h4>Nice to have</h4>
-              <ul>
-                {suggestion.niceToHaves.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </div>
-            <div className="demand-ai-block">
-              <h4>Suggested skills</h4>
-              <div className="selected-skill-list">
-                {suggestion.recommendedSkills.map((skill) => (
-                  <span className="selected-skill-chip is-static" key={skill}>
-                    {skill}
-                  </span>
-                ))}
-              </div>
-              <p className="form-inline-note">{suggestion.salaryBand.rationale}</p>
-            </div>
-          </div>
-        ) : (
-          <p className="dashboard-empty-state">
-            Use AI Enhance to generate a polished role draft, recommended seniority, and a salary band grounded in the selected company context.
-          </p>
-        )}
-      </section>
+      </div>
     </div>
   );
 }

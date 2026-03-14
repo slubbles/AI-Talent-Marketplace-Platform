@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { graphQLRequest } from "../../../../lib/graphql";
 import { VerificationAdminClient } from "./verification-admin-client";
 
+import { getSession } from "../../../../lib/session";
 type VerificationQuery = {
   talentProfiles: {
     edges: Array<{
@@ -74,7 +73,7 @@ const verificationQuery = `#graphql
 `;
 
 export default async function AdminVerificationPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   const data = await graphQLRequest<VerificationQuery>(verificationQuery, undefined, session?.accessToken);
 
   return <VerificationAdminClient accessToken={session?.accessToken ?? ""} initialProfiles={data.talentProfiles.edges.map((edge) => edge.node)} />;

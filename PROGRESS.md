@@ -2,14 +2,30 @@
 
 > Live progress on every session and deliverable.
 > Updated after each completed task.
-> Overall: **94%** (18 of 19 sessions complete)
+> Overall: **95%** (18 of 19 sessions complete + UI merge build passing)
 
 ## Current Focus
 
+- UI Merge Build Fix Pass: **100%**
 - Session 18 — Integration, Testing + Deploy: **94%**
-- Session 19 — Documentation + Polish: **100%**
 - Status: 🔄 In progress
 - Branch: `1st-execution`
+
+## UI Merge Build Fix Snapshot
+
+| Task | Status | % |
+|------|--------|---|
+| Fix Windows-1252 → UTF-8 encoding across 14 source files | ✅ | 100 |
+| Migrate getServerSession to lib/session.ts typed helper (21 files) | ✅ | 100 |
+| Rename next-auth.d.ts → types.d.ts to fix module resolution with baseUrl | ✅ | 100 |
+| Disable experimental typedRoutes (incompatible with dynamic Link hrefs) | ✅ | 100 |
+| Pin Zod 4.0.2 for @hookform/resolvers v5 type compatibility | ✅ | 100 |
+| Install all Radix UI + shadcn peer dependencies (24 Radix pkgs + 7 others) | ✅ | 100 |
+| Update calendar component for react-day-picker v9 API | ✅ | 100 |
+| Remove 43 unused shadcn components, keep 6 used (button, input, label, select, switch, textarea) | ✅ | 100 |
+| Remove dynamic icon generators (Node.js 23 / @vercel/og incompatibility) | ✅ | 100 |
+| Align root React 18.2→18.3.1 to fix styled-jsx useContext mismatch | ✅ | 100 |
+| Production build passes: 24 routes compiled, typed, and generated | ✅ | 100 |
 
 ## Session 19 Snapshot
 

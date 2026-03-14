@@ -3,7 +3,7 @@
 import { gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { createApolloClient } from "../../../../lib/apollo-client";
-import { EmptyStateCard } from "../../../dashboard/empty-state-card";
+import Link from "next/link";
 
 type VerificationProfile = {
   id: string;
@@ -104,116 +104,104 @@ export function VerificationAdminClient({ accessToken, initialProfiles }: Verifi
   };
 
   return (
-    <section className="dashboard-panel-card admin-page-stack">
-      <div className="dashboard-section-heading">
-        <div>
-          <span className="eyebrow">Talent verification queue</span>
-          <h3>Approve or reject pending profiles</h3>
-        </div>
+    <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-5">
+      <div>
+        <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Talent verification queue</p>
+        <h3 className="text-lg font-semibold text-white mt-1">Approve or reject pending profiles</h3>
       </div>
 
-      {message ? <p className="form-success">{message}</p> : null}
-      {error ? <p className="form-error">{error}</p> : null}
+      {message ? <p className="text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2 text-sm">{message}</p> : null}
+      {error ? <p className="text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2 text-sm">{error}</p> : null}
 
-      <div className="admin-card-grid">
+      <div className="grid gap-4">
         {profiles.length === 0 ? (
-          <EmptyStateCard
-            accent="admin"
-            actions={[{ href: "/admin", label: "Back to admin overview", tone: "secondary" }]}
-            description="There are no pending talent profiles waiting for approval or rejection right now."
-            eyebrow="Talent verification"
-            title="All pending profiles have been reviewed"
-          />
+          <div className="text-center py-12">
+            <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Talent verification</p>
+            <h4 className="text-lg font-semibold text-white mt-2">All pending profiles have been reviewed</h4>
+            <p className="text-sm text-[#52525B] mt-1">There are no pending talent profiles waiting for approval or rejection right now.</p>
+            <Link className="text-sm text-[#A1A1AA] hover:text-white mt-3 inline-block" href="/admin">Back to admin overview</Link>
+          </div>
         ) : (
           profiles.map((profile) => (
-            <article className="role-list-card admin-verification-card" key={profile.id}>
-              <div className="role-list-card-header">
-                <div>
-                  <span className="role-status-badge">{profile.verificationStatus}</span>
-                  <h4>
-                    {profile.firstName} {profile.lastName}
-                  </h4>
+            <article className="bg-[#111111] border border-[#27272A] rounded-lg p-5 space-y-4" key={profile.id}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-950 text-amber-400">{profile.verificationStatus}</span>
+                  <h4 className="text-sm font-medium text-white">{profile.firstName} {profile.lastName}</h4>
                 </div>
-                <strong>{profile.user.email}</strong>
+                <span className="text-sm text-[#A1A1AA]">{profile.user.email}</span>
               </div>
 
-              <p>{profile.headline}</p>
-              <p>{profile.summary}</p>
+              <p className="text-sm text-white">{profile.headline}</p>
+              <p className="text-sm text-[#A1A1AA]">{profile.summary}</p>
 
-              <div className="role-list-meta-grid">
+              <div className="grid grid-cols-3 gap-3 text-sm">
                 <div>
-                  <span>Industries</span>
-                  <strong>{profile.industries.join(", ") || "Not provided"}</strong>
+                  <span className="text-[#52525B] text-xs">Industries</span>
+                  <p className="text-white font-medium">{profile.industries.join(", ") || "Not provided"}</p>
                 </div>
                 <div>
-                  <span>Location preferences</span>
-                  <strong>{profile.locationPreferences.join(", ") || "Not provided"}</strong>
+                  <span className="text-[#52525B] text-xs">Location preferences</span>
+                  <p className="text-white font-medium">{profile.locationPreferences.join(", ") || "Not provided"}</p>
                 </div>
                 <div>
-                  <span>Visa eligibility</span>
-                  <strong>{profile.workVisaEligibility.join(", ") || "Not provided"}</strong>
+                  <span className="text-[#52525B] text-xs">Visa eligibility</span>
+                  <p className="text-white font-medium">{profile.workVisaEligibility.join(", ") || "Not provided"}</p>
                 </div>
               </div>
 
-              <div className="selected-skill-list">
+              <div className="flex flex-wrap gap-1">
                 {profile.skills.slice(0, 8).map((skill) => (
-                  <span className="selected-skill-chip is-static" key={skill.id}>
+                  <span className="px-2 py-0.5 bg-[#1A1A1A] border border-[#27272A] rounded text-xs text-[#A1A1AA]" key={skill.id}>
                     {skill.skill.displayName} • {skill.yearsOfExperience}y
                   </span>
                 ))}
               </div>
 
-              <div className="admin-subsection">
-                <strong>Identity documents</strong>
-                <div className="admin-list-grid compact">
+              <div className="mt-2">
+                <p className="text-sm font-medium text-white mb-2">Identity documents</p>
+                <div className="space-y-2">
                   {profile.identityDocumentUrls.length === 0 ? (
-                    <EmptyStateCard
-                      accent="warning"
-                      description="This profile has not uploaded an identity document yet, so approval should wait until the record is complete."
-                      eyebrow="Identity review"
-                      title="No identity documents uploaded"
-                    />
+                    <div className="bg-amber-950/20 border border-amber-900/40 rounded-md p-3">
+                      <p className="text-xs text-amber-400">No identity documents uploaded — approval should wait until the record is complete.</p>
+                    </div>
                   ) : (
                     profile.identityDocumentUrls.map((url) => (
-                      <div className="dashboard-activity-item" key={url}>
+                      <div className="flex items-center justify-between py-2 border-b border-[#27272A] last:border-b-0" key={url}>
                         <div>
-                          <h4>Identity document</h4>
-                          <p>Uploaded for verification review</p>
+                          <p className="text-sm font-medium text-white">Identity document</p>
+                          <p className="text-xs text-[#A1A1AA]">Uploaded for verification review</p>
                         </div>
-                        <a href={url}>Open file</a>
+                        <a className="text-sm text-[#EFFE5E] hover:underline" href={url} rel="noreferrer" target="_blank">Open file</a>
                       </div>
                     ))
                   )}
                 </div>
               </div>
 
-              <div className="admin-subsection">
-                <strong>Certifications</strong>
-                <div className="admin-list-grid compact">
+              <div className="mt-2">
+                <p className="text-sm font-medium text-white mb-2">Certifications</p>
+                <div className="space-y-2">
                   {profile.certifications.length === 0 ? (
-                    <EmptyStateCard
-                      accent="admin"
-                      description="No certification records are attached to this profile yet. Review the resume and identity evidence instead."
-                      eyebrow="Certification review"
-                      title="No certifications uploaded"
-                    />
+                    <p className="text-xs text-[#52525B]">No certification records attached. Review the resume and identity evidence instead.</p>
                   ) : (
                     profile.certifications.map((certification) => (
-                      <div className="dashboard-activity-item" key={certification.id}>
+                      <div className="flex items-center justify-between py-2 border-b border-[#27272A] last:border-b-0" key={certification.id}>
                         <div>
-                          <h4>{certification.name}</h4>
-                          <p>{certification.issuer}</p>
+                          <p className="text-sm font-medium text-white">{certification.name}</p>
+                          <p className="text-xs text-[#A1A1AA]">{certification.issuer}</p>
                         </div>
-                        {certification.credentialUrl ? <a href={certification.credentialUrl}>Credential</a> : null}
+                        {certification.credentialUrl ? <a className="text-sm text-[#EFFE5E] hover:underline" href={certification.credentialUrl} rel="noreferrer" target="_blank">Credential</a> : null}
                       </div>
                     ))
                   )}
                 </div>
               </div>
 
-              <label>
+              <label className="block text-sm text-[#A1A1AA]">
                 Review notes or rejection reason
                 <textarea
+                  className="mt-1 w-full bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-2 text-sm placeholder:text-[#52525B]"
                   onChange={(event) => updateNotes(profile.id, event.target.value)}
                   placeholder="Record verification notes, missing document details, or a rejection reason."
                   rows={3}
@@ -221,16 +209,16 @@ export function VerificationAdminClient({ accessToken, initialProfiles }: Verifi
                 />
               </label>
 
-              <div className="admin-inline-actions">
+              <div className="flex gap-3">
                 {profile.resumeUrl ? (
-                  <a className="secondary-link" href={profile.resumeUrl} rel="noreferrer" target="_blank">
+                  <a className="px-4 py-2 rounded-md text-sm font-medium border border-[#27272A] text-[#A1A1AA] hover:text-white transition-colors" href={profile.resumeUrl} rel="noreferrer" target="_blank">
                     Open resume
                   </a>
                 ) : null}
-                <button className="primary-link" disabled={pendingProfileId === profile.id} onClick={() => resolveProfile(profile.id, "verify")} type="button">
+                <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] disabled:opacity-50 transition-colors" disabled={pendingProfileId === profile.id} onClick={() => resolveProfile(profile.id, "verify")} type="button">
                   {pendingProfileId === profile.id ? "Processing..." : "Approve"}
                 </button>
-                <button className="secondary-button" disabled={pendingProfileId === profile.id} onClick={() => resolveProfile(profile.id, "reject")} type="button">
+                <button className="px-4 py-2 rounded-md text-sm font-medium border border-[#27272A] text-[#A1A1AA] hover:text-white disabled:opacity-50 transition-colors" disabled={pendingProfileId === profile.id} onClick={() => resolveProfile(profile.id, "reject")} type="button">
                   Request changes / reject
                 </button>
               </div>
@@ -238,6 +226,6 @@ export function VerificationAdminClient({ accessToken, initialProfiles }: Verifi
           ))
         )}
       </div>
-    </section>
+    </div>
   );
 }

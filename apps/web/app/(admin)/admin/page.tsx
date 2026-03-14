@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
-import { EmptyStateCard } from "../../dashboard/empty-state-card";
+import Link from "next/link";
 
+import { getSession } from "../../../lib/session";
 type AdminDashboardQuery = {
   adminDashboard: {
     totalUsers: number;
@@ -81,7 +80,7 @@ const formatDate = (value: string) =>
   new Intl.DateTimeFormat("en", { month: "short", day: "numeric" }).format(new Date(value));
 
 export default async function AdminDashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   const data = await graphQLRequest<AdminDashboardQuery>(adminDashboardQuery, undefined, session?.accessToken);
   const dashboard = data.adminDashboard;
 
@@ -93,136 +92,104 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="dashboard-grid admin-dashboard-grid">
-      <section className="dashboard-hero dashboard-panel-card admin-hero-card">
-        <span className="eyebrow">Admin dashboard</span>
-        <h2>Platform health and governance</h2>
-        <p>
+    <div className="space-y-6">
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+        <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Admin dashboard</p>
+        <h2 className="text-xl font-bold text-white mt-1">Platform health and governance</h2>
+        <p className="text-sm text-[#A1A1AA] mt-2">
           This surface tracks the full marketplace: user activation, pending verification work, approval bottlenecks, hard-to-fill roles,
           and portfolio-company throughput.
         </p>
-        <div className="dashboard-hero-actions">
-          <a className="primary-link" href="/admin/verification">
-            Review verification queue
-          </a>
-          <a className="secondary-link" href="/admin/approvals">
-            Open role approvals
-          </a>
+        <div className="flex gap-3 mt-4">
+          <Link className="text-sm text-[#EFFE5E] hover:underline" href="/admin/verification">Review verification queue</Link>
+          <Link className="text-sm text-[#A1A1AA] hover:text-white" href="/admin/approvals">Open role approvals</Link>
         </div>
-      </section>
+      </div>
 
-      <section className="dashboard-metrics">
+      <div className="grid grid-cols-4 gap-4">
         {metrics.map((metric) => (
-          <article className="dashboard-metric-card admin-metric-card" key={metric.label}>
-            <span>{metric.label}</span>
-            <strong>{metric.value}</strong>
-            <p>{metric.detail}</p>
-          </article>
+          <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5" key={metric.label}>
+            <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">{metric.label}</span>
+            <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{metric.value}</p>
+            <p className="text-xs text-[#52525B] mt-1">{metric.detail}</p>
+          </div>
         ))}
-      </section>
+      </div>
 
-      <section className="dashboard-panel-card">
-        <div className="dashboard-section-heading">
+      {/* Verification queue */}
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <span className="eyebrow">Verification queue</span>
-            <h3>Pending talent reviews</h3>
+            <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Verification queue</p>
+            <h3 className="text-lg font-semibold text-white mt-1">Pending talent reviews</h3>
           </div>
-          <a href="/admin/verification">Open queue</a>
+          <Link className="text-sm text-[#EFFE5E] hover:underline" href="/admin/verification">Open queue</Link>
         </div>
-        <div className="dashboard-activity-list admin-list-grid">
-          {dashboard.pendingVerificationProfiles.length === 0 ? (
-            <EmptyStateCard
-              accent="admin"
-              actions={[{ href: "/admin/verification", label: "Open verification queue", tone: "secondary" }]}
-              description="There are no newly pending talent profiles waiting on admin review right now."
-              eyebrow="Verification queue"
-              title="The review queue is clear"
-            />
-          ) : (
-            dashboard.pendingVerificationProfiles.map((profile) => (
-              <article className="dashboard-activity-item" key={profile.id}>
+        {dashboard.pendingVerificationProfiles.length === 0 ? (
+          <p className="text-sm text-[#52525B]">No newly pending talent profiles waiting on admin review right now.</p>
+        ) : (
+          <div className="space-y-3">
+            {dashboard.pendingVerificationProfiles.map((profile) => (
+              <div className="flex items-center justify-between border-b border-[#27272A] pb-3 last:border-b-0 last:pb-0" key={profile.id}>
                 <div>
-                  <span className="dashboard-activity-type">PENDING</span>
-                  <h4>
-                    {profile.firstName} {profile.lastName}
-                  </h4>
-                  <p>{profile.headline}</p>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-950 text-amber-400">PENDING</span>
+                  <p className="text-sm font-medium text-white mt-1">{profile.firstName} {profile.lastName}</p>
+                  <p className="text-xs text-[#A1A1AA]">{profile.headline}</p>
                 </div>
-                <div className="dashboard-activity-meta">
-                  <strong>{profile.user.email}</strong>
-                  <time dateTime={profile.createdAt}>Queued {formatDate(profile.createdAt)}</time>
+                <div className="text-right text-xs">
+                  <p className="text-white">{profile.user.email}</p>
+                  <p className="text-[#52525B]">Queued {formatDate(profile.createdAt)}</p>
                 </div>
-              </article>
-            ))
-          )}
-        </div>
-      </section>
-
-      <section className="dashboard-panel-card">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Company watchlist</span>
-            <h3>Portfolio company demand pressure</h3>
+              </div>
+            ))}
           </div>
-          <a href="/admin/companies">Manage companies</a>
-        </div>
-        <div className="admin-company-metrics-grid">
-          {dashboard.companyMetrics.length === 0 ? (
-            <EmptyStateCard
-              accent="admin"
-              actions={[
-                { href: "/admin/companies", label: "Open companies" },
-                { href: "/admin/users", label: "Manage recruiter users", tone: "secondary" }
-              ]}
-              description="Company oversight cards appear once recruiters are attached to organizations with live demand history."
-              eyebrow="Company watchlist"
-              title="No company pressure signals yet"
-            />
-          ) : (
-            dashboard.companyMetrics.map((company) => (
-              <article className="role-list-card admin-company-metric-card" key={company.id}>
-                <div className="role-list-card-header">
-                  <div>
-                    <span className="role-status-badge">{company.industry}</span>
-                    <h4>{company.name}</h4>
-                  </div>
-                </div>
-                <div className="role-list-meta-grid">
-                  <div>
-                    <span>Active demands</span>
-                    <strong>{company.activeDemandCount}</strong>
-                  </div>
-                  <div>
-                    <span>Pending approvals</span>
-                    <strong>{company.pendingApprovalsCount}</strong>
-                  </div>
-                  <div>
-                    <span>Hard-to-fill</span>
-                    <strong>{company.hardToFillCount}</strong>
-                  </div>
-                  <div>
-                    <span>Placements</span>
-                    <strong>{company.placementsCount}</strong>
-                  </div>
-                </div>
-              </article>
-            ))
-          )}
-        </div>
-      </section>
+        )}
+      </div>
 
-      <section className="dashboard-panel-card">
-        <div className="dashboard-section-heading">
+      {/* Company watchlist */}
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <span className="eyebrow">Concierge signal</span>
-            <h3>Hard-to-fill demand coverage</h3>
+            <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Company watchlist</p>
+            <h3 className="text-lg font-semibold text-white mt-1">Portfolio company demand pressure</h3>
           </div>
-          <a href="/admin/concierge">Open concierge desk</a>
+          <Link className="text-sm text-[#EFFE5E] hover:underline" href="/admin/companies">Manage companies</Link>
         </div>
-        <p className="dashboard-empty-state admin-inline-note">
+        {dashboard.companyMetrics.length === 0 ? (
+          <p className="text-sm text-[#52525B]">Company oversight cards appear once recruiters are attached to organizations with live demand history.</p>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            {dashboard.companyMetrics.map((company) => (
+              <div className="bg-[#111111] border border-[#27272A] rounded-lg p-4" key={company.id}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-950 text-blue-400">{company.industry}</span>
+                  <h4 className="text-sm font-medium text-white">{company.name}</h4>
+                </div>
+                <div className="grid grid-cols-4 gap-3 text-sm">
+                  <div><span className="text-[#52525B] text-xs">Active demands</span><p className="text-white font-medium">{company.activeDemandCount}</p></div>
+                  <div><span className="text-[#52525B] text-xs">Pending approvals</span><p className="text-white font-medium">{company.pendingApprovalsCount}</p></div>
+                  <div><span className="text-[#52525B] text-xs">Hard-to-fill</span><p className="text-white font-medium">{company.hardToFillCount}</p></div>
+                  <div><span className="text-[#52525B] text-xs">Placements</span><p className="text-white font-medium">{company.placementsCount}</p></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Concierge signal */}
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Concierge signal</p>
+            <h3 className="text-lg font-semibold text-white mt-1">Hard-to-fill demand coverage</h3>
+          </div>
+          <Link className="text-sm text-[#EFFE5E] hover:underline" href="/admin/concierge">Open concierge desk</Link>
+        </div>
+        <p className="text-sm text-[#52525B]">
           {dashboard.hardToFillDemandCount} active demand{dashboard.hardToFillDemandCount === 1 ? "" : "s"} are currently flagged for concierge sourcing.
         </p>
-      </section>
+      </div>
     </div>
   );
 }

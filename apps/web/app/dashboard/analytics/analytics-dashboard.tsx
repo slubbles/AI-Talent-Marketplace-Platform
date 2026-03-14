@@ -37,115 +37,104 @@ export function AnalyticsDashboard({ data }: AnalyticsDashboardProps) {
   const fastestMonth = [...data.hiringVelocity].sort((left, right) => left.averageDays - right.averageDays).find((item) => item.hires > 0);
 
   return (
-    <div className="dashboard-grid analytics-page-grid">
-      <section className="dashboard-hero dashboard-panel-card analytics-hero-card">
-        <span className="eyebrow">Recruiter analytics</span>
-        <h2>Hiring velocity, funnel health, and role demand trends</h2>
-        <p>
-          This reporting surface tracks how quickly roles convert into hires, which skills dominate current demand, and where the funnel is leaking.
-        </p>
-      </section>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-white">Recruiter Analytics</h1>
+        <p className="text-sm text-[#A1A1AA] mt-1">Hiring velocity, funnel health, and role demand trends</p>
+      </div>
 
-      <section className="dashboard-metrics analytics-metrics-grid">
-        <article className="dashboard-metric-card">
-          <span>Average cost per hire</span>
-          <strong>{formatCurrency(data.averageCostPerHire)}</strong>
-          <p>Estimated from accepted offer rates across your recruiting pipeline.</p>
-        </article>
-        <article className="dashboard-metric-card">
-          <span>Total hires</span>
-          <strong>{totalHires}</strong>
-          <p>Accepted offers over the visible six-month reporting window.</p>
-        </article>
-        <article className="dashboard-metric-card">
-          <span>Fastest month</span>
-          <strong>{fastestMonth ? `${fastestMonth.averageDays}d` : "N/A"}</strong>
-          <p>{fastestMonth ? `${fastestMonth.label} delivered the quickest time-to-hire.` : "No completed hires yet."}</p>
-        </article>
-      </section>
+      {/* KPI Row */}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
+          <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Average cost per hire</span>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{formatCurrency(data.averageCostPerHire)}</p>
+          <p className="text-xs text-[#52525B] mt-1">Estimated from accepted offer rates across your recruiting pipeline.</p>
+        </div>
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
+          <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Total hires</span>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{totalHires}</p>
+          <p className="text-xs text-[#52525B] mt-1">Accepted offers over the visible six-month reporting window.</p>
+        </div>
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
+          <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Fastest month</span>
+          <p className="text-2xl font-bold text-[#EFFE5E] mt-1">{fastestMonth ? `${fastestMonth.averageDays}d` : "N/A"}</p>
+          <p className="text-xs text-[#52525B] mt-1">{fastestMonth ? `${fastestMonth.label} delivered the quickest time-to-hire.` : "No completed hires yet."}</p>
+        </div>
+      </div>
 
-      <section className="dashboard-panel-card analytics-chart-card">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Hiring velocity</span>
-            <h3>Time from role creation to hire</h3>
+      {/* Charts 2x2 */}
+      <div className="grid grid-cols-2 gap-6">
+        {/* Hiring velocity */}
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Hiring velocity</p>
+          <h3 className="text-lg font-semibold text-white mt-1 mb-4">Time from role creation to hire</h3>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={data.hiringVelocity}>
+                <CartesianGrid stroke="#27272A" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="label" tick={{ fill: "#52525B", fontSize: 12 }} />
+                <YAxis yAxisId="left" tick={{ fill: "#52525B", fontSize: 12 }} />
+                <YAxis yAxisId="right" orientation="right" tick={{ fill: "#52525B", fontSize: 12 }} />
+                <Tooltip />
+                <Bar dataKey="hires" fill="#EFFE5E" radius={[4, 4, 0, 0]} yAxisId="left" />
+                <Line dataKey="averageDays" stroke="#F59E0B" strokeWidth={2} type="monotone" yAxisId="right" dot={false} />
+              </ComposedChart>
+            </ResponsiveContainer>
           </div>
         </div>
-        <div className="analytics-chart-shell">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={data.hiringVelocity}>
-              <CartesianGrid stroke="rgba(148, 163, 184, 0.14)" vertical={false} />
-              <XAxis dataKey="label" stroke="#94a3b8" />
-              <YAxis yAxisId="left" stroke="#94a3b8" />
-              <YAxis yAxisId="right" orientation="right" stroke="#94a3b8" />
-              <Tooltip />
-              <Bar dataKey="hires" fill="#38bdf8" radius={[8, 8, 0, 0]} yAxisId="left" />
-              <Line dataKey="averageDays" stroke="#f59e0b" strokeWidth={3} type="monotone" yAxisId="right" />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
 
-      <section className="dashboard-panel-card analytics-chart-card">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Open roles by status</span>
-            <h3>Demand mix across the pipeline</h3>
+        {/* Open roles by status */}
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Open roles by status</p>
+          <h3 className="text-lg font-semibold text-white mt-1 mb-4">Demand mix across the pipeline</h3>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={data.openRolesByStatus} dataKey="count" nameKey="status" innerRadius={70} outerRadius={110} paddingAngle={3}>
+                  {data.openRolesByStatus.map((entry, index) => (
+                    <Cell fill={chartColors[index % chartColors.length]} key={entry.status} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
-        <div className="analytics-chart-shell analytics-chart-shell-pie">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie data={data.openRolesByStatus} dataKey="count" nameKey="status" innerRadius={70} outerRadius={110} paddingAngle={3}>
-                {data.openRolesByStatus.map((entry, index) => (
-                  <Cell fill={chartColors[index % chartColors.length]} key={entry.status} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
 
-      <section className="dashboard-panel-card analytics-chart-card">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Top requested skills</span>
-            <h3>Skills driving active recruiter demand</h3>
+        {/* Top requested skills */}
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Top requested skills</p>
+          <h3 className="text-lg font-semibold text-white mt-1 mb-4">Skills driving active recruiter demand</h3>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data.topRequestedSkills} layout="vertical" margin={{ left: 16, right: 16 }}>
+                <CartesianGrid stroke="#27272A" strokeDasharray="3 3" horizontal={false} />
+                <XAxis type="number" tick={{ fill: "#52525B", fontSize: 12 }} />
+                <YAxis dataKey="skill" type="category" tick={{ fill: "#A1A1AA", fontSize: 11 }} width={110} />
+                <Tooltip />
+                <Bar dataKey="count" fill="#EFFE5E" radius={[0, 4, 4, 0]} barSize={18} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
-        <div className="analytics-chart-shell">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data.topRequestedSkills} layout="vertical" margin={{ left: 16, right: 16 }}>
-              <CartesianGrid stroke="rgba(148, 163, 184, 0.14)" horizontal={false} />
-              <XAxis type="number" stroke="#94a3b8" />
-              <YAxis dataKey="skill" type="category" stroke="#94a3b8" width={110} />
-              <Tooltip />
-              <Bar dataKey="count" fill="#34d399" radius={[0, 8, 8, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
 
-      <section className="dashboard-panel-card analytics-chart-card">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Pipeline conversion</span>
-            <h3>Matches through hires</h3>
+        {/* Pipeline conversion */}
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Pipeline conversion</p>
+          <h3 className="text-lg font-semibold text-white mt-1 mb-4">Matches through hires</h3>
+          <div className="h-[280px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={data.pipelineConversion}>
+                <CartesianGrid stroke="#27272A" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="stage" tick={{ fill: "#52525B", fontSize: 12 }} />
+                <YAxis tick={{ fill: "#52525B", fontSize: 12 }} />
+                <Tooltip />
+                <Bar dataKey="count" fill="#a78bfa" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
-        <div className="analytics-chart-shell">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data.pipelineConversion}>
-              <CartesianGrid stroke="rgba(148, 163, 184, 0.14)" vertical={false} />
-              <XAxis dataKey="stage" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip />
-              <Bar dataKey="count" fill="#a78bfa" radius={[8, 8, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      </section>
+      </div>
     </div>
   );
 }

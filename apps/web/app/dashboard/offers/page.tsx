@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
-import { EmptyStateCard } from "../empty-state-card";
+import Link from "next/link";
+import { FileText } from "lucide-react";
 
+import { getSession } from "../../../lib/session";
 const demandQueueQuery = `#graphql
   query OfferDemandQueue {
     myDemands(pagination: { first: 30 }) {
@@ -71,7 +71,7 @@ type OffersPageProps = {
 const statusFilters = ["ALL", "DRAFT", "SENT", "ACCEPTED", "DECLINED", "WITHDRAWN"] as const;
 
 export default async function OffersPage({ searchParams }: OffersPageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
   if (!session?.accessToken) {
     redirect("/login");
@@ -127,93 +127,116 @@ export default async function OffersPage({ searchParams }: OffersPageProps) {
 
   const visibleOffers = offers.filter((offer) => activeStatus === "ALL" || offer.status === activeStatus);
 
+  const statusStyles: Record<string, string> = {
+    DRAFT: "bg-[#27272A] text-[#A1A1AA]",
+    SENT: "bg-blue-950 text-blue-400",
+    ACCEPTED: "bg-green-950 text-green-400",
+    DECLINED: "bg-red-950 text-red-400",
+    WITHDRAWN: "bg-[#27272A] text-[#52525B]",
+  };
+
   return (
-    <div className="dashboard-grid">
-      <section className="dashboard-panel-card pipeline-overview-card">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Offers</span>
-            <h3>Recruiter offer pipeline</h3>
-          </div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Offers</h1>
+          <p className="text-sm text-[#A1A1AA] mt-1">Recruiter offer pipeline</p>
         </div>
+      </div>
 
-        <div className="dashboard-metrics shortlist-overview-metrics">
-          <div className="dashboard-metric-card">
-            <span>Drafts</span>
-            <strong>{offers.filter((item) => item.status === "DRAFT").length}</strong>
-            <p>Offers that still need recruiter review before sending.</p>
-          </div>
-          <div className="dashboard-metric-card">
-            <span>Sent</span>
-            <strong>{offers.filter((item) => item.status === "SENT").length}</strong>
-            <p>Offers visible to talent and waiting on a decision.</p>
-          </div>
-          <div className="dashboard-metric-card">
-            <span>Accepted</span>
-            <strong>{offers.filter((item) => item.status === "ACCEPTED").length}</strong>
-            <p>Offers ready for contract generation and onboarding.</p>
-          </div>
+      <div className="grid grid-cols-3 gap-4">
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
+          <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Drafts</span>
+          <p className="text-2xl font-bold text-white mt-1">{offers.filter((item) => item.status === "DRAFT").length}</p>
+          <p className="text-xs text-[#52525B] mt-1">Offers that still need recruiter review before sending.</p>
         </div>
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
+          <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Sent</span>
+          <p className="text-2xl font-bold text-white mt-1">{offers.filter((item) => item.status === "SENT").length}</p>
+          <p className="text-xs text-[#52525B] mt-1">Offers visible to talent and waiting on a decision.</p>
+        </div>
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-5">
+          <span className="text-xs uppercase tracking-wider text-[#A1A1AA]">Accepted</span>
+          <p className="text-2xl font-bold text-white mt-1">{offers.filter((item) => item.status === "ACCEPTED").length}</p>
+          <p className="text-xs text-[#52525B] mt-1">Offers ready for contract generation and onboarding.</p>
+        </div>
+      </div>
 
-        <div className="roles-filter-row">
-          {statusFilters.map((status) => {
-            const isActive = activeStatus === status;
-            const href = status === "ALL" ? "/dashboard/offers" : `/dashboard/offers?status=${status}`;
-            return (
-              <a className={`roles-filter-chip${isActive ? " is-active" : ""}`} href={href} key={status}>
-                {status}
-              </a>
-            );
-          })}
-        </div>
-      </section>
+      <div className="flex gap-1">
+        {statusFilters.map((status) => {
+          const isActive = activeStatus === status;
+          const href = status === "ALL" ? "/dashboard/offers" : `/dashboard/offers?status=${status}`;
+          return (
+            <Link
+              className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+                isActive
+                  ? "bg-[rgba(239,254,94,0.12)] text-white border-b-2 border-[#EFFE5E]"
+                  : "text-[#A1A1AA] hover:text-white"
+              }`}
+              href={href}
+              key={status}
+            >
+              {status}
+            </Link>
+          );
+        })}
+      </div>
 
-      <section className="dashboard-panel-card">
-        <div className="pipeline-list-grid">
-          {visibleOffers.length === 0 ? (
-            <EmptyStateCard
-              actions={[
-                { href: "/dashboard/interviews", label: "Review interviews" },
-                { href: "/dashboard/offers", label: "Show all offers", tone: "secondary" }
-              ]}
-              description="Offers populate after interviews move forward into compensation and term drafting."
-              eyebrow="Offer pipeline"
-              title="No offers in this status"
-            />
-          ) : (
-            visibleOffers.map((offer) => (
-              <article className="pipeline-card" key={offer.id}>
-                <div className="role-list-card-header">
-                  <div>
-                    <span className="role-status-badge">{offer.status}</span>
-                    <h4>{offer.candidateName}</h4>
-                  </div>
-                  <a href={`/dashboard/offers/${offer.demandId}/${offer.id}`}>Open offer</a>
-                </div>
-                <p>{offer.candidateHeadline}</p>
-                <div className="shortlist-meta-grid">
-                  <div>
-                    <span>Role</span>
-                    <strong>{offer.demandTitle}</strong>
-                  </div>
-                  <div>
-                    <span>Company</span>
-                    <strong>{offer.companyName}</strong>
-                  </div>
-                  <div>
-                    <span>Rate</span>
-                    <strong>{offer.hourlyRate} {offer.currency}/hr</strong>
-                  </div>
-                  <div>
-                    <span>Start</span>
-                    <strong>{new Date(offer.startDate).toLocaleDateString()}</strong>
-                  </div>
-                </div>
-              </article>
-            ))
-          )}
+      {visibleOffers.length === 0 ? (
+        <div className="mt-16 flex flex-col items-center text-center">
+          <FileText className="h-12 w-12 text-[#52525B] mb-4" />
+          <p className="text-sm text-[#A1A1AA]">No offers in this status. Offers populate after interviews move forward into compensation and term drafting.</p>
+          <Link
+            className="mt-4 inline-flex items-center px-4 py-2 bg-[#222222] border border-[#27272A] text-white rounded-md text-sm hover:bg-[#222222]/80"
+            href="/dashboard/interviews"
+          >
+            Review interviews
+          </Link>
         </div>
-      </section>
+      ) : (
+        <div className="border border-[#27272A] rounded-[14px] overflow-hidden">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-[#27272A] bg-[#0A0A0A]">
+                <th className="text-left px-4 py-3 text-[#52525B] font-medium text-xs uppercase tracking-wide">Candidate</th>
+                <th className="text-left px-4 py-3 text-[#52525B] font-medium text-xs uppercase tracking-wide">Role</th>
+                <th className="text-left px-4 py-3 text-[#52525B] font-medium text-xs uppercase tracking-wide">Rate</th>
+                <th className="text-left px-4 py-3 text-[#52525B] font-medium text-xs uppercase tracking-wide">Start</th>
+                <th className="text-left px-4 py-3 text-[#52525B] font-medium text-xs uppercase tracking-wide">Status</th>
+                <th className="text-left px-4 py-3 text-[#52525B] font-medium text-xs uppercase tracking-wide">Company</th>
+                <th className="text-right px-4 py-3 text-[#52525B] font-medium text-xs uppercase tracking-wide" />
+              </tr>
+            </thead>
+            <tbody>
+              {visibleOffers.map((offer) => (
+                <tr key={offer.id} className="h-14 border-b border-[#27272A] last:border-b-0 hover:bg-[#222222] transition-colors">
+                  <td className="px-4">
+                    <p className="text-white font-medium">{offer.candidateName}</p>
+                    <p className="text-xs text-[#52525B]">{offer.candidateHeadline}</p>
+                  </td>
+                  <td className="px-4 text-[#A1A1AA]">{offer.demandTitle}</td>
+                  <td className="px-4 text-white">{offer.hourlyRate} {offer.currency}/hr</td>
+                  <td className="px-4 text-[#A1A1AA]">{new Date(offer.startDate).toLocaleDateString()}</td>
+                  <td className="px-4">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyles[offer.status] ?? "bg-[#27272A] text-[#A1A1AA]"}`}>
+                      {offer.status}
+                    </span>
+                  </td>
+                  <td className="px-4 text-[#A1A1AA]">{offer.companyName}</td>
+                  <td className="px-4 text-right">
+                    <Link
+                      className="text-xs text-[#EFFE5E] hover:underline"
+                      href={`/dashboard/offers/${offer.demandId}/${offer.id}`}
+                    >
+                      Open
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

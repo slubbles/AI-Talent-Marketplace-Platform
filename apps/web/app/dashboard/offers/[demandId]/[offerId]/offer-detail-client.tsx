@@ -4,6 +4,12 @@ import { gql } from "@apollo/client";
 import { useEffect, useMemo, useState } from "react";
 import { CandidateProfileModal } from "../../../candidate-profile-modal";
 import { createApolloClient } from "../../../../../lib/apollo-client";
+import { Button } from "../../../../../components/ui/button";
+import { Input } from "../../../../../components/ui/input";
+import { Label } from "../../../../../components/ui/label";
+import { Textarea } from "../../../../../components/ui/textarea";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import type { CandidateProfile } from "../../../shortlists/types";
 
 type DemandSummary = {
@@ -222,104 +228,123 @@ export function OfferDetailClient({ accessToken, demand, offer }: OfferDetailCli
     }
   };
 
+  const statusStyles: Record<string, string> = {
+    DRAFT: "bg-[#27272A] text-[#A1A1AA]",
+    SENT: "bg-blue-950 text-blue-400",
+    ACCEPTED: "bg-green-950 text-green-400",
+    DECLINED: "bg-red-950 text-red-400",
+    WITHDRAWN: "bg-[#27272A] text-[#52525B]",
+  };
+
   return (
-    <div className="dashboard-grid">
-      <section className="dashboard-panel-card pipeline-detail-hero">
-        <div className="role-detail-hero-top">
+    <div className="space-y-6">
+      <Link href="/dashboard/offers" className="inline-flex items-center gap-1 text-sm text-[#A1A1AA] hover:text-white">
+        <ArrowLeft className="h-4 w-4" /> Back to Offers
+      </Link>
+
+      {/* Hero */}
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-[14px] p-6">
+        <div className="flex items-center justify-between">
           <div>
-            <span className="eyebrow">Offer detail</span>
-            <h2>{offer.candidate.firstName} {offer.candidate.lastName}</h2>
-            <p>
-              {demand.title} • {demand.company.name} • {status}
+            <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Offer detail</p>
+            <h2 className="text-xl font-bold text-white mt-1">{offer.candidate.firstName} {offer.candidate.lastName}</h2>
+            <p className="text-sm text-[#A1A1AA] mt-1">
+              {demand.title} &middot; {demand.company.name} &middot; {status}
             </p>
           </div>
-          <div className="role-detail-actions">
-            <span className="role-status-badge">{status}</span>
-            <button className="secondary-button" onClick={() => setShowCandidate(true)} type="button">
-              View candidate
-            </button>
+          <div className="flex items-center gap-3">
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyles[status] ?? "bg-[#27272A] text-[#A1A1AA]"}`}>{status}</span>
+            <Button variant="outline" size="sm" onClick={() => setShowCandidate(true)}>View candidate</Button>
           </div>
         </div>
 
-        <div className="shortlist-meta-grid">
+        <div className="grid grid-cols-4 gap-4 mt-6 text-sm">
           <div>
-            <span>Rate</span>
-            <strong>{hourlyRate} {demand.currency}/hr</strong>
+            <span className="text-[#52525B]">Rate</span>
+            <p className="text-white font-medium mt-0.5">{hourlyRate} {demand.currency}/hr</p>
           </div>
           <div>
-            <span>Start date</span>
-            <strong>{startDate}</strong>
+            <span className="text-[#52525B]">Start date</span>
+            <p className="text-white font-medium mt-0.5">{startDate}</p>
           </div>
           <div>
-            <span>End date</span>
-            <strong>{endDate || "Open-ended"}</strong>
+            <span className="text-[#52525B]">End date</span>
+            <p className="text-white font-medium mt-0.5">{endDate || "Open-ended"}</p>
           </div>
           <div>
-            <span>Remote policy</span>
-            <strong>{demand.remotePolicy}</strong>
+            <span className="text-[#52525B]">Remote policy</span>
+            <p className="text-white font-medium mt-0.5">{demand.remotePolicy}</p>
           </div>
         </div>
-      </section>
+      </div>
 
-      <section className="dashboard-panel-card pipeline-detail-grid">
-        <div className="pipeline-form-card">
-          <h3>Offer draft</h3>
-          <div className="pipeline-form-grid">
-            <label>
-              <span>Hourly rate</span>
-              <input onChange={(event) => setHourlyRate(event.target.value)} type="number" value={hourlyRate} />
-            </label>
-            <label>
-              <span>Start date</span>
-              <input onChange={(event) => setStartDate(event.target.value)} type="date" value={startDate} />
-            </label>
-            <label>
-              <span>End date</span>
-              <input onChange={(event) => setEndDate(event.target.value)} type="date" value={endDate} />
-            </label>
-            <label className="demand-form-field-wide">
-              <span>Terms</span>
-              <textarea onChange={(event) => setTerms(event.target.value)} rows={6} value={terms} />
-            </label>
-          </div>
-          <div className="dashboard-actions">
-            <button onClick={() => void saveOffer()} type="button">Save draft</button>
-            <button className="secondary-button" onClick={() => void saveOffer("SENT")} type="button">Send offer</button>
-            <button className="secondary-button" onClick={() => void saveOffer("WITHDRAWN")} type="button">Withdraw</button>
-          </div>
-        </div>
-
-        <div className="pipeline-form-card">
-          <h3>Contract and onboarding</h3>
-          <p className="dashboard-empty-state">
-            Accepted offers can generate a recruiter-ready contract PDF and launch a lightweight onboarding checklist.
-          </p>
-          <div className="dashboard-actions">
-            <button disabled={status !== "ACCEPTED"} onClick={() => void generateContract()} type="button">Generate contract PDF</button>
-            {storedContractUrl ? <a className="secondary-link" href={storedContractUrl} target="_blank">Open stored contract</a> : null}
-          </div>
-
-          {status === "ACCEPTED" ? (
-            <div className="checklist-list">
-              {checklistLabels.map((label) => (
-                <label className="checklist-item" key={label}>
-                  <input
-                    checked={Boolean(checklist[label])}
-                    onChange={(event) => setChecklist((current) => ({ ...current, [label]: event.target.checked }))}
-                    type="checkbox"
-                  />
-                  <span>{label}</span>
-                </label>
-              ))}
+      <div className="flex gap-6">
+        {/* Left: Offer form + Contract */}
+        <div className="flex-[2] space-y-4">
+          {/* Offer draft */}
+          <div className="bg-[#0A0A0A] border border-[#27272A] rounded-[14px] p-6">
+            <h3 className="text-sm font-semibold text-white mb-4">Offer draft</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label className="text-[#A1A1AA]">Hourly rate</Label>
+                <Input type="number" value={hourlyRate} onChange={(event) => setHourlyRate(event.target.value)} className="mt-1 bg-[#1A1A1A] border-[#27272A] text-white" />
+              </div>
+              <div>
+                <Label className="text-[#A1A1AA]">Start date</Label>
+                <Input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className="mt-1 bg-[#1A1A1A] border-[#27272A] text-white" />
+              </div>
+              <div>
+                <Label className="text-[#A1A1AA]">End date</Label>
+                <Input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className="mt-1 bg-[#1A1A1A] border-[#27272A] text-white" />
+              </div>
+              <div className="col-span-3">
+                <Label className="text-[#A1A1AA]">Terms</Label>
+                <Textarea value={terms} onChange={(event) => setTerms(event.target.value)} rows={6} className="mt-1 bg-[#1A1A1A] border-[#27272A] text-white resize-none" />
+              </div>
             </div>
-          ) : (
-            <p className="dashboard-empty-state">Send and accept the offer to unlock contract generation and onboarding tracking.</p>
-          )}
-        </div>
-      </section>
+            <div className="flex gap-3 mt-4">
+              <Button className="bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906]" onClick={() => void saveOffer()}>Save draft</Button>
+              <Button variant="outline" className="border-[#27272A] text-[#A1A1AA] hover:bg-[#222222]" onClick={() => void saveOffer("SENT")}>Send offer</Button>
+              <Button variant="outline" className="border-[#27272A] text-[#EF4444] hover:bg-[#222222]" onClick={() => void saveOffer("WITHDRAWN")}>Withdraw</Button>
+            </div>
+          </div>
 
-      {error ? <p className="form-error">{error}</p> : null}
-      {message ? <p className="form-success">{message}</p> : null}
+          {/* Contract and onboarding */}
+          <div className="bg-[#0A0A0A] border border-[#27272A] rounded-[14px] p-6">
+            <h3 className="text-sm font-semibold text-white mb-2">Contract and onboarding</h3>
+            <p className="text-xs text-[#52525B] mb-4">Accepted offers can generate a recruiter-ready contract PDF and launch a lightweight onboarding checklist.</p>
+            <div className="flex gap-3 mb-4">
+              <Button className="bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906]" disabled={status !== "ACCEPTED"} onClick={() => void generateContract()}>Generate contract PDF</Button>
+              {storedContractUrl ? (
+                <a href={storedContractUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-4 py-2 border border-[#27272A] text-[#A1A1AA] rounded-md text-sm hover:bg-[#222222]">
+                  Open stored contract
+                </a>
+              ) : null}
+            </div>
+
+            {status === "ACCEPTED" ? (
+              <div className="space-y-3 border-t border-[#27272A] pt-4">
+                {checklistLabels.map((label) => (
+                  <label className="flex items-center gap-3 cursor-pointer" key={label}>
+                    <input
+                      type="checkbox"
+                      checked={Boolean(checklist[label])}
+                      onChange={(event) => setChecklist((current) => ({ ...current, [label]: event.target.checked }))}
+                      className="h-4 w-4 rounded border-[#27272A] bg-[#1A1A1A] accent-[#EFFE5E]"
+                    />
+                    <span className="text-sm text-white">{label}</span>
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-[#52525B]">Send and accept the offer to unlock contract generation and onboarding tracking.</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {error ? <p className="text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2 text-sm">{error}</p> : null}
+      {message ? <p className="text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2 text-sm">{message}</p> : null}
 
       {showCandidate ? <CandidateProfileModal candidate={offer.candidate} onClose={() => setShowCandidate(false)} /> : null}
     </div>

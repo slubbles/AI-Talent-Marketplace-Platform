@@ -1,6 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Button } from "../../components/ui/button";
+import { X } from "lucide-react";
 import type { CandidateProfile } from "./shortlists/types";
 
 type CandidateProfileModalProps = {
@@ -29,122 +31,131 @@ const formatRate = (profile: CandidateProfile) => {
 
 export function CandidateProfileModal({ candidate, footer, onClose }: CandidateProfileModalProps) {
   return (
-    <div className="candidate-modal-backdrop" role="presentation">
-      <div aria-modal="true" className="candidate-modal" role="dialog">
-        <div className="candidate-modal-header">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70" role="presentation">
+      <div aria-modal="true" className="bg-[#0A0A0A] border border-[#27272A] rounded-[14px] w-full max-w-3xl max-h-[85vh] overflow-y-auto p-6" role="dialog">
+        {/* Header */}
+        <div className="flex items-start justify-between mb-6">
           <div>
-            <span className="eyebrow">Candidate profile</span>
-            <h3>
+            <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Candidate profile</p>
+            <h3 className="text-xl font-bold text-white mt-1">
               {candidate.firstName} {candidate.lastName}
             </h3>
-            <p>{candidate.headline}</p>
+            <p className="text-sm text-[#A1A1AA] mt-0.5">{candidate.headline}</p>
           </div>
-          <button className="secondary-button" onClick={onClose} type="button">
-            Close
-          </button>
+          <Button variant="outline" size="sm" onClick={onClose} className="border-[#27272A]">
+            <X className="h-4 w-4" />
+          </Button>
         </div>
 
-        <div className="candidate-profile-grid">
-          <section className="candidate-profile-card candidate-profile-wide">
-            <h4>Summary</h4>
-            <p>{candidate.summary}</p>
-          </section>
+        <div className="grid grid-cols-2 gap-4">
+          {/* Summary */}
+          <div className="col-span-2 bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-2">Summary</h4>
+            <p className="text-sm text-[#A1A1AA] leading-relaxed">{candidate.summary}</p>
+          </div>
 
-          <section className="candidate-profile-card">
-            <h4>Availability and pricing</h4>
-            <div className="candidate-fact-list">
-              <span>{formatEnumLabel(candidate.availability)}</span>
-              <span>{candidate.availableFrom ? `Available ${formatDate(candidate.availableFrom)}` : "Availability date not set"}</span>
-              <span>{formatRate(candidate)}</span>
-              <span>Verification: {formatEnumLabel(candidate.verificationStatus)}</span>
+          {/* Availability */}
+          <div className="bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-2">Availability and pricing</h4>
+            <div className="space-y-1 text-sm text-[#A1A1AA]">
+              <p>{formatEnumLabel(candidate.availability)}</p>
+              <p>{candidate.availableFrom ? `Available ${formatDate(candidate.availableFrom)}` : "Availability date not set"}</p>
+              <p>{formatRate(candidate)}</p>
+              <p>Verification: {formatEnumLabel(candidate.verificationStatus)}</p>
             </div>
-          </section>
+          </div>
 
-          <section className="candidate-profile-card">
-            <h4>Location and visa</h4>
-            <div className="candidate-fact-list">
-              <span>{candidate.locationPreferences.join(", ") || "Location preferences not set"}</span>
-              <span>{candidate.workVisaEligibility.join(", ") || "No visa notes shared"}</span>
+          {/* Location */}
+          <div className="bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-2">Location and visa</h4>
+            <div className="space-y-1 text-sm text-[#A1A1AA]">
+              <p>{candidate.locationPreferences.join(", ") || "Location preferences not set"}</p>
+              <p>{candidate.workVisaEligibility.join(", ") || "No visa notes shared"}</p>
             </div>
-          </section>
+          </div>
 
-          <section className="candidate-profile-card candidate-profile-wide">
-            <h4>Skills</h4>
-            <div className="candidate-skill-grid">
+          {/* Skills */}
+          <div className="col-span-2 bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-2">Skills</h4>
+            <div className="flex flex-wrap gap-2">
               {candidate.skills.map((skill) => (
-                <div className="candidate-skill-card" key={skill.id}>
-                  <strong>{skill.skill.displayName}</strong>
-                  <span>{formatEnumLabel(skill.proficiency)}</span>
-                  <span>{skill.yearsOfExperience} years</span>
+                <div className="bg-[#1A1A1A] border border-[#27272A] rounded px-2 py-1 text-xs" key={skill.id}>
+                  <span className="text-white font-medium">{skill.skill.displayName}</span>
+                  <span className="text-[#52525B] ml-1">{formatEnumLabel(skill.proficiency)} &middot; {skill.yearsOfExperience}y</span>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
 
-          <section className="candidate-profile-card candidate-profile-wide">
-            <h4>Career trajectory</h4>
-            <p>{candidate.careerTrajectory ?? "No trajectory summary yet."}</p>
-          </section>
+          {/* Career trajectory */}
+          <div className="col-span-2 bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-2">Career trajectory</h4>
+            <p className="text-sm text-[#A1A1AA]">{candidate.careerTrajectory ?? "No trajectory summary yet."}</p>
+          </div>
 
-          <section className="candidate-profile-card candidate-profile-wide">
-            <h4>Experience timeline</h4>
-            <div className="candidate-timeline">
+          {/* Experience */}
+          <div className="col-span-2 bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-3">Experience timeline</h4>
+            <div className="space-y-4">
               {candidate.experiences.map((experience) => (
-                <article className="candidate-timeline-item" key={experience.id}>
+                <div className="flex items-start justify-between border-b border-[#27272A] pb-3 last:border-b-0 last:pb-0" key={experience.id}>
                   <div>
-                    <strong>{experience.title}</strong>
-                    <p>{experience.companyName}{experience.location ? ` • ${experience.location}` : ""}</p>
+                    <p className="text-sm font-medium text-white">{experience.title}</p>
+                    <p className="text-xs text-[#A1A1AA]">{experience.companyName}{experience.location ? ` \u00b7 ${experience.location}` : ""}</p>
                   </div>
-                  <span>
+                  <span className="text-xs text-[#52525B] shrink-0">
                     {formatDate(experience.startDate)} - {experience.isCurrent ? "Present" : experience.endDate ? formatDate(experience.endDate) : "Unknown"}
                   </span>
-                </article>
+                </div>
               ))}
             </div>
-          </section>
+          </div>
 
-          <section className="candidate-profile-card">
-            <h4>Certifications</h4>
-            <div className="candidate-fact-list">
+          {/* Certifications */}
+          <div className="bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-2">Certifications</h4>
+            <div className="space-y-1 text-sm text-[#A1A1AA]">
               {candidate.certifications.length === 0 ? (
-                <span>No certifications listed.</span>
+                <p>No certifications listed.</p>
               ) : (
                 candidate.certifications.map((certification) => (
-                  <span key={certification.id}>{certification.name} • {certification.issuer}</span>
+                  <p key={certification.id}>{certification.name} &middot; {certification.issuer}</p>
                 ))
               )}
             </div>
-          </section>
+          </div>
 
-          <section className="candidate-profile-card">
-            <h4>Education</h4>
-            <div className="candidate-fact-list">
+          {/* Education */}
+          <div className="bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-2">Education</h4>
+            <div className="space-y-1 text-sm text-[#A1A1AA]">
               {candidate.educationEntries.length === 0 ? (
-                <span>No education entries listed.</span>
+                <p>No education entries listed.</p>
               ) : (
                 candidate.educationEntries.map((entry) => (
-                  <span key={entry.id}>{entry.degree} • {entry.institution}</span>
+                  <p key={entry.id}>{entry.degree} &middot; {entry.institution}</p>
                 ))
               )}
             </div>
-          </section>
+          </div>
 
-          <section className="candidate-profile-card candidate-profile-wide">
-            <h4>Portfolio</h4>
-            <div className="candidate-link-list">
+          {/* Portfolio */}
+          <div className="col-span-2 bg-[#111111] border border-[#27272A] rounded-lg p-4">
+            <h4 className="text-sm font-semibold text-white mb-2">Portfolio</h4>
+            <div className="space-y-1">
               {candidate.portfolioUrls.length === 0 ? (
-                <span>No portfolio links attached.</span>
+                <p className="text-sm text-[#A1A1AA]">No portfolio links attached.</p>
               ) : (
                 candidate.portfolioUrls.map((url) => (
-                  <a href={url} key={url} rel="noreferrer" target="_blank">
+                  <a href={url} key={url} rel="noreferrer" target="_blank" className="block text-sm text-[#EFFE5E] hover:underline">
                     {url}
                   </a>
                 ))
               )}
             </div>
-          </section>
+          </div>
 
-          {footer ? <section className="candidate-profile-card candidate-profile-wide">{footer}</section> : null}
+          {footer ? <div className="col-span-2 bg-[#111111] border border-[#27272A] rounded-lg p-4">{footer}</div> : null}
         </div>
       </div>
     </div>

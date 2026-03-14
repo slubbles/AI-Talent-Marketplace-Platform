@@ -100,95 +100,88 @@ export function UsersAdminClient({ accessToken, initialUsers }: UsersAdminClient
   };
 
   return (
-    <section className="dashboard-panel-card admin-page-stack">
-      <div className="dashboard-section-heading">
-        <div>
-          <span className="eyebrow">User management</span>
-          <h3>Roles, verification, and activation state</h3>
-        </div>
+    <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-5">
+      <div>
+        <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">User management</p>
+        <h3 className="text-lg font-semibold text-white mt-1">Roles, verification, and activation state</h3>
       </div>
 
-      <div className="admin-filter-row">
-        <label>
+      <div className="flex gap-4 items-end">
+        <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
           Role
-          <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as (typeof userRoles)[number])}>
+          <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as (typeof userRoles)[number])}>
             {userRoles.map((role) => (
-              <option key={role} value={role}>
-                {role}
-              </option>
+              <option key={role} value={role}>{role}</option>
             ))}
           </select>
         </label>
-        <label>
+        <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
           Status
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as (typeof userStates)[number])}>
+          <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as (typeof userStates)[number])}>
             {userStates.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
+              <option key={state} value={state}>{state}</option>
             ))}
           </select>
         </label>
       </div>
 
-      {message ? <p className="form-success">{message}</p> : null}
-      {error ? <p className="form-error">{error}</p> : null}
+      {message ? <p className="text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2 text-sm">{message}</p> : null}
+      {error ? <p className="text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2 text-sm">{error}</p> : null}
 
-      <div className="admin-card-grid">
+      <div className="grid gap-4">
         {filteredUsers.map((user) => (
-          <article className="role-list-card admin-user-card" key={user.id}>
-            <div className="role-list-card-header">
-              <div>
-                <span className={`role-status-badge${user.isActive ? "" : " is-muted"}`}>{user.isActive ? "ACTIVE" : "INACTIVE"}</span>
-                <h4>{user.email}</h4>
+          <article className="bg-[#111111] border border-[#27272A] rounded-lg p-5" key={user.id}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${user.isActive ? "bg-green-950 text-green-400" : "bg-zinc-800 text-zinc-500"}`}>{user.isActive ? "ACTIVE" : "INACTIVE"}</span>
+                <h4 className="text-sm font-medium text-white">{user.email}</h4>
               </div>
-              <strong>{user.role}</strong>
+              <span className="text-sm font-medium text-[#A1A1AA]">{user.role}</span>
             </div>
 
-            <div className="admin-form-grid compact">
-              <label>
+            <div className="grid grid-cols-3 gap-3 mt-4 text-sm">
+              <label className="flex flex-col gap-1 text-[#A1A1AA]">
                 Role
-                <select value={user.role} onChange={(event) => updateLocalUser(user.id, { role: event.target.value as AdminUser["role"] })}>
+                <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={user.role} onChange={(event) => updateLocalUser(user.id, { role: event.target.value as AdminUser["role"] })}>
                   {userRoles.filter((value) => value !== "ALL").map((role) => (
-                    <option key={role} value={role}>
-                      {role}
-                    </option>
+                    <option key={role} value={role}>{role}</option>
                   ))}
                 </select>
               </label>
-              <label className="admin-toggle-row">
+              <label className="flex items-center gap-2 self-end text-sm text-[#A1A1AA]">
                 <input
+                  className="accent-[#EFFE5E]"
                   checked={user.emailVerified}
                   onChange={(event) => updateLocalUser(user.id, { emailVerified: event.target.checked })}
                   type="checkbox"
                 />
                 <span>Email verified</span>
               </label>
-              <label className="admin-toggle-row">
-                <input checked={user.isActive} onChange={(event) => updateLocalUser(user.id, { isActive: event.target.checked })} type="checkbox" />
+              <label className="flex items-center gap-2 self-end text-sm text-[#A1A1AA]">
+                <input className="accent-[#EFFE5E]" checked={user.isActive} onChange={(event) => updateLocalUser(user.id, { isActive: event.target.checked })} type="checkbox" />
                 <span>User active</span>
               </label>
             </div>
 
-            <div className="role-list-meta-grid">
+            <div className="grid grid-cols-2 gap-3 mt-3 text-sm">
               <div>
-                <span>Joined</span>
-                <strong>{formatDate(user.createdAt)}</strong>
+                <span className="text-[#52525B] text-xs">Joined</span>
+                <p className="text-white font-medium">{formatDate(user.createdAt)}</p>
               </div>
               <div>
-                <span>Last update</span>
-                <strong>{formatDate(user.updatedAt)}</strong>
+                <span className="text-[#52525B] text-xs">Last update</span>
+                <p className="text-white font-medium">{formatDate(user.updatedAt)}</p>
               </div>
             </div>
 
-            <div className="admin-inline-actions">
-              <button className="primary-link" disabled={savingUserId === user.id} onClick={() => saveUser(user)} type="button">
+            <div className="flex gap-3 mt-4">
+              <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] disabled:opacity-50 transition-colors" disabled={savingUserId === user.id} onClick={() => saveUser(user)} type="button">
                 {savingUserId === user.id ? "Saving..." : "Save changes"}
               </button>
             </div>
           </article>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

@@ -5,6 +5,13 @@ import { useMemo, useState } from "react";
 import { CandidateProfileModal } from "../candidate-profile-modal";
 import { createApolloClient } from "../../../lib/apollo-client";
 import type { CandidateProfile, ShortlistEntry, ShortlistInterview } from "./types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
+import { Sparkles, RefreshCw } from "lucide-react";
 
 type ShortlistWorkbenchProps = {
   accessToken: string;
@@ -259,15 +266,9 @@ const parseBreakdown = (value: string): MatchBreakdown => {
 };
 
 const scoreTone = (score: number) => {
-  if (score >= 80) {
-    return "is-strong";
-  }
-
-  if (score >= 60) {
-    return "is-medium";
-  }
-
-  return "is-weak";
+  if (score >= 80) return "text-primary bg-[#1a1c00]";
+  if (score >= 60) return "text-amber-400 bg-amber-950";
+  return "text-red-400 bg-red-950";
 };
 
 const formatRate = (profile: CandidateProfile) => {
@@ -501,70 +502,72 @@ export function ShortlistWorkbench({ accessToken, demandId, demandTitle, require
   };
 
   return (
-    <div className="shortlist-workbench">
-      <div className="shortlist-toolbar">
-        <div className="shortlist-toolbar-copy">
-          <span className="eyebrow">Shortlist</span>
-          <h3>AI-ranked candidates for {demandTitle}</h3>
-          <p>Filter, compare, and move candidates into recruiter review, shortlisted, or rejected states.</p>
+    <div>
+      {/* Toolbar */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <h3 className="font-semibold">AI-ranked candidates for {demandTitle}</h3>
+          <p className="text-sm text-[#A1A1AA]">Filter, compare, and move candidates into review states.</p>
         </div>
-        <div className="dashboard-actions">
-          <button className="secondary-button" onClick={toggleVisibleSelection} type="button">
-            {selectedVisibleCount === visibleItems.length && visibleItems.length > 0 ? "Clear visible selection" : "Select visible"}
-          </button>
-          <button className="secondary-button" disabled={pendingAction === "bulk-reject"} onClick={() => void runBulkAction("reject")} type="button">
-            Reject selected
-          </button>
-          <button className="secondary-button" disabled={pendingAction === "bulk-shortlist"} onClick={() => void runBulkAction("shortlist")} type="button">
-            Shortlist selected
-          </button>
-          <button disabled={pendingAction === "regenerate"} onClick={() => void regenerateShortlist()} type="button">
-            Regenerate shortlist
-          </button>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" onClick={toggleVisibleSelection}>
+            {selectedVisibleCount === visibleItems.length && visibleItems.length > 0 ? "Clear Selection" : "Select Visible"}
+          </Button>
+          <Button variant="ghost" size="sm" disabled={pendingAction === "bulk-reject"} onClick={() => void runBulkAction("reject")}>Reject Selected</Button>
+          <Button variant="ghost" size="sm" disabled={pendingAction === "bulk-shortlist"} onClick={() => void runBulkAction("shortlist")}>Shortlist Selected</Button>
+          <Button size="sm" disabled={pendingAction === "regenerate"} onClick={() => void regenerateShortlist()}>
+            <RefreshCw className="h-4 w-4" /> Regenerate
+          </Button>
         </div>
       </div>
 
-      <div className="shortlist-filter-grid">
-        <label>
-          <span>Minimum score</span>
-          <input max="100" min="0" onChange={(event) => setMinimumScore(event.target.value)} type="number" value={minimumScore} />
-        </label>
-        <label>
-          <span>Availability</span>
-          <select onChange={(event) => setAvailabilityFilter(event.target.value as (typeof availabilityOptions)[number])} value={availabilityFilter}>
-            {availabilityOptions.map((value) => (
-              <option key={value} value={value}>
-                {value === "ALL" ? "All windows" : formatEnumLabel(value)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          <span>Max hourly rate</span>
-          <input min="0" onChange={(event) => setMaximumRate(event.target.value)} placeholder="No cap" type="number" value={maximumRate} />
-        </label>
-        <label>
-          <span>Sort by</span>
-          <select onChange={(event) => setSortBy(event.target.value as "SCORE" | "AVAILABILITY" | "RATE")} value={sortBy}>
-            <option value="SCORE">Match score</option>
-            <option value="AVAILABILITY">Availability</option>
-            <option value="RATE">Hourly rate</option>
-          </select>
-        </label>
+      {/* Filters */}
+      <div className="grid grid-cols-4 gap-4 mb-4">
+        <div>
+          <Label className="text-xs text-[#52525B]">Min score</Label>
+          <Input type="number" min={0} max={100} value={minimumScore} onChange={(e) => setMinimumScore(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs text-[#52525B]">Availability</Label>
+          <Select value={availabilityFilter} onValueChange={(v) => setAvailabilityFilter(v as typeof availabilityFilter)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              {availabilityOptions.map((v) => <SelectItem key={v} value={v}>{v === "ALL" ? "All windows" : formatEnumLabel(v)}</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label className="text-xs text-[#52525B]">Max hourly rate</Label>
+          <Input type="number" min={0} placeholder="No cap" value={maximumRate} onChange={(e) => setMaximumRate(e.target.value)} />
+        </div>
+        <div>
+          <Label className="text-xs text-[#52525B]">Sort by</Label>
+          <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="SCORE">Match score</SelectItem>
+              <SelectItem value="AVAILABILITY">Availability</SelectItem>
+              <SelectItem value="RATE">Hourly rate</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="shortlist-summary-row">
-        <span className="dashboard-status-pill">Visible candidates: {visibleItems.length}</span>
-        <span className="dashboard-status-pill">Selected: {selectedIds.length}</span>
-        <span className="dashboard-status-pill">Shortlisted: {items.filter((item) => item.status === "SHORTLISTED").length}</span>
+      {/* Summary pills */}
+      <div className="flex gap-3 mb-3">
+        <span className="text-xs px-2 py-1 bg-[#1A1A1A] border border-[#27272A] rounded">Visible: {visibleItems.length}</span>
+        <span className="text-xs px-2 py-1 bg-[#1A1A1A] border border-[#27272A] rounded">Selected: {selectedIds.length}</span>
+        <span className="text-xs px-2 py-1 bg-[#1a1c00] border border-primary/20 rounded text-primary">Shortlisted: {items.filter((item) => item.status === "SHORTLISTED").length}</span>
       </div>
 
-      {feedback.error ? <p className="form-error">{feedback.error}</p> : null}
-      {feedback.success ? <p className="form-success">{feedback.success}</p> : null}
+      {/* Feedback */}
+      {feedback.error && <p className="text-sm text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2 mb-3">{feedback.error}</p>}
+      {feedback.success && <p className="text-sm text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2 mb-3">{feedback.success}</p>}
 
-      <div className="shortlist-card-grid">
+      {/* Candidate cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {visibleItems.length === 0 ? (
-          <p className="dashboard-empty-state">No candidates match the current shortlist filters.</p>
+          <p className="text-[#A1A1AA] text-sm col-span-2 py-8 text-center">No candidates match the current filters.</p>
         ) : (
           visibleItems.map((item) => {
             const topMatchingSkills = getTopMatchingSkills(item.talentProfile, requiredSkillNames);
@@ -572,96 +575,70 @@ export function ShortlistWorkbench({ accessToken, demandId, demandTitle, require
             const isSelected = selectedIds.includes(item.id);
 
             return (
-              <article className="shortlist-card" key={item.id}>
-                <div className="shortlist-card-top">
-                  <label className="shortlist-select-toggle">
+              <article key={item.id} className={`bg-[#0A0A0A] border rounded-lg p-4 space-y-3 ${isSelected ? "border-primary" : "border-[#27272A]"}`}>
+                {/* Top row: checkbox + score */}
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-xs text-[#A1A1AA] cursor-pointer">
                     <input
-                      checked={isSelected}
-                      onChange={() =>
-                        setSelectedIds((current) =>
-                          current.includes(item.id) ? current.filter((id) => id !== item.id) : [...current, item.id]
-                        )
-                      }
                       type="checkbox"
+                      checked={isSelected}
+                      onChange={() => setSelectedIds((c) => c.includes(item.id) ? c.filter((id) => id !== item.id) : [...c, item.id])}
+                      className="accent-[#EFFE5E]"
                     />
-                    <span>Select</span>
+                    Select
                   </label>
-                  <div className={`shortlist-score-pill ${scoreTone(item.matchScore)}`}>{item.matchScore.toFixed(0)}</div>
+                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${scoreTone(item.matchScore)}`}>{item.matchScore.toFixed(0)}</span>
                 </div>
 
-                <div className="shortlist-card-header">
+                {/* Name + status */}
+                <div className="flex items-start justify-between">
                   <div>
-                    <h4>
-                      {item.talentProfile.firstName} {item.talentProfile.lastName}
-                    </h4>
-                    <p>{item.talentProfile.headline}</p>
+                    <h4 className="font-semibold">{item.talentProfile.firstName} {item.talentProfile.lastName}</h4>
+                    <p className="text-xs text-[#A1A1AA]">{item.talentProfile.headline}</p>
                   </div>
-                  <span className="role-status-badge">{formatEnumLabel(item.status)}</span>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-[#27272A] text-[#A1A1AA]">{formatEnumLabel(item.status)}</span>
                 </div>
 
-                <div className="shortlist-meta-grid">
-                  <div>
-                    <span>Availability</span>
-                    <strong>{formatEnumLabel(item.talentProfile.availability)}</strong>
-                  </div>
-                  <div>
-                    <span>Available from</span>
-                    <strong>{item.talentProfile.availableFrom ? formatDate(item.talentProfile.availableFrom) : "Flexible"}</strong>
-                  </div>
-                  <div>
-                    <span>Rate</span>
-                    <strong>{formatRate(item.talentProfile)}</strong>
-                  </div>
-                  <div>
-                    <span>Interviews</span>
-                    <strong>{item.interviews.length}</strong>
-                  </div>
+                {/* Meta grid */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div><span className="text-[#52525B]">Availability</span><p className="font-medium">{formatEnumLabel(item.talentProfile.availability)}</p></div>
+                  <div><span className="text-[#52525B]">Available from</span><p className="font-medium">{item.talentProfile.availableFrom ? formatDate(item.talentProfile.availableFrom) : "Flexible"}</p></div>
+                  <div><span className="text-[#52525B]">Rate</span><p className="font-medium">{formatRate(item.talentProfile)}</p></div>
+                  <div><span className="text-[#52525B]">Interviews</span><p className="font-medium">{item.interviews.length}</p></div>
                 </div>
 
-                <div className="selected-skill-list">
-                  {topMatchingSkills.length === 0 ? (
-                    <span className="selected-skill-chip is-static">Needs manual skill review</span>
-                  ) : (
-                    topMatchingSkills.map((skill) => (
-                      <span className="selected-skill-chip is-static" key={`${item.id}-${skill}`}>
-                        {skill}
-                      </span>
-                    ))
-                  )}
+                {/* Skills */}
+                <div className="flex flex-wrap gap-1">
+                  {(topMatchingSkills.length === 0 ? ["Needs review"] : topMatchingSkills).map((skill) => (
+                    <span key={`${item.id}-${skill}`} className="px-2 py-0.5 bg-[#1A1A1A] border border-[#27272A] rounded text-xs text-[#A1A1AA]">{skill}</span>
+                  ))}
                 </div>
 
-                <details className="shortlist-explanation">
-                  <summary>Why this match</summary>
-                  <p>{item.aiExplanation}</p>
+                {/* AI explanation */}
+                <details className="text-xs">
+                  <summary className="text-[#52525B] cursor-pointer hover:text-white transition-colors">Why this match</summary>
+                  <p className="text-[#A1A1AA] mt-1 leading-relaxed">{item.aiExplanation}</p>
                 </details>
 
-                <div className="shortlist-breakdown-list">
+                {/* Score breakdown */}
+                <div className="space-y-1.5">
                   {breakdownLabels.map((entry) => (
-                    <div className="shortlist-breakdown-item" key={`${item.id}-${entry.key}`}>
-                      <div>
-                        <span>{entry.label}</span>
-                        <strong>{Math.round(breakdown[entry.key])}</strong>
+                    <div key={`${item.id}-${entry.key}`} className="flex items-center gap-2 text-xs">
+                      <span className="text-[#52525B] w-20">{entry.label}</span>
+                      <div className="flex-1 h-1.5 bg-[#222222] rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full" style={{ width: `${Math.max(0, Math.min(100, breakdown[entry.key]))}%` }} />
                       </div>
-                      <div className="shortlist-breakdown-track">
-                        <span style={{ width: `${Math.max(0, Math.min(100, breakdown[entry.key]))}%` }} />
-                      </div>
+                      <span className="text-[#A1A1AA] w-6 text-right">{Math.round(breakdown[entry.key])}</span>
                     </div>
                   ))}
                 </div>
 
-                <div className="dashboard-actions">
-                  <button className="secondary-button" onClick={() => openCandidate(item.id)} type="button">
-                    View profile
-                  </button>
-                  <button className="secondary-button" disabled={pendingAction === `save-${item.id}`} onClick={() => void runSingleAction(item.id, "save")} type="button">
-                    Save for later
-                  </button>
-                  <button className="secondary-button" disabled={pendingAction === `reject-${item.id}`} onClick={() => void runSingleAction(item.id, "reject")} type="button">
-                    Reject
-                  </button>
-                  <button disabled={pendingAction === `shortlist-${item.id}`} onClick={() => void runSingleAction(item.id, "shortlist")} type="button">
-                    Shortlist
-                  </button>
+                {/* Actions */}
+                <div className="flex gap-2 pt-2 border-t border-[#27272A]">
+                  <Button variant="ghost" size="sm" className="text-xs" onClick={() => openCandidate(item.id)}>View Profile</Button>
+                  <Button variant="ghost" size="sm" className="text-xs" disabled={pendingAction === `save-${item.id}`} onClick={() => void runSingleAction(item.id, "save")}>Save</Button>
+                  <Button variant="ghost" size="sm" className="text-xs text-red-400" disabled={pendingAction === `reject-${item.id}`} onClick={() => void runSingleAction(item.id, "reject")}>Reject</Button>
+                  <Button size="sm" className="text-xs ml-auto" disabled={pendingAction === `shortlist-${item.id}`} onClick={() => void runSingleAction(item.id, "shortlist")}>Shortlist</Button>
                 </div>
               </article>
             );
@@ -669,54 +646,32 @@ export function ShortlistWorkbench({ accessToken, demandId, demandTitle, require
         )}
       </div>
 
+      {/* Candidate profile modal with interview form */}
       {activeCandidate ? (
         <CandidateProfileModal
           candidate={activeCandidate.talentProfile}
           footer={(
             <>
-              <h4>Request interview</h4>
-              <div className="shortlist-filter-grid">
-                <label>
-                  <span>Date and time</span>
-                  <input
-                    onChange={(event) => setInterviewDraft((current) => ({ ...current, scheduledAt: event.target.value }))}
-                    type="datetime-local"
-                    value={interviewDraft.scheduledAt}
-                  />
-                </label>
-                <label>
-                  <span>Duration (minutes)</span>
-                  <input
-                    max="180"
-                    min="15"
-                    onChange={(event) => setInterviewDraft((current) => ({ ...current, duration: event.target.value }))}
-                    type="number"
-                    value={interviewDraft.duration}
-                  />
-                </label>
-                <label className="demand-form-field-wide">
-                  <span>Meeting URL</span>
-                  <input
-                    onChange={(event) => setInterviewDraft((current) => ({ ...current, meetingUrl: event.target.value }))}
-                    placeholder="https://meet.example.com/session"
-                    type="url"
-                    value={interviewDraft.meetingUrl}
-                  />
-                </label>
+              <h4 className="font-semibold mb-3">Request Interview</h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs text-[#52525B]">Date and time</Label>
+                  <Input type="datetime-local" value={interviewDraft.scheduledAt} onChange={(e) => setInterviewDraft((c) => ({ ...c, scheduledAt: e.target.value }))} />
+                </div>
+                <div>
+                  <Label className="text-xs text-[#52525B]">Duration (min)</Label>
+                  <Input type="number" min={15} max={180} value={interviewDraft.duration} onChange={(e) => setInterviewDraft((c) => ({ ...c, duration: e.target.value }))} />
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-xs text-[#52525B]">Meeting URL</Label>
+                  <Input type="url" placeholder="https://meet.example.com/session" value={interviewDraft.meetingUrl} onChange={(e) => setInterviewDraft((c) => ({ ...c, meetingUrl: e.target.value }))} />
+                </div>
               </div>
-              <div className="dashboard-actions">
-                <button className="secondary-button" disabled={pendingAction === `save-${activeCandidate.id}`} onClick={() => void runSingleAction(activeCandidate.id, "save")} type="button">
-                  Save for later
-                </button>
-                <button className="secondary-button" disabled={pendingAction === `reject-${activeCandidate.id}`} onClick={() => void runSingleAction(activeCandidate.id, "reject")} type="button">
-                  Reject
-                </button>
-                <button className="secondary-button" disabled={pendingAction === `shortlist-${activeCandidate.id}`} onClick={() => void runSingleAction(activeCandidate.id, "shortlist")} type="button">
-                  Shortlist
-                </button>
-                <button disabled={pendingAction === `interview-${activeCandidate.id}`} onClick={() => void scheduleInterview()} type="button">
-                  Request interview
-                </button>
+              <div className="flex gap-2 mt-3">
+                <Button variant="ghost" size="sm" disabled={pendingAction === `save-${activeCandidate.id}`} onClick={() => void runSingleAction(activeCandidate.id, "save")}>Save</Button>
+                <Button variant="ghost" size="sm" className="text-red-400" disabled={pendingAction === `reject-${activeCandidate.id}`} onClick={() => void runSingleAction(activeCandidate.id, "reject")}>Reject</Button>
+                <Button variant="ghost" size="sm" disabled={pendingAction === `shortlist-${activeCandidate.id}`} onClick={() => void runSingleAction(activeCandidate.id, "shortlist")}>Shortlist</Button>
+                <Button size="sm" className="ml-auto" disabled={pendingAction === `interview-${activeCandidate.id}`} onClick={() => void scheduleInterview()}>Request Interview</Button>
               </div>
             </>
           )}

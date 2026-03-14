@@ -1,17 +1,17 @@
 export default function AdminNotFound() {
   return (
-    <section className="dashboard-panel-card route-state-panel admin-hero-card">
-      <span className="route-state-kicker">Admin route missing</span>
-      <h2>That admin page was not found</h2>
-      <p>The requested governance route does not exist in the current admin console.</p>
-      <div className="route-state-actions">
-        <a className="primary-link" href="/admin">
+    <div className="flex flex-col items-center text-center py-16">
+      <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Admin route missing</p>
+      <h2 className="text-xl font-bold text-white mt-2">That admin page was not found</h2>
+      <p className="text-sm text-[#A1A1AA] mt-2 max-w-md">The requested governance route does not exist in the current admin console.</p>
+      <div className="flex gap-3 mt-6">
+        <a className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] transition-colors" href="/admin">
           Admin overview
         </a>
-        <a className="secondary-link" href="/admin/verification">
+        <a className="px-4 py-2 rounded-md text-sm font-medium border border-[#27272A] text-[#A1A1AA] hover:text-white transition-colors" href="/admin/verification">
           Verification queue
         </a>
       </div>
-    </section>
+    </div>
   );
 }

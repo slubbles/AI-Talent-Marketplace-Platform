@@ -1,9 +1,8 @@
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { graphQLRequest } from "../../../../lib/graphql";
 import { DemandForm } from "../demand-form";
 
+import { getSession } from "../../../../lib/session";
 const companiesQuery = `#graphql
   query CompaniesForDemandForm {
     companies(pagination: { first: 50 }) {
@@ -20,7 +19,7 @@ const companiesQuery = `#graphql
 `;
 
 export default async function NewRolePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
   if (!session?.accessToken) {
     redirect("/login");

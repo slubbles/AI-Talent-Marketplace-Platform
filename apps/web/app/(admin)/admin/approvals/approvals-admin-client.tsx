@@ -3,7 +3,7 @@
 import { gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { createApolloClient } from "../../../../lib/apollo-client";
-import { EmptyStateCard } from "../../../dashboard/empty-state-card";
+import Link from "next/link";
 
 type DemandApprovalRecord = {
   id: string;
@@ -86,62 +86,60 @@ export function ApprovalsAdminClient({ accessToken, initialDemands }: ApprovalsA
   };
 
   return (
-    <section className="dashboard-panel-card admin-page-stack">
-      <div className="dashboard-section-heading">
-        <div>
-          <span className="eyebrow">Role approvals</span>
-          <h3>Review demands before they go live</h3>
-        </div>
+    <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-5">
+      <div>
+        <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Role approvals</p>
+        <h3 className="text-lg font-semibold text-white mt-1">Review demands before they go live</h3>
       </div>
 
-      {message ? <p className="form-success">{message}</p> : null}
-      {error ? <p className="form-error">{error}</p> : null}
+      {message ? <p className="text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2 text-sm">{message}</p> : null}
+      {error ? <p className="text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2 text-sm">{error}</p> : null}
 
-      <div className="admin-card-grid">
+      <div className="grid gap-4">
         {demands.length === 0 ? (
-          <EmptyStateCard
-            accent="admin"
-            actions={[{ href: "/admin/companies", label: "Review company demand", tone: "secondary" }]}
-            description="There are no recruiter demands in a pending approval state at the moment."
-            eyebrow="Role approvals"
-            title="No demands are waiting on approval"
-          />
+          <div className="text-center py-12">
+            <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Role approvals</p>
+            <h4 className="text-lg font-semibold text-white mt-2">No demands are waiting on approval</h4>
+            <p className="text-sm text-[#52525B] mt-1">There are no recruiter demands in a pending approval state at the moment.</p>
+            <Link className="text-sm text-[#A1A1AA] hover:text-white mt-3 inline-block" href="/admin/companies">Review company demand</Link>
+          </div>
         ) : (
           demands.map((demand) => (
-            <article className="role-list-card admin-approval-card" key={demand.id}>
-              <div className="role-list-card-header">
-                <div>
-                  <span className="role-status-badge">{demand.approvalStatus}</span>
-                  <h4>{demand.title}</h4>
+            <article className="bg-[#111111] border border-[#27272A] rounded-lg p-5 space-y-4" key={demand.id}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-950 text-amber-400">{demand.approvalStatus}</span>
+                  <h4 className="text-sm font-medium text-white">{demand.title}</h4>
                 </div>
-                <strong>{demand.company.name}</strong>
+                <span className="text-sm font-medium text-[#A1A1AA]">{demand.company.name}</span>
               </div>
 
-              <p>
+              <p className="text-sm text-[#A1A1AA]">
                 {demand.company.industry} • {demand.location} • {demand.remotePolicy} • {demand.experienceLevel}
               </p>
 
-              <div className="selected-skill-list">
+              <div className="flex flex-wrap gap-1">
                 {demand.requiredSkills.slice(0, 8).map((skill) => (
-                  <span className="selected-skill-chip is-static" key={skill.id}>
+                  <span className="px-2 py-0.5 bg-[#1A1A1A] border border-[#27272A] rounded text-xs text-[#A1A1AA]" key={skill.id}>
                     {skill.skill.displayName}
                   </span>
                 ))}
               </div>
 
-              <div className="role-list-meta-grid">
+              <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <span>Current status</span>
-                  <strong>{demand.status}</strong>
+                  <span className="text-[#52525B] text-xs">Current status</span>
+                  <p className="text-white font-medium">{demand.status}</p>
                 </div>
                 <div>
-                  <span>Submitted</span>
-                  <strong>{formatDate(demand.createdAt)}</strong>
+                  <span className="text-[#52525B] text-xs">Submitted</span>
+                  <p className="text-white font-medium">{formatDate(demand.createdAt)}</p>
                 </div>
               </div>
 
-              <label className="admin-toggle-row">
+              <label className="flex items-center gap-2 text-sm text-[#A1A1AA]">
                 <input
+                  className="accent-[#EFFE5E]"
                   checked={hardToFillByDemand[demand.id] ?? false}
                   onChange={(event) => setHardToFillByDemand((current) => ({ ...current, [demand.id]: event.target.checked }))}
                   type="checkbox"
@@ -149,9 +147,10 @@ export function ApprovalsAdminClient({ accessToken, initialDemands }: ApprovalsA
                 <span>Flag as hard-to-fill for concierge support</span>
               </label>
 
-              <label>
+              <label className="block text-sm text-[#A1A1AA]">
                 Approval notes
                 <textarea
+                  className="mt-1 w-full bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-2 text-sm placeholder:text-[#52525B]"
                   onChange={(event) => setNotesByDemand((current) => ({ ...current, [demand.id]: event.target.value }))}
                   placeholder="Capture approval notes or requested changes for the recruiter."
                   rows={3}
@@ -159,11 +158,11 @@ export function ApprovalsAdminClient({ accessToken, initialDemands }: ApprovalsA
                 />
               </label>
 
-              <div className="admin-inline-actions">
-                <button className="primary-link" disabled={pendingDemandId === demand.id} onClick={() => resolveDemand(demand.id, "APPROVED")} type="button">
+              <div className="flex gap-3">
+                <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] disabled:opacity-50 transition-colors" disabled={pendingDemandId === demand.id} onClick={() => resolveDemand(demand.id, "APPROVED")} type="button">
                   {pendingDemandId === demand.id ? "Processing..." : "Approve demand"}
                 </button>
-                <button className="secondary-button" disabled={pendingDemandId === demand.id} onClick={() => resolveDemand(demand.id, "CHANGES_REQUESTED")} type="button">
+                <button className="px-4 py-2 rounded-md text-sm font-medium border border-[#27272A] text-[#A1A1AA] hover:text-white disabled:opacity-50 transition-colors" disabled={pendingDemandId === demand.id} onClick={() => resolveDemand(demand.id, "CHANGES_REQUESTED")} type="button">
                   Request changes
                 </button>
               </div>
@@ -171,6 +170,6 @@ export function ApprovalsAdminClient({ accessToken, initialDemands }: ApprovalsA
           ))
         )}
       </div>
-    </section>
+    </div>
   );
 }

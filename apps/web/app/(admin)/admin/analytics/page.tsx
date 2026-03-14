@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { graphQLRequest } from "../../../../lib/graphql";
 import { AnalyticsOverview } from "./analytics-overview";
 
+import { getSession } from "../../../../lib/session";
 type AdminAnalyticsQuery = {
   adminAnalytics: {
     talentPoolGrowth: Array<{ label: string; totalProfiles: number; verifiedProfiles: number; pendingProfiles: number; newProfiles: number }>;
@@ -75,7 +74,7 @@ const adminAnalyticsQuery = `#graphql
 `;
 
 export default async function AdminAnalyticsPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   const data = await graphQLRequest<AdminAnalyticsQuery>(adminAnalyticsQuery, undefined, session?.accessToken);
 
   return <AnalyticsOverview data={data.adminAnalytics} />;

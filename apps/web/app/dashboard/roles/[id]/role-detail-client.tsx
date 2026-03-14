@@ -6,6 +6,7 @@ import { createApolloClient } from "../../../../lib/apollo-client";
 import { ShortlistWorkbench } from "../../shortlists/shortlist-workbench";
 import type { RoleSkillReference, ShortlistEntry, ShortlistInterview, ShortlistOffer } from "../../shortlists/types";
 import { DemandForm } from "../demand-form";
+import { Button } from "@/components/ui/button";
 
 type CompanyOption = {
   id: string;
@@ -145,149 +146,170 @@ export function RoleDetailClient({ accessToken, companies, demand, shortlist }: 
     }
   };
 
+  const statusStyles: Record<string, string> = {
+    ACTIVE: "bg-green-950 text-green-400",
+    DRAFT: "bg-[#27272A] text-[#A1A1AA]",
+    PAUSED: "bg-blue-950 text-blue-400",
+    FILLED: "bg-[#1a1c00] text-[#EFFE5E]",
+    CANCELLED: "bg-[#27272A] text-[#52525B]",
+  };
+
   return (
-    <div className="dashboard-grid">
-      <section className="dashboard-panel-card role-detail-hero">
-        <div className="role-detail-hero-top">
-          <div>
-            <span className="eyebrow">Role detail</span>
-            <h2>{demand.title}</h2>
-            <p>
-              {demand.company.name} • {demand.company.industry} • {demand.location} • {demand.remotePolicy}
-            </p>
+    <div>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold">{demand.title}</h1>
+            <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyles[currentStatus] ?? statusStyles.DRAFT}`}>{currentStatus}</span>
           </div>
-          <div className="role-detail-actions">
-            <span className="role-status-badge">{currentStatus}</span>
-            <button className="secondary-button" onClick={() => setIsEditing((current) => !current)} type="button">
-              {isEditing ? "Close edit" : "Edit role"}
-            </button>
-          </div>
+          <p className="text-sm text-[#A1A1AA]">{demand.company.name} · {demand.company.industry} · {demand.location} · {demand.remotePolicy}</p>
         </div>
-        <div className="role-list-meta-grid">
-          <div>
-            <span>Experience</span>
-            <strong>{demand.experienceLevel}</strong>
-          </div>
-          <div>
-            <span>Budget</span>
-            <strong>
-              {demand.budgetMin && demand.budgetMax ? `${demand.currency} ${demand.budgetMin} - ${demand.budgetMax}` : "Not set"}
-            </strong>
-          </div>
-          <div>
-            <span>Timeline</span>
-            <strong>{demand.contractDuration ?? "Not set"}</strong>
-          </div>
-          <div>
-            <span>Shortlist count</span>
-            <strong>{shortlist.length}</strong>
-          </div>
+        <div className="flex gap-2">
+          <Button variant="ghost" size="sm" onClick={() => setIsEditing((c) => !c)}>{isEditing ? "Close Edit" : "Edit Role"}</Button>
+          <Button variant="ghost" size="sm" onClick={() => void runAction("pause")}>Pause</Button>
+          <Button variant="ghost" size="sm" onClick={() => void runAction("activate")}>Activate</Button>
+          <Button variant="ghost" size="sm" className="text-green-400" onClick={() => void runAction("fill")}>Mark Filled</Button>
+          <Button variant="ghost" size="sm" className="text-red-400" onClick={() => void runAction("cancel")}>Cancel</Button>
         </div>
-        <div className="dashboard-actions">
-          <button onClick={() => void runAction("pause")} type="button">Pause</button>
-          <button className="secondary-button" onClick={() => void runAction("activate")} type="button">Activate</button>
-          <button className="secondary-button" onClick={() => void runAction("cancel")} type="button">Cancel</button>
-          <button className="secondary-button" onClick={() => void runAction("fill")} type="button">Mark filled</button>
-        </div>
-        {actionError ? <p className="form-error">{actionError}</p> : null}
-        {actionMessage ? <p className="form-success">{actionMessage}</p> : null}
-      </section>
+      </div>
 
-      {isEditing ? <DemandForm accessToken={accessToken} companies={companies} initialDemand={demand} mode="edit" /> : null}
+      {/* Error / success */}
+      {actionError && <p className="text-sm text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2 mb-4">{actionError}</p>}
+      {actionMessage && <p className="text-sm text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2 mb-4">{actionMessage}</p>}
 
-      <section className="dashboard-panel-card">
-        <div className="role-tab-row">
-          {tabs.map((tab) => (
-            <button
-              className={`roles-filter-chip${activeTab === tab ? " is-active" : ""}`}
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              type="button"
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+      {/* Meta row */}
+      <div className="grid grid-cols-4 gap-4 mb-6">
+        {[
+          ["Experience", demand.experienceLevel],
+          ["Budget", demand.budgetMin && demand.budgetMax ? `${demand.currency} ${demand.budgetMin}–${demand.budgetMax}` : "Not set"],
+          ["Duration", demand.contractDuration ?? "Not set"],
+          ["Shortlist", `${shortlist.length} candidates`],
+        ].map(([label, value]) => (
+          <div key={label} className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-4">
+            <span className="text-xs text-[#52525B]">{label}</span>
+            <p className="text-sm font-semibold mt-1">{value}</p>
+          </div>
+        ))}
+      </div>
 
-        {activeTab === "OVERVIEW" ? (
-          <div className="role-overview-grid">
-            <div>
-              <h3>Raw description</h3>
-              <p>{demand.description}</p>
+      {/* Edit form */}
+      {isEditing && <div className="mb-6"><DemandForm accessToken={accessToken} companies={companies} initialDemand={demand} mode="edit" /></div>}
+
+      {/* Tabs */}
+      <div className="flex gap-0 border-b border-[#27272A] mb-6">
+        {tabs.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
+              activeTab === tab ? "text-white border-primary" : "text-[#A1A1AA] border-transparent hover:text-white"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {activeTab === "OVERVIEW" && (
+        <div className="space-y-6">
+          <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-4">
+            <h3 className="font-semibold">Role Description</h3>
+            <p className="text-sm text-[#A1A1AA] leading-relaxed whitespace-pre-wrap">{demand.description}</p>
+          </div>
+          {demand.aiGeneratedDescription && (
+            <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-4">
+              <h3 className="font-semibold">AI-Enhanced Description</h3>
+              <p className="text-sm text-[#A1A1AA] leading-relaxed whitespace-pre-wrap">{demand.aiGeneratedDescription}</p>
             </div>
-            <div>
-              <h3>AI-enhanced version</h3>
-              <p>{demand.aiGeneratedDescription ?? "No AI-enhanced description stored yet."}</p>
+          )}
+          {demand.projectRequirements && (
+            <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-4">
+              <h3 className="font-semibold">Project Requirements</h3>
+              <p className="text-sm text-[#A1A1AA] leading-relaxed whitespace-pre-wrap">{demand.projectRequirements}</p>
             </div>
-            <div>
-              <h3>Project requirements</h3>
-              <p>{demand.projectRequirements ?? "No project requirements added yet."}</p>
-            </div>
-            <div>
-              <h3>Required skills</h3>
-              <div className="selected-skill-list">
-                {demand.requiredSkills.map((item) => (
-                  <span className="selected-skill-chip is-static" key={item.id}>
-                    {item.skill.displayName}
-                  </span>
-                ))}
-              </div>
+          )}
+          <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6">
+            <h3 className="font-semibold mb-3">Required Skills</h3>
+            <div className="flex flex-wrap gap-2">
+              {demand.requiredSkills.map((item) => (
+                <span key={item.id} className="px-2 py-1 bg-[#1A1A1A] border border-[#27272A] rounded text-xs text-[#A1A1AA]">{item.skill.displayName}</span>
+              ))}
             </div>
           </div>
-        ) : null}
+        </div>
+      )}
 
-        {activeTab === "SHORTLIST" ? (
-          <ShortlistWorkbench
-            accessToken={accessToken}
-            demandId={demand.id}
-            demandTitle={demand.title}
-            requiredSkillNames={demand.requiredSkills.map((item) => item.skill.displayName)}
-            shortlist={shortlist}
-          />
-        ) : null}
+      {activeTab === "SHORTLIST" && (
+        <ShortlistWorkbench
+          accessToken={accessToken}
+          demandId={demand.id}
+          demandTitle={demand.title}
+          requiredSkillNames={demand.requiredSkills.map((item) => item.skill.displayName)}
+          shortlist={shortlist}
+        />
+      )}
 
-        {activeTab === "INTERVIEWS" ? (
-          <div className="role-detail-list">
-            {interviews.length === 0 ? (
-              <p className="dashboard-empty-state">No interviews are attached to this role yet.</p>
-            ) : (
-              interviews.map((item) => (
-                <article className="role-detail-list-item" key={item.id}>
-                  <div>
-                    <h4>{item.candidateName}</h4>
-                    <p>{item.status} • {new Date(item.scheduledAt).toLocaleString()}</p>
-                  </div>
-                  <div className="dashboard-attention-meta">
-                    <strong>{item.duration} min</strong>
-                    <span>{item.demandTitle}</span>
-                  </div>
-                </article>
-              ))
-            )}
-          </div>
-        ) : null}
+      {activeTab === "INTERVIEWS" && (
+        <div>
+          {interviews.length === 0 ? (
+            <p className="text-[#A1A1AA] text-sm py-8 text-center">No interviews are attached to this role yet.</p>
+          ) : (
+            <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#27272A]">
+                    {["Candidate", "Date", "Duration", "Status"].map((h) => (
+                      <th key={h} className="text-left px-4 py-3 text-xs font-medium text-[#52525B] uppercase tracking-wide">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {interviews.map((item) => (
+                    <tr key={item.id} className="h-14 border-b border-[#27272A] last:border-b-0 hover:bg-[#222222] transition-colors">
+                      <td className="px-4 font-medium">{item.candidateName}</td>
+                      <td className="px-4 text-[#A1A1AA]">{new Date(item.scheduledAt).toLocaleString()}</td>
+                      <td className="px-4 text-[#A1A1AA]">{item.duration} min</td>
+                      <td className="px-4"><span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-950 text-blue-400">{item.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
 
-        {activeTab === "OFFERS" ? (
-          <div className="role-detail-list">
-            {offers.length === 0 ? (
-              <p className="dashboard-empty-state">No offers are attached to this role yet.</p>
-            ) : (
-              offers.map((item) => (
-                <article className="role-detail-list-item" key={item.id}>
-                  <div>
-                    <h4>{item.candidateName}</h4>
-                    <p>{item.status} • starts {new Date(item.startDate).toLocaleDateString()}</p>
-                  </div>
-                  <div className="dashboard-attention-meta">
-                    <strong>{item.hourlyRate} {demand.currency}/hr</strong>
-                    <span>{item.demandTitle}</span>
-                  </div>
-                </article>
-              ))
-            )}
-          </div>
-        ) : null}
-      </section>
+      {activeTab === "OFFERS" && (
+        <div>
+          {offers.length === 0 ? (
+            <p className="text-[#A1A1AA] text-sm py-8 text-center">No offers are attached to this role yet.</p>
+          ) : (
+            <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-[#27272A]">
+                    {["Candidate", "Rate", "Start Date", "Status"].map((h) => (
+                      <th key={h} className="text-left px-4 py-3 text-xs font-medium text-[#52525B] uppercase tracking-wide">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {offers.map((item) => (
+                    <tr key={item.id} className="h-14 border-b border-[#27272A] last:border-b-0 hover:bg-[#222222] transition-colors">
+                      <td className="px-4 font-medium">{item.candidateName}</td>
+                      <td className="px-4 text-[#A1A1AA]">{item.hourlyRate} {demand.currency}/hr</td>
+                      <td className="px-4 text-[#A1A1AA]">{new Date(item.startDate).toLocaleDateString()}</td>
+                      <td className="px-4"><span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-950 text-blue-400">{item.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

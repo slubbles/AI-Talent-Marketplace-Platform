@@ -1,10 +1,9 @@
 import { notFound, redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { graphQLRequest } from "../../../../lib/graphql";
 import { RoleDetailClient } from "./role-detail-client";
 import type { RoleSkillReference, ShortlistEntry } from "../../shortlists/types";
 
+import { getSession } from "../../../../lib/session";
 const roleDetailQuery = `#graphql
   query RoleDetail($id: ID!, $demandId: ID!) {
     demand(id: $id) {
@@ -167,7 +166,7 @@ type RoleDetailDemand = {
 };
 
 export default async function RoleDetailPage({ params }: RoleDetailPageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
   if (!session?.accessToken) {
     redirect("/login");

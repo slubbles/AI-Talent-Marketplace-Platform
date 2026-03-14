@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { graphQLRequest } from "../../../../lib/graphql";
 import { ConciergeAdminClient } from "./concierge-admin-client";
 
+import { getSession } from "../../../../lib/session";
 type ConciergeQuery = {
   users: {
     edges: Array<{
@@ -98,7 +97,7 @@ const conciergeQuery = `#graphql
 `;
 
 export default async function AdminConciergePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   const data = await graphQLRequest<ConciergeQuery>(conciergeQuery, undefined, session?.accessToken);
 
   return (

@@ -3,7 +3,7 @@
 import { gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { createApolloClient } from "../../../../lib/apollo-client";
-import { EmptyStateCard } from "../../../dashboard/empty-state-card";
+import Link from "next/link";
 
 type DemandOption = {
   id: string;
@@ -201,220 +201,200 @@ export function ConciergeAdminClient({ accessToken, demands, headhunters, initia
     }
   };
 
+  const statusStyles: Record<string, string> = {
+    SUBMITTED: "bg-blue-950 text-blue-400",
+    REVIEWED: "bg-amber-950 text-amber-400",
+    SHORTLISTED: "bg-green-950 text-green-400",
+    REJECTED: "bg-red-950 text-red-400"
+  };
+
   return (
-    <div className="dashboard-grid admin-dashboard-grid">
-      <section className="dashboard-panel-card admin-page-stack">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Headhunter assignments</span>
-            <h3>Assign hard-to-fill roles</h3>
-          </div>
+    <div className="space-y-6">
+      {/* Headhunter assignments */}
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-5">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Headhunter assignments</p>
+          <h3 className="text-lg font-semibold text-white mt-1">Assign hard-to-fill roles</h3>
         </div>
 
-        {message ? <p className="form-success">{message}</p> : null}
-        {error ? <p className="form-error">{error}</p> : null}
+        {message ? <p className="text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2 text-sm">{message}</p> : null}
+        {error ? <p className="text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2 text-sm">{error}</p> : null}
+
         {headhunters.length === 0 ? (
-          <EmptyStateCard
-            accent="admin"
-            actions={[{ href: "/admin/users", label: "Manage users" }]}
-            description="Promote at least one user to the HEADHUNTER role before creating concierge assignments."
-            eyebrow="Headhunter pool"
-            title="No active headhunter users exist yet"
-          />
+          <div className="bg-amber-950/20 border border-amber-900/40 rounded-md p-4">
+            <p className="text-sm text-amber-400">No active headhunter users exist yet. Promote at least one user to HEADHUNTER role first.</p>
+            <Link className="text-sm text-[#EFFE5E] hover:underline mt-2 inline-block" href="/admin/users">Manage users</Link>
+          </div>
         ) : null}
         {approvedDemands.length === 0 ? (
-          <EmptyStateCard
-            accent="warning"
-            actions={[{ href: "/admin/approvals", label: "Review role approvals", tone: "secondary" }]}
-            description="Concierge assignments only make sense once at least one demand has been approved for live sourcing."
-            eyebrow="Approved demand"
-            title="No approved demands are available"
-          />
+          <div className="bg-amber-950/20 border border-amber-900/40 rounded-md p-4">
+            <p className="text-sm text-amber-400">No approved demands available. Concierge assignments need at least one approved demand.</p>
+            <Link className="text-sm text-[#A1A1AA] hover:text-white mt-2 inline-block" href="/admin/approvals">Review role approvals</Link>
+          </div>
         ) : null}
 
-        <div className="admin-form-grid">
-          <label>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Demand
-            <select value={assignmentForm.demandId} onChange={(event) => setAssignmentForm((current) => ({ ...current, demandId: event.target.value }))}>
+            <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={assignmentForm.demandId} onChange={(event) => setAssignmentForm((current) => ({ ...current, demandId: event.target.value }))}>
               {approvedDemands.map((demand) => (
-                <option key={demand.id} value={demand.id}>
-                  {demand.title} • {demand.company.name}
-                </option>
+                <option key={demand.id} value={demand.id}>{demand.title} • {demand.company.name}</option>
               ))}
             </select>
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Headhunter
-            <select value={assignmentForm.headhunterUserId} onChange={(event) => setAssignmentForm((current) => ({ ...current, headhunterUserId: event.target.value }))}>
+            <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={assignmentForm.headhunterUserId} onChange={(event) => setAssignmentForm((current) => ({ ...current, headhunterUserId: event.target.value }))}>
               {headhunters.map((headhunter) => (
-                <option key={headhunter.id} value={headhunter.id}>
-                  {headhunter.email}
-                </option>
+                <option key={headhunter.id} value={headhunter.id}>{headhunter.email}</option>
               ))}
             </select>
           </label>
-          <label>
+          <label className="col-span-2 flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Notes
-            <textarea onChange={(event) => setAssignmentForm((current) => ({ ...current, notes: event.target.value }))} rows={3} value={assignmentForm.notes} />
+            <textarea className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-2 text-sm placeholder:text-[#52525B]" onChange={(event) => setAssignmentForm((current) => ({ ...current, notes: event.target.value }))} rows={3} value={assignmentForm.notes} />
           </label>
         </div>
 
-        <div className="admin-inline-actions">
-          <button className="primary-link" disabled={headhunters.length === 0 || approvedDemands.length === 0} onClick={createAssignment} type="button">
+        <div className="flex gap-3">
+          <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] disabled:opacity-50 transition-colors" disabled={headhunters.length === 0 || approvedDemands.length === 0} onClick={createAssignment} type="button">
             Assign role
           </button>
         </div>
 
-        <div className="admin-list-grid">
+        <div className="space-y-2">
           {assignments.length === 0 ? (
-            <EmptyStateCard
-              accent="admin"
-              description="Create the first headhunter assignment to start tracking concierge coverage here."
-              eyebrow="Assignment log"
-              title="No headhunter assignments yet"
-            />
+            <p className="text-sm text-[#52525B] py-4">No headhunter assignments yet. Create the first assignment above.</p>
           ) : (
             assignments.map((assignment) => (
-              <article className="dashboard-activity-item" key={assignment.id}>
+              <div className="flex items-center justify-between py-3 border-b border-[#27272A] last:border-b-0" key={assignment.id}>
                 <div>
-                  <span className="dashboard-activity-type">ASSIGNED</span>
-                  <h4>{assignment.demand.title}</h4>
-                  <p>{assignment.headhunterUser.email}</p>
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-950 text-blue-400">ASSIGNED</span>
+                  <p className="text-sm font-medium text-white mt-1">{assignment.demand.title}</p>
+                  <p className="text-xs text-[#A1A1AA]">{assignment.headhunterUser.email}</p>
                 </div>
-                <div className="dashboard-activity-meta">
-                  <span>{assignment.notes ?? "No notes"}</span>
-                </div>
-              </article>
+                <span className="text-xs text-[#52525B]">{assignment.notes ?? "No notes"}</span>
+              </div>
             ))
           )}
         </div>
-      </section>
+      </div>
 
-      <section className="dashboard-panel-card admin-page-stack">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">External candidate submission</span>
-            <h3>Submit concierge candidates into the review pipeline</h3>
-          </div>
+      {/* External candidate submission */}
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-5">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">External candidate submission</p>
+          <h3 className="text-lg font-semibold text-white mt-1">Submit concierge candidates into the review pipeline</h3>
         </div>
 
-        <div className="admin-form-grid">
-          <label>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Demand
-            <select value={submissionForm.demandId} onChange={(event) => setSubmissionForm((current) => ({ ...current, demandId: event.target.value }))}>
+            <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={submissionForm.demandId} onChange={(event) => setSubmissionForm((current) => ({ ...current, demandId: event.target.value }))}>
               {approvedDemands.map((demand) => (
-                <option key={demand.id} value={demand.id}>
-                  {demand.title}
-                </option>
+                <option key={demand.id} value={demand.id}>{demand.title}</option>
               ))}
             </select>
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Headhunter
-            <select value={submissionForm.headhunterUserId} onChange={(event) => setSubmissionForm((current) => ({ ...current, headhunterUserId: event.target.value }))}>
+            <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={submissionForm.headhunterUserId} onChange={(event) => setSubmissionForm((current) => ({ ...current, headhunterUserId: event.target.value }))}>
               {headhunters.map((headhunter) => (
-                <option key={headhunter.id} value={headhunter.id}>
-                  {headhunter.email}
-                </option>
+                <option key={headhunter.id} value={headhunter.id}>{headhunter.email}</option>
               ))}
             </select>
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             First name
-            <input onChange={(event) => setSubmissionForm((current) => ({ ...current, firstName: event.target.value }))} value={submissionForm.firstName} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setSubmissionForm((current) => ({ ...current, firstName: event.target.value }))} value={submissionForm.firstName} />
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Last name
-            <input onChange={(event) => setSubmissionForm((current) => ({ ...current, lastName: event.target.value }))} value={submissionForm.lastName} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setSubmissionForm((current) => ({ ...current, lastName: event.target.value }))} value={submissionForm.lastName} />
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Email
-            <input onChange={(event) => setSubmissionForm((current) => ({ ...current, email: event.target.value }))} value={submissionForm.email} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setSubmissionForm((current) => ({ ...current, email: event.target.value }))} value={submissionForm.email} />
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Headline
-            <input onChange={(event) => setSubmissionForm((current) => ({ ...current, headline: event.target.value }))} value={submissionForm.headline} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setSubmissionForm((current) => ({ ...current, headline: event.target.value }))} value={submissionForm.headline} />
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Location
-            <input onChange={(event) => setSubmissionForm((current) => ({ ...current, location: event.target.value }))} value={submissionForm.location} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setSubmissionForm((current) => ({ ...current, location: event.target.value }))} value={submissionForm.location} />
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Availability
-            <select value={submissionForm.availability} onChange={(event) => setSubmissionForm((current) => ({ ...current, availability: event.target.value as (typeof availabilityWindows)[number] }))}>
+            <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={submissionForm.availability} onChange={(event) => setSubmissionForm((current) => ({ ...current, availability: event.target.value as (typeof availabilityWindows)[number] }))}>
               {availabilityWindows.map((window) => (
-                <option key={window} value={window}>
-                  {window}
-                </option>
+                <option key={window} value={window}>{window}</option>
               ))}
             </select>
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Hourly rate
-            <input onChange={(event) => setSubmissionForm((current) => ({ ...current, hourlyRate: event.target.value }))} value={submissionForm.hourlyRate} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setSubmissionForm((current) => ({ ...current, hourlyRate: event.target.value }))} value={submissionForm.hourlyRate} />
           </label>
-          <label className="admin-form-grid-span">
+          <label className="col-span-2 flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Summary
-            <textarea onChange={(event) => setSubmissionForm((current) => ({ ...current, summary: event.target.value }))} rows={4} value={submissionForm.summary} />
+            <textarea className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-2 text-sm placeholder:text-[#52525B]" onChange={(event) => setSubmissionForm((current) => ({ ...current, summary: event.target.value }))} rows={4} value={submissionForm.summary} />
           </label>
         </div>
 
-        <div className="admin-inline-actions">
-          <button className="primary-link" disabled={headhunters.length === 0 || approvedDemands.length === 0} onClick={submitCandidate} type="button">
+        <div className="flex gap-3">
+          <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] disabled:opacity-50 transition-colors" disabled={headhunters.length === 0 || approvedDemands.length === 0} onClick={submitCandidate} type="button">
             Submit candidate
           </button>
         </div>
-      </section>
+      </div>
 
-      <section className="dashboard-panel-card admin-page-stack">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Submission tracking</span>
-            <h3>Submitted, reviewed, shortlisted, or rejected</h3>
-          </div>
+      {/* Submission tracking */}
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-5">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Submission tracking</p>
+          <h3 className="text-lg font-semibold text-white mt-1">Submitted, reviewed, shortlisted, or rejected</h3>
         </div>
 
-        <div className="admin-card-grid">
+        <div className="grid gap-4">
           {submissions.length === 0 ? (
-            <EmptyStateCard
-              accent="admin"
-              description="Submitted external candidates will appear here once concierge sourcing starts contributing into the pipeline."
-              eyebrow="Submission tracking"
-              title="No external submissions yet"
-            />
+            <div className="text-center py-12">
+              <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Submission tracking</p>
+              <h4 className="text-lg font-semibold text-white mt-2">No external submissions yet</h4>
+              <p className="text-sm text-[#52525B] mt-1">Submitted external candidates will appear here once concierge sourcing starts contributing into the pipeline.</p>
+            </div>
           ) : (
             submissions.map((submission) => (
-              <article className="role-list-card" key={submission.id}>
-                <div className="role-list-card-header">
-                  <div>
-                    <span className="role-status-badge">{submission.status}</span>
-                    <h4>
-                      {submission.firstName} {submission.lastName}
-                    </h4>
+              <article className="bg-[#111111] border border-[#27272A] rounded-lg p-5 space-y-3" key={submission.id}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusStyles[submission.status] ?? "bg-zinc-800 text-zinc-400"}`}>{submission.status}</span>
+                    <h4 className="text-sm font-medium text-white">{submission.firstName} {submission.lastName}</h4>
                   </div>
-                  <strong>{submission.demand.title}</strong>
+                  <span className="text-sm font-medium text-[#A1A1AA]">{submission.demand.title}</span>
                 </div>
 
-                <p>{submission.headline}</p>
-                <p>{submission.headhunterUser.email}</p>
+                <p className="text-sm text-[#A1A1AA]">{submission.headline}</p>
+                <p className="text-xs text-[#52525B]">{submission.headhunterUser.email}</p>
 
-                <label>
+                <label className="block text-sm text-[#A1A1AA]">
                   Review notes
                   <textarea
+                    className="mt-1 w-full bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-2 text-sm placeholder:text-[#52525B]"
                     onChange={(event) => setReviewNotes((current) => ({ ...current, [submission.id]: event.target.value }))}
                     rows={3}
                     value={reviewNotes[submission.id] ?? submission.reviewNotes ?? ""}
                   />
                 </label>
 
-                <div className="admin-inline-actions">
-                  <button className="secondary-button" onClick={() => updateSubmissionStatus(submission.id, "REVIEWED")} type="button">
+                <div className="flex gap-3">
+                  <button className="px-4 py-2 rounded-md text-sm font-medium border border-[#27272A] text-[#A1A1AA] hover:text-white transition-colors" onClick={() => updateSubmissionStatus(submission.id, "REVIEWED")} type="button">
                     Mark reviewed
                   </button>
-                  <button className="primary-link" onClick={() => updateSubmissionStatus(submission.id, "SHORTLISTED")} type="button">
+                  <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] transition-colors" onClick={() => updateSubmissionStatus(submission.id, "SHORTLISTED")} type="button">
                     Shortlist
                   </button>
-                  <button className="secondary-button" onClick={() => updateSubmissionStatus(submission.id, "REJECTED")} type="button">
+                  <button className="px-4 py-2 rounded-md text-sm font-medium border border-[#27272A] text-[#A1A1AA] hover:text-white transition-colors" onClick={() => updateSubmissionStatus(submission.id, "REJECTED")} type="button">
                     Reject
                   </button>
                 </div>
@@ -422,7 +402,7 @@ export function ConciergeAdminClient({ accessToken, demands, headhunters, initia
             ))
           )}
         </div>
-      </section>
+      </div>
     </div>
   );
 }

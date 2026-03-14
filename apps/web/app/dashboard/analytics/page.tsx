@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
 import { AnalyticsDashboard } from "./analytics-dashboard";
 
+import { getSession } from "../../../lib/session";
 type RecruiterAnalyticsQuery = {
   recruiterAnalytics: {
     hiringVelocity: Array<{ label: string; averageDays: number; hires: number }>;
@@ -39,7 +38,7 @@ const recruiterAnalyticsQuery = `#graphql
 `;
 
 export default async function AnalyticsPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   const data = await graphQLRequest<RecruiterAnalyticsQuery>(recruiterAnalyticsQuery, undefined, session?.accessToken);
 
   return <AnalyticsDashboard data={data.recruiterAnalytics} />;

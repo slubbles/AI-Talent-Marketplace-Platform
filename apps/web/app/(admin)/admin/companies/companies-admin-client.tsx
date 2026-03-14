@@ -3,7 +3,7 @@
 import { gql } from "@apollo/client";
 import { useMemo, useState } from "react";
 import { createApolloClient } from "../../../../lib/apollo-client";
-import { EmptyStateCard } from "../../../dashboard/empty-state-card";
+import Link from "next/link";
 
 type CompanyRecord = {
   id: string;
@@ -158,142 +158,128 @@ export function CompaniesAdminClient({ accessToken, initialCompanies, recruiters
   };
 
   return (
-    <div className="dashboard-grid admin-dashboard-grid">
-      <section className="dashboard-panel-card admin-page-stack">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Company management</span>
-            <h3>Add or edit portfolio companies</h3>
-          </div>
+    <div className="space-y-6">
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-5">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Company management</p>
+          <h3 className="text-lg font-semibold text-white mt-1">Add or edit portfolio companies</h3>
         </div>
 
-        {message ? <p className="form-success">{message}</p> : null}
-        {error ? <p className="form-error">{error}</p> : null}
+        {message ? <p className="text-green-400 bg-green-950/30 border border-green-900 rounded-md px-3 py-2 text-sm">{message}</p> : null}
+        {error ? <p className="text-red-400 bg-red-950/30 border border-red-900 rounded-md px-3 py-2 text-sm">{error}</p> : null}
 
         {recruiters.length === 0 ? (
-          <EmptyStateCard
-            accent="admin"
-            actions={[{ href: "/admin/users", label: "Add recruiter users" }]}
-            description="At least one recruiter user needs to exist before a company can be assigned an owner."
-            eyebrow="Recruiter owners"
-            title="No recruiter users available"
-          />
+          <div className="bg-amber-950/20 border border-amber-900/40 rounded-md p-4">
+            <p className="text-sm text-amber-400">No recruiter users available. At least one recruiter user needs to exist before a company can be assigned an owner.</p>
+            <Link className="text-sm text-[#EFFE5E] hover:underline mt-2 inline-block" href="/admin/users">Add recruiter users</Link>
+          </div>
         ) : null}
 
-        <div className="admin-form-grid">
-          <label>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Recruiter owner
-            <select value={newCompany.recruiterId} onChange={(event) => setNewCompany((current) => ({ ...current, recruiterId: event.target.value }))}>
+            <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={newCompany.recruiterId} onChange={(event) => setNewCompany((current) => ({ ...current, recruiterId: event.target.value }))}>
               {recruiters.map((recruiter) => (
-                <option key={recruiter.id} value={recruiter.id}>
-                  {recruiter.email}
-                </option>
+                <option key={recruiter.id} value={recruiter.id}>{recruiter.email}</option>
               ))}
             </select>
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Company name
-            <input onChange={(event) => setNewCompany((current) => ({ ...current, name: event.target.value }))} value={newCompany.name} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setNewCompany((current) => ({ ...current, name: event.target.value }))} value={newCompany.name} />
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Industry
-            <input onChange={(event) => setNewCompany((current) => ({ ...current, industry: event.target.value }))} value={newCompany.industry} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setNewCompany((current) => ({ ...current, industry: event.target.value }))} value={newCompany.industry} />
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Size
-            <select value={newCompany.size} onChange={(event) => setNewCompany((current) => ({ ...current, size: event.target.value as CompanyRecord["size"] }))}>
+            <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={newCompany.size} onChange={(event) => setNewCompany((current) => ({ ...current, size: event.target.value as CompanyRecord["size"] }))}>
               {companySizes.map((size) => (
-                <option key={size} value={size}>
-                  {size}
-                </option>
+                <option key={size} value={size}>{size}</option>
               ))}
             </select>
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Website
-            <input onChange={(event) => setNewCompany((current) => ({ ...current, website: event.target.value }))} value={newCompany.website} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setNewCompany((current) => ({ ...current, website: event.target.value }))} value={newCompany.website} />
           </label>
-          <label>
+          <label className="flex flex-col gap-1 text-sm text-[#A1A1AA]">
             Logo URL
-            <input onChange={(event) => setNewCompany((current) => ({ ...current, logoUrl: event.target.value }))} value={newCompany.logoUrl} />
+            <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => setNewCompany((current) => ({ ...current, logoUrl: event.target.value }))} value={newCompany.logoUrl} />
           </label>
         </div>
 
-        <div className="admin-inline-actions">
-          <button className="primary-link" onClick={createCompany} type="button">
+        <div className="flex gap-3">
+          <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] transition-colors" onClick={createCompany} type="button">
             Add company
           </button>
         </div>
-      </section>
+      </div>
 
-      <section className="dashboard-panel-card admin-page-stack">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Company roster</span>
-            <h3>Demand and placement metrics by company</h3>
-          </div>
+      <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-6 space-y-5">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Company roster</p>
+          <h3 className="text-lg font-semibold text-white mt-1">Demand and placement metrics by company</h3>
         </div>
 
-        <div className="admin-card-grid">
+        <div className="grid gap-4">
           {companies.length === 0 ? (
-            <EmptyStateCard
-              accent="admin"
-              description="Company records and their demand metrics will appear here once the first portfolio company is created."
-              eyebrow="Company roster"
-              title="No companies have been added yet"
-            />
+            <div className="text-center py-12">
+              <p className="text-xs uppercase tracking-wider text-[#A1A1AA]">Company roster</p>
+              <h4 className="text-lg font-semibold text-white mt-2">No companies have been added yet</h4>
+              <p className="text-sm text-[#52525B] mt-1">Company records and their demand metrics will appear here once the first portfolio company is created.</p>
+            </div>
           ) : (
             companies.map((company) => {
               const metric = metrics.find((item) => item.id === company.id);
 
               return (
-                <article className="role-list-card admin-company-card" key={company.id}>
-                  <div className="admin-form-grid compact">
-                    <label>
+                <article className="bg-[#111111] border border-[#27272A] rounded-lg p-5 space-y-4" key={company.id}>
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <label className="flex flex-col gap-1 text-[#A1A1AA]">
                       Name
-                      <input onChange={(event) => updateCompanyLocal(company.id, { name: event.target.value })} value={company.name} />
+                      <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => updateCompanyLocal(company.id, { name: event.target.value })} value={company.name} />
                     </label>
-                    <label>
+                    <label className="flex flex-col gap-1 text-[#A1A1AA]">
                       Industry
-                      <input onChange={(event) => updateCompanyLocal(company.id, { industry: event.target.value })} value={company.industry} />
+                      <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => updateCompanyLocal(company.id, { industry: event.target.value })} value={company.industry} />
                     </label>
-                    <label>
+                    <label className="flex flex-col gap-1 text-[#A1A1AA]">
                       Size
-                      <select value={company.size} onChange={(event) => updateCompanyLocal(company.id, { size: event.target.value as CompanyRecord["size"] })}>
+                      <select className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" value={company.size} onChange={(event) => updateCompanyLocal(company.id, { size: event.target.value as CompanyRecord["size"] })}>
                         {companySizes.map((size) => (
-                          <option key={size} value={size}>
-                            {size}
-                          </option>
+                          <option key={size} value={size}>{size}</option>
                         ))}
                       </select>
                     </label>
-                    <label>
+                    <label className="flex flex-col gap-1 text-[#A1A1AA]">
                       Website
-                      <input onChange={(event) => updateCompanyLocal(company.id, { website: event.target.value })} value={company.website ?? ""} />
+                      <input className="bg-[#1A1A1A] border border-[#27272A] text-white rounded-md px-3 py-1.5 text-sm" onChange={(event) => updateCompanyLocal(company.id, { website: event.target.value })} value={company.website ?? ""} />
                     </label>
                   </div>
 
-                  <div className="role-list-meta-grid">
+                  <div className="grid grid-cols-4 gap-3 text-sm">
                     <div>
-                      <span>Active demands</span>
-                      <strong>{metric?.activeDemandCount ?? 0}</strong>
+                      <span className="text-[#52525B] text-xs">Active demands</span>
+                      <p className="text-white font-medium">{metric?.activeDemandCount ?? 0}</p>
                     </div>
                     <div>
-                      <span>Pending approvals</span>
-                      <strong>{metric?.pendingApprovalsCount ?? 0}</strong>
+                      <span className="text-[#52525B] text-xs">Pending approvals</span>
+                      <p className="text-white font-medium">{metric?.pendingApprovalsCount ?? 0}</p>
                     </div>
                     <div>
-                      <span>Hard-to-fill</span>
-                      <strong>{metric?.hardToFillCount ?? 0}</strong>
+                      <span className="text-[#52525B] text-xs">Hard-to-fill</span>
+                      <p className="text-white font-medium">{metric?.hardToFillCount ?? 0}</p>
                     </div>
                     <div>
-                      <span>Placements</span>
-                      <strong>{metric?.placementsCount ?? 0}</strong>
+                      <span className="text-[#52525B] text-xs">Placements</span>
+                      <p className="text-white font-medium">{metric?.placementsCount ?? 0}</p>
                     </div>
                   </div>
 
-                  <div className="admin-inline-actions">
-                    <button className="primary-link" disabled={savingId === company.id} onClick={() => saveCompany(company)} type="button">
+                  <div className="flex gap-3">
+                    <button className="px-4 py-2 rounded-md text-sm font-medium bg-[#EFFE5E] text-[#000000] hover:bg-[#BBB906] disabled:opacity-50 transition-colors" disabled={savingId === company.id} onClick={() => saveCompany(company)} type="button">
                       {savingId === company.id ? "Saving..." : "Save company"}
                     </button>
                   </div>
@@ -302,7 +288,7 @@ export function CompaniesAdminClient({ accessToken, initialCompanies, recruiters
             })
           )}
         </div>
-      </section>
+      </div>
     </div>
   );
 }

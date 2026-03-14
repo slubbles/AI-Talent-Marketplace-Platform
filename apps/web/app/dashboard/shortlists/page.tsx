@@ -1,11 +1,12 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../lib/auth";
 import { graphQLRequest } from "../../../lib/graphql";
-import { EmptyStateCard } from "../empty-state-card";
 import { ShortlistWorkbench } from "./shortlist-workbench";
 import type { ShortlistDemandSummary, ShortlistEntry } from "./types";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
+import { getSession } from "../../../lib/session";
 const shortlistOverviewQuery = `#graphql
   query ShortlistsOverview {
     myDemands(pagination: { first: 12 }) {
@@ -134,7 +135,7 @@ type ShortlistsPageProps = {
 };
 
 export default async function ShortlistsPage({ searchParams }: ShortlistsPageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
 
   if (!session?.accessToken) {
     redirect("/login");
@@ -150,17 +151,13 @@ export default async function ShortlistsPage({ searchParams }: ShortlistsPagePro
 
   if (roles.length === 0) {
     return (
-      <section className="dashboard-panel-card section-placeholder">
-        <EmptyStateCard
-          actions={[
-            { href: "/dashboard/roles/new", label: "Create recruiter role" },
-            { href: "/dashboard/search", label: "Open talent search", tone: "secondary" }
-          ]}
-          description="Create a recruiter demand and trigger AI matching to turn this page into a real shortlist review queue."
-          eyebrow="Shortlists"
-          title="No role shortlists yet"
-        />
-      </section>
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <p className="text-[#A1A1AA] mb-4">No role shortlists yet. Create a recruiter demand and trigger AI matching.</p>
+        <div className="flex gap-3">
+          <Button asChild><Link href="/dashboard/roles/new"><Plus className="h-4 w-4" /> Create Role</Link></Button>
+          <Button asChild variant="ghost"><Link href="/dashboard/search">Open Talent Search</Link></Button>
+        </div>
+      </div>
     );
   }
 
@@ -178,72 +175,68 @@ export default async function ShortlistsPage({ searchParams }: ShortlistsPagePro
   const totalShortlisted = roleQueues.reduce((sum, role) => sum + role.shortlist.filter((item) => item.status === "SHORTLISTED").length, 0);
 
   return (
-    <div className="dashboard-grid">
-      <section className="dashboard-panel-card shortlist-overview-card">
-        <div className="dashboard-section-heading">
-          <div>
-            <span className="eyebrow">Shortlists</span>
-            <h3>Recruiter candidate review queue</h3>
-          </div>
-          <a className="primary-link" href={`/dashboard/roles/${activeQueue.id}`}>
-            Open role detail
-          </a>
+    <div>
+      {/* Header */}
+      <div className="flex items-start justify-between mb-1">
+        <div>
+          <h1 className="text-2xl font-bold">Shortlists</h1>
+          <p className="text-sm text-[#A1A1AA]">Review AI-matched candidates across all your active roles.</p>
         </div>
+        <Button asChild variant="ghost" size="sm">
+          <Link href={`/dashboard/roles/${activeQueue.id}`}>Open Role Detail</Link>
+        </Button>
+      </div>
 
-        <div className="dashboard-metrics shortlist-overview-metrics">
-          <div className="dashboard-metric-card">
-            <span>Roles with AI matches</span>
-            <strong>{roleQueues.length}</strong>
-            <p>Demand pipelines available for recruiter review.</p>
-          </div>
-          <div className="dashboard-metric-card">
-            <span>Visible candidates</span>
-            <strong>{totalCandidates}</strong>
-            <p>Total AI-ranked profiles across active recruiter roles.</p>
-          </div>
-          <div className="dashboard-metric-card">
-            <span>Shortlisted</span>
-            <strong>{totalShortlisted}</strong>
-            <p>Candidates already promoted to the live shortlist stage.</p>
-          </div>
+      {/* KPI row */}
+      <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-4">
+          <span className="text-xs text-[#52525B]">Roles with AI matches</span>
+          <p className="text-xl font-bold mt-1">{roleQueues.length}</p>
         </div>
-
-        <div className="roles-filter-row">
-          {roleQueues.map((role) => {
-            const isActive = role.id === activeQueue.id;
-            return (
-              <a className={`roles-filter-chip${isActive ? " is-active" : ""}`} href={`/dashboard/shortlists?demandId=${role.id}`} key={role.id}>
-                {role.title} ({role.shortlist.length})
-              </a>
-            );
-          })}
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-4">
+          <span className="text-xs text-[#52525B]">Visible candidates</span>
+          <p className="text-xl font-bold mt-1">{totalCandidates}</p>
         </div>
-      </section>
-
-      <section className="dashboard-panel-card shortlist-role-summary">
-        <div className="role-list-card-header">
-          <div>
-            <span className="role-status-badge">{activeQueue.status}</span>
-            <h4>{activeQueue.title}</h4>
-          </div>
-          <div className="dashboard-attention-meta">
-            <strong>{activeQueue.company.name}</strong>
-            <span>
-              {activeQueue.location} • {activeQueue.remotePolicy}
-            </span>
-          </div>
+        <div className="bg-[#0A0A0A] border border-[#27272A] rounded-lg p-4">
+          <span className="text-xs text-[#52525B]">Shortlisted</span>
+          <p className="text-xl font-bold mt-1">{totalShortlisted}</p>
         </div>
+      </div>
 
-        <div className="selected-skill-list">
+      {/* Role tabs */}
+      <div className="flex items-center gap-0.5 mt-4">
+        {roleQueues.map((role) => {
+          const isActive = role.id === activeQueue.id;
+          return (
+            <Link
+              key={role.id}
+              href={`/dashboard/shortlists?demandId=${role.id}`}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                isActive ? "bg-primary/10 text-white border-b-2 border-primary" : "text-[#A1A1AA] hover:text-white"
+              }`}
+            >
+              {role.title} ({role.shortlist.length})
+            </Link>
+          );
+        })}
+      </div>
+
+      {/* Active role summary */}
+      <div className="mt-4 bg-[#0A0A0A] border border-[#27272A] rounded-lg p-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-950 text-green-400">{activeQueue.status}</span>
+          <h3 className="font-semibold">{activeQueue.title}</h3>
+          <span className="text-sm text-[#A1A1AA]">{activeQueue.company.name} · {activeQueue.location} · {activeQueue.remotePolicy}</span>
+        </div>
+        <div className="flex gap-1">
           {activeQueue.requiredSkills.map((skill) => (
-            <span className="selected-skill-chip is-static" key={skill.id}>
-              {skill.skill.displayName}
-            </span>
+            <span key={skill.id} className="px-2 py-0.5 bg-[#1A1A1A] border border-[#27272A] rounded text-xs text-[#A1A1AA]">{skill.skill.displayName}</span>
           ))}
         </div>
-      </section>
+      </div>
 
-      <section className="dashboard-panel-card">
+      {/* Workbench */}
+      <div className="mt-4">
         <ShortlistWorkbench
           accessToken={session.accessToken}
           demandId={activeQueue.id}
@@ -251,7 +244,7 @@ export default async function ShortlistsPage({ searchParams }: ShortlistsPagePro
           requiredSkillNames={activeQueue.requiredSkills.map((skill) => skill.skill.displayName)}
           shortlist={activeQueue.shortlist}
         />
-      </section>
+      </div>
     </div>
   );
 }

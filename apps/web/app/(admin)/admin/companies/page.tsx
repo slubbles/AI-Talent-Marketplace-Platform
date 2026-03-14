@@ -1,8 +1,7 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "../../../../lib/auth";
 import { graphQLRequest } from "../../../../lib/graphql";
 import { CompaniesAdminClient } from "./companies-admin-client";
 
+import { getSession } from "../../../../lib/session";
 type CompaniesQuery = {
   companies: {
     edges: Array<{
@@ -80,7 +79,7 @@ const companiesQuery = `#graphql
 `;
 
 export default async function AdminCompaniesPage() {
-  const session = await getServerSession(authOptions);
+  const session = await getSession();
   const data = await graphQLRequest<CompaniesQuery>(companiesQuery, undefined, session?.accessToken);
 
   return (
