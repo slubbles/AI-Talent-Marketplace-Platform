@@ -24,8 +24,15 @@ services:
     environment:
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_talent_marketplace
       DIRECT_URL: postgresql://postgres:postgres@postgres:5432/ai_talent_marketplace
-      JWT_SECRET: change-me
+      JWT_SECRET: docker-local-dev-secret-do-not-use-in-production
+      JWT_REFRESH_SECRET: docker-local-dev-refresh-secret
       AI_ENGINE_URL: http://ai-engine:8000
+      INTERNAL_API_KEY: docker-local-internal-key
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:8081
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
+      OPENROUTER_MODEL: gpt-4o-mini
+      OPENROUTER_EMBEDDING_MODEL: text-embedding-3-small
       HOST: 0.0.0.0
     ports:
       - "4000:4000"
@@ -40,10 +47,21 @@ services:
     container_name: atm-ai-engine
     working_dir: /workspace/services/ai-engine
     command: sh -c "pip install -e . && python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ai_talent_marketplace
+      DIRECT_URL: postgresql://postgres:postgres@postgres:5432/ai_talent_marketplace
+      INTERNAL_API_KEY: docker-local-internal-key
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_BASE_URL: https://openrouter.ai/api/v1
+      OPENROUTER_MODEL: gpt-4o-mini
+      OPENROUTER_EMBEDDING_MODEL: text-embedding-3-small
     ports:
       - "8000:8000"
     volumes:
       - ./:/workspace
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   web:
     image: node:20-alpine
@@ -52,8 +70,8 @@ services:
     command: sh -c "npm run dev:web"
     environment:
       NEXTAUTH_URL: http://localhost:3000
-      NEXTAUTH_SECRET: change-me
-      GRAPHQL_API_URL: http://api:4000/graphql
+      NEXTAUTH_SECRET: docker-local-nextauth-secret
+      NEXT_PUBLIC_GRAPHQL_API_URL: http://localhost:4000/graphql
     ports:
       - "3000:3000"
     volumes:

@@ -203,6 +203,28 @@ Or provide real admin credentials in `.env`:
 - API + AI engine + Postgres: Render using [render.yaml](render.yaml)
 - Mobile preview and production builds: Expo EAS using [apps/mobile/eas.json](apps/mobile/eas.json)
 
+### Docker production deployment
+
+Build and run all services with production Dockerfiles:
+
+```bash
+# Create private env files from templates
+npm run deploy:prepare
+
+# Edit .env.production.web, .env.production.api, .env.production.ai with real values
+# Then start the stack:
+POSTGRES_PASSWORD=your-secure-password docker compose -f docker-compose.prod.yml up --build -d
+
+# Apply migrations + seed
+docker compose -f docker-compose.prod.yml exec api npx prisma migrate deploy --schema packages/db/prisma/schema.prisma
+docker compose -f docker-compose.prod.yml exec api npx prisma db seed --schema packages/db/prisma/schema.prisma
+```
+
+Production Dockerfiles:
+- [apps/api/Dockerfile](apps/api/Dockerfile) — Node.js API (multi-stage)
+- [apps/web/Dockerfile](apps/web/Dockerfile) — Next.js standalone (multi-stage)
+- [services/ai-engine/Dockerfile](services/ai-engine/Dockerfile) — FastAPI
+
 Full deployment steps and environment mapping are in [notes/DEPLOYMENT.md](notes/DEPLOYMENT.md).
 
 Hosted environment templates:

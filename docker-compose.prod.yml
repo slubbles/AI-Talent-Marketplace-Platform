@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: atm-postgres
+    environment:
+      POSTGRES_DB: ai_talent_marketplace
+      POSTGRES_USER: atm_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U atm_admin -d ai_talent_marketplace"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: atm-api
+    env_file: .env.production.api
+    environment:
+      DATABASE_URL: postgresql://atm_admin:${POSTGRES_PASSWORD}@postgres:5432/ai_talent_marketplace
+      DIRECT_URL: postgresql://atm_admin:${POSTGRES_PASSWORD}@postgres:5432/ai_talent_marketplace
+      AI_ENGINE_URL: http://ai-engine:8000
+      HOST: 0.0.0.0
+    ports:
+      - "4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  ai-engine:
+    build:
+      context: ./services/ai-engine
+      dockerfile: Dockerfile
+    container_name: atm-ai-engine
+    env_file: .env.production.ai
+    environment:
+      DATABASE_URL: postgresql://atm_admin:${POSTGRES_PASSWORD}@postgres:5432/ai_talent_marketplace
+      DIRECT_URL: postgresql://atm_admin:${POSTGRES_PASSWORD}@postgres:5432/ai_talent_marketplace
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: atm-web
+    env_file: .env.production.web
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres-data:
