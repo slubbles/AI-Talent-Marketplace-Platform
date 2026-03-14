@@ -2,15 +2,15 @@ databases:
   - name: atm-postgres
     databaseName: ai_talent_marketplace
     user: atm_admin
-    plan: starter
+    plan: free
 
 services:
   - type: web
     name: atm-api
     runtime: node
-    plan: starter
+    plan: free
     rootDir: .
-    buildCommand: npm install && npm run db:generate --workspace @atm/db && npm run build --workspace @atm/api
+    buildCommand: npm install && npx prisma generate --schema packages/db/prisma/schema.prisma && npm run build --workspace @atm/api
     startCommand: npm run start --workspace @atm/api
     envVars:
       - key: DATABASE_URL
@@ -61,7 +61,7 @@ services:
   - type: web
     name: atm-ai-engine
     runtime: python
-    plan: starter
+    plan: free
     rootDir: services/ai-engine
     buildCommand: pip install -e .
     startCommand: python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT
