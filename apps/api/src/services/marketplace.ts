@@ -49,7 +49,7 @@ import {
   semanticSearchProfiles,
   type ParsedResumeResponse
 } from "./ai-engine.js";
-import { sendInterviewScheduledEmail, sendMatchAlertEmail, sendOfferReceivedEmail } from "./email.js";
+import { sendAvailabilityUpdateEmail, sendInterviewScheduledEmail, sendMatchAlertEmail, sendOfferReceivedEmail } from "./email.js";
 import { createNotification, createNotifications } from "./notifications.js";
 import { uploadBase64Asset } from "./storage.js";
 import { prisma } from "../lib/prisma.js";
@@ -712,6 +712,15 @@ export const updateAvailability = async (inputValue: unknown, currentUser: AuthU
         }
       }))
     );
+
+    const recruiters = await prisma.user.findMany({
+      where: { id: { in: recruiterIds } },
+      select: { email: true }
+    });
+    const talentName = `${profile.firstName} ${profile.lastName}`;
+    for (const recruiter of recruiters) {
+      await sendAvailabilityUpdateEmail(recruiter.email, talentName, input.availability);
+    }
   }
 
   return updatedProfile;

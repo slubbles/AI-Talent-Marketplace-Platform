@@ -52,3 +52,10 @@ export const sendMatchAlertEmail = async (email: string, roleTitle: string) =>
     subject: "New talent match",
     html: `<p>A new role match is available for <strong>${roleTitle}</strong>.</p>`
   });
+
+export const sendAvailabilityUpdateEmail = async (email: string, talentName: string, availability: string) =>
+  sendEmail({
+    to: email,
+    subject: "Talent availability update",
+    html: `<p><strong>${talentName}</strong> has updated their availability to <strong>${availability}</strong>.</p>`
+  });
