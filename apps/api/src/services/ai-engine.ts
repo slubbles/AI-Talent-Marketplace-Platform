@@ -71,7 +71,10 @@ export type RoleDescriptionResponse = {
   generation_mode: "heuristic" | "llm";
 };
 
-const aiEngineBaseUrl = () => process.env.AI_ENGINE_URL ?? "http://localhost:8000";
+const normalizeLocalAiUrl = (url: string) => url.replace("http://localhost:", "http://127.0.0.1:");
+
+const aiEngineBaseUrl = () => normalizeLocalAiUrl(process.env.AI_ENGINE_URL ?? "http://127.0.0.1:8000");
+const aiEngineRequestTimeoutMs = 15_000;
 
 const internalHeaders = (): Record<string, string> => {
   const key = process.env.INTERNAL_API_KEY;
@@ -87,8 +90,13 @@ async function parseJsonResponse<T>(response: Response): Promise<T> {
   return (await response.json()) as T;
 }
 
+const aiEngineFetch = (path: string, init: RequestInit) => fetch(`${aiEngineBaseUrl()}${path}`, {
+  ...init,
+  signal: AbortSignal.timeout(aiEngineRequestTimeoutMs)
+});
+
 export const parseResumeFromUrl = async (resumeUrl: string): Promise<ParsedResumeResponse> => {
-  const response = await fetch(`${aiEngineBaseUrl()}/parse-resume`, {
+  const response = await aiEngineFetch("/parse-resume", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -111,7 +119,7 @@ export const parseResumeFromUpload = async (
 
   formData.append("file", file, fileName);
 
-  const response = await fetch(`${aiEngineBaseUrl()}/parse-resume`, {
+  const response = await aiEngineFetch("/parse-resume", {
     method: "POST",
     headers: internalHeaders(),
     body: formData
@@ -121,7 +129,7 @@ export const parseResumeFromUpload = async (
 };
 
 export const generateShortlistMatches = async (demandId: string, limit: number): Promise<MatchCandidatesResponse> => {
-  const response = await fetch(`${aiEngineBaseUrl()}/match-candidates`, {
+  const response = await aiEngineFetch("/match-candidates", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -138,7 +146,7 @@ export const semanticSearchProfiles = async (
   filters: Record<string, unknown>,
   limit: number
 ): Promise<SemanticSearchResponse> => {
-  const response = await fetch(`${aiEngineBaseUrl()}/semantic-search`, {
+  const response = await aiEngineFetch("/semantic-search", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -157,7 +165,7 @@ export const generateRoleDescription = async (input: {
   companyName?: string;
   companyIndustry?: string;
 }): Promise<RoleDescriptionResponse> => {
-  const response = await fetch(`${aiEngineBaseUrl()}/generate-role-description`, {
+  const response = await aiEngineFetch("/generate-role-description", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

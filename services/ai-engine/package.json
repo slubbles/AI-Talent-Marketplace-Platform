@@ -2,6 +2,9 @@
   "name": "@atm/ai-engine",
   "private": true,
   "version": "0.1.0",
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  },
   "scripts": {
     "build": "echo \"Python service build handled by uvicorn/FastAPI\"",
     "dev": "node ./scripts/run-dev.mjs",

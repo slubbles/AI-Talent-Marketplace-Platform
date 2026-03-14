@@ -482,6 +482,7 @@ async function main() {
         hourlyRateMax: createDecimal(talentSeed.rateMax),
         locationPreferences: talentSeed.locations,
         workVisaEligibility: talentSeed.visas,
+        identityDocumentUrls: [],
         portfolioUrls: [`https://portfolio.example/${talentSeed.firstName.toLowerCase()}-${talentSeed.lastName.toLowerCase()}`],
         culturalValues: talentSeed.values,
         verificationStatus: index < 12 ? "VERIFIED" : "PENDING",

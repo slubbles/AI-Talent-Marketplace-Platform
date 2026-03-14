@@ -3,8 +3,12 @@ import { expressMiddleware } from "@apollo/server/express4";
 import { Prisma } from "@prisma/client";
 import cors from "cors";
 import type { CorsOptions } from "cors";
+import dotenv from "dotenv";
 import express from "express";
 import type { ErrorRequestHandler, RequestHandler } from "express";
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   availabilityWindows,
   companySizes,
@@ -100,6 +104,20 @@ import {
 import { generateRoleDescription } from "./services/ai-engine.js";
 import { createNotification } from "./services/notifications.js";
 import { storeGeneratedDocument } from "./services/storage.js";
+
+const currentFileDir = dirname(fileURLToPath(import.meta.url));
+const envFileCandidates = [
+  resolve(process.cwd(), ".env"),
+  resolve(process.cwd(), "../../.env"),
+  resolve(currentFileDir, "../.env"),
+  resolve(currentFileDir, "../../../.env")
+];
+
+for (const envFilePath of envFileCandidates) {
+  if (existsSync(envFilePath)) {
+    dotenv.config({ path: envFilePath });
+  }
+}
 
 type ApiContext = {
   currentUser: AuthUser | null;

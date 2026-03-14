@@ -175,7 +175,7 @@ model TalentProfile {
   currency            String               @default("USD") @db.VarChar(3)
   locationPreferences String[]
   workVisaEligibility String[]
-  identityDocumentUrls String[]
+  identityDocumentUrls String[]             @default([])
   portfolioUrls       String[]
   culturalValues      Json?
   verificationStatus  VerificationStatus   @default(PENDING)

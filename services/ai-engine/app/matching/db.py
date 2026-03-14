@@ -11,7 +11,7 @@ def _database_url() -> str:
     url = os.getenv("DATABASE_URL")
     if not url:
         raise RuntimeError("DATABASE_URL environment variable is required.")
-    return url
+    return url.replace("@localhost:", "@127.0.0.1:")
 
 
 def vector_literal(values: list[float]) -> str:

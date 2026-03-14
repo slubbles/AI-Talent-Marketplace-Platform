@@ -252,6 +252,7 @@ const registerUser = async (role) => {
     }
   });
 
+  expectNoGraphQlErrors(payload, `Could not register ${role.toLowerCase()} user`);
   const accessToken = payload?.data?.register?.tokens?.accessToken;
   assert(accessToken, `Missing access token for registered ${role.toLowerCase()} user.`);
   return accessToken;
@@ -444,9 +445,11 @@ const main = async () => {
 
   if (adminCredentials) {
     console.log("6. Running optional admin-backed approval and workflow flow...");
+    console.log("6a. Logging in admin...");
     const adminToken = await loginUser(adminCredentials.email, adminCredentials.password);
     checks.push(`admin-login:${adminCredentials.source}`);
 
+    console.log("6b. Verifying talent profile...");
     const verifyTalentPayload = await graphQlRequest(verifyTalentMutation, {
       profileId: talentProfile.id,
       notes: "Verified by Session 18 smoke flow"
@@ -454,6 +457,7 @@ const main = async () => {
     requireData(verifyTalentPayload, "verifyTalent", "Could not verify talent profile");
     checks.push("talent-verify");
 
+    console.log("6c. Approving demand...");
     const approveDemandPayload = await graphQlRequest(updateDemandApprovalMutation, {
       input: {
         demandId: demand.id,
@@ -464,10 +468,11 @@ const main = async () => {
     requireData(approveDemandPayload, "updateDemandApproval", "Could not approve smoke demand");
     checks.push("demand-approve");
 
+    console.log("6d. Generating shortlist...");
     const shortlistPayload = await graphQlRequest(generateShortlistMutation, {
       input: {
         demandId: demand.id,
-        limit: 5
+        limit: 25
       }
     }, recruiterToken);
     const shortlist = requireData(shortlistPayload, "generateShortlist", "Could not generate shortlist")
@@ -478,6 +483,7 @@ const main = async () => {
     } else {
       checks.push("shortlist-generate");
 
+      console.log("6e. Recording talent interest...");
       const respondToMatchPayload = await graphQlRequest(respondToMatchMutation, {
         input: {
           shortlistId: shortlist.id,
@@ -488,6 +494,7 @@ const main = async () => {
       checks.push("match-interest");
 
       const scheduledAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
+      console.log("6f. Scheduling interview...");
       const interviewPayload = await graphQlRequest(scheduleInterviewMutation, {
         input: {
           shortlistId: shortlist.id,
@@ -499,6 +506,7 @@ const main = async () => {
       const interview = requireData(interviewPayload, "scheduleInterview", "Could not schedule smoke interview");
       checks.push("interview-schedule");
 
+      console.log("6g. Accepting interview...");
       const respondToInterviewPayload = await graphQlRequest(respondToInterviewMutation, {
         input: {
           interviewId: interview.id,
@@ -508,6 +516,7 @@ const main = async () => {
       requireData(respondToInterviewPayload, "respondToInterview", "Could not accept smoke interview");
       checks.push("interview-accept");
 
+      console.log("6h. Creating offer...");
       const offerPayload = await graphQlRequest(createOfferMutation, {
         input: {
           interviewId: interview.id,
@@ -522,12 +531,14 @@ const main = async () => {
       const offer = requireData(offerPayload, "createOffer", "Could not create smoke offer");
       checks.push("offer-create");
 
+      console.log("6i. Accepting offer...");
       const acceptOfferPayload = await graphQlRequest(acceptOfferMutation, {
         id: offer.id
       }, talentToken);
       requireData(acceptOfferPayload, "acceptOffer", "Could not accept smoke offer");
       checks.push("offer-accept");
 
+      console.log("6j. Re-reading profile...");
       const profileAfterFlow = await graphQlRequest(myProfileQuery, undefined, talentToken);
       requireData(profileAfterFlow, "myProfile", "Could not re-read smoke talent profile after workflow");
       checks.push("profile-readback");

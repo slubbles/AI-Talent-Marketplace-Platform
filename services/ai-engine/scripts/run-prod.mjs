@@ -1,3 +1,4 @@
+import dotenv from "dotenv";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { spawn } from "node:child_process";
@@ -6,6 +7,19 @@ import { fileURLToPath } from "node:url";
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 const serviceDir = path.resolve(currentDir, "..");
 const repoRoot = path.resolve(serviceDir, "..", "..");
+
+const envFileCandidates = [
+  path.resolve(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "../../.env"),
+  path.resolve(serviceDir, ".env"),
+  path.resolve(repoRoot, ".env")
+];
+
+for (const envFilePath of envFileCandidates) {
+  if (existsSync(envFilePath)) {
+    dotenv.config({ path: envFilePath });
+  }
+}
 
 const pythonExecutable = process.platform === "win32"
   ? path.join(repoRoot, ".venv", "Scripts", "python.exe")

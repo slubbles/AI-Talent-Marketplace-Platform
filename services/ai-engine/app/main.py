@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
@@ -24,6 +25,7 @@ from app.parsing.service import (
 )
 
 _INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY", "")
+logger = logging.getLogger(__name__)
 
 
 def _verify_internal_key(x_internal_api_key: str = Header("")) -> None:
@@ -106,6 +108,7 @@ async def match_candidates(input: MatchCandidatesRequest) -> dict[str, object]:
     except ValueError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
     except Exception as error:
+        logger.exception("Candidate matching failed for demand %s", input.demand_id)
         raise HTTPException(status_code=502, detail="Candidate matching failed.") from error
 
     return payload.model_dump(mode="json")
