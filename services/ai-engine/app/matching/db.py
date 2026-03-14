@@ -8,10 +8,10 @@ from psycopg.rows import dict_row
 
 
 def _database_url() -> str:
-    return os.getenv(
-        "DATABASE_URL",
-        "postgresql://postgres:postgres@localhost:5432/ai_talent_marketplace",
-    )
+    url = os.getenv("DATABASE_URL")
+    if not url:
+        raise RuntimeError("DATABASE_URL environment variable is required.")
+    return url
 
 
 def vector_literal(values: list[float]) -> str:

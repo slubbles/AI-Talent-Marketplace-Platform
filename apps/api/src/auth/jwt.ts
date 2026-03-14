@@ -13,8 +13,18 @@ type AuthTokenPayload = {
   tokenType: "access" | "refresh" | "reset";
 };
 
-const getJwtSecret = () => process.env.JWT_SECRET ?? "change-me";
-const getRefreshSecret = () => process.env.JWT_REFRESH_SECRET ?? getJwtSecret();
+const getJwtSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret === "change-me") {
+    throw new Error("JWT_SECRET environment variable is required and must not be the default placeholder.");
+  }
+  return secret;
+};
+
+const getRefreshSecret = () => {
+  const secret = process.env.JWT_REFRESH_SECRET;
+  return secret && secret !== "change-me" ? secret : getJwtSecret();
+};
 
 export const signAuthTokens = (user: AuthUser): AuthTokens => {
   const basePayload = {

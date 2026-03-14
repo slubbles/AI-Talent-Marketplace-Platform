@@ -2,15 +2,29 @@
 
 > Live progress on every session and deliverable.
 > Updated after each completed task.
-> Overall: **96%** (18 of 19 sessions complete + UI merge on 1st-execution, build passing)
+> Overall: **97%** (18 of 19 sessions complete + security hardening pass)
 
 ## Current Focus
 
 - UI Merge Build Fix Pass: **100%** — merged into `1st-execution`
-- Session 18 — Integration, Testing + Deploy: **94%**
+- Security Hardening Pass: **100%** — all HIGH/MEDIUM findings resolved
+- Session 18 — Integration, Testing + Deploy: **97%**
 - Status: 🔄 In progress (remaining: hosted deployment + mobile→live API)
-- Render blueprint schema updated (`env` → `runtime`)
 - Branch: `1st-execution`
+
+## Security Hardening Snapshot
+
+| Finding | Severity | Status | % |
+|---------|----------|--------|---|
+| JWT/NextAuth secrets crash on insecure defaults | HIGH | ✅ | 100 |
+| AI engine internal API key auth middleware | HIGH | ✅ | 100 |
+| AI engine DB URL fallback removed (require env) | HIGH | ✅ | 100 |
+| Reset token only exposed in NODE_ENV=development | HIGH | ✅ | 100 |
+| File upload MIME allowlist + 5MB size cap | MEDIUM | ✅ | 100 |
+| HEADHUNTER RBAC gap in getDemand closed | MEDIUM | ✅ | 100 |
+| Startup env validation for DATABASE_URL + JWT_SECRET | MEDIUM | ✅ | 100 |
+| INTERNAL_API_KEY added to render.yaml + env templates | MEDIUM | ✅ | 100 |
+| LinkedIn stub secret normalized in .env.example | LOW | ✅ | 100 |
 
 ## UI Merge Build Fix Snapshot
 

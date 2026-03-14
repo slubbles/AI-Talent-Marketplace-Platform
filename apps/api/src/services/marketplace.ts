@@ -747,6 +747,13 @@ export const getDemand = async (id: string, currentUser: AuthUser | null) => {
     await assertDemandAccess(id, user);
   }
 
+  if (user.role === "HEADHUNTER") {
+    const assignment = await prisma.headhunterAssignment.findFirst({ where: { demandId: id, headhunterUserId: user.id } });
+    if (!assignment) {
+      throw forbidden();
+    }
+  }
+
   return prisma.demand.findUnique({ where: { id }, include: demandInclude });
 };
 

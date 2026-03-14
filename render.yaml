@@ -55,6 +55,8 @@ services:
         sync: false
       - key: R2_PUBLIC_URL
         sync: false
+      - key: INTERNAL_API_KEY
+        sync: false
 
   - type: web
     name: atm-ai-engine
@@ -80,3 +82,5 @@ services:
         value: gpt-4o-mini
       - key: OPENROUTER_EMBEDDING_MODEL
         value: text-embedding-3-small
+      - key: INTERNAL_API_KEY
+        sync: false

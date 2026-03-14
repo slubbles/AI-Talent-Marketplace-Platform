@@ -24,7 +24,7 @@ const loginMutation = `#graphql
 `;
 
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET ?? "change-me",
+  secret: process.env.NEXTAUTH_SECRET || "dev-only-nextauth-secret",
   session: {
     strategy: "jwt"
   },

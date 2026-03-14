@@ -1368,7 +1368,7 @@ const resolvers = {
       const authUser = buildAuthUser(user);
       return {
         message: "If an account exists for that email, a reset link has been prepared.",
-        developmentResetToken: process.env.NODE_ENV === "production" ? null : signResetToken(authUser)
+        developmentResetToken: process.env.NODE_ENV === "development" ? signResetToken(authUser) : null
       };
     },
     resetPassword: async (_parent: unknown, args: AuthArgs<unknown>) => {
@@ -1638,7 +1638,16 @@ const buildApiContext = async (headers: {
   }
 };
 
+const validateRequiredEnv = () => {
+  const required = ["DATABASE_URL", "JWT_SECRET"] as const;
+  const missing = required.filter((key) => !process.env[key]);
+  if (missing.length > 0) {
+    throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
+  }
+};
+
 const bootstrap = async () => {
+  validateRequiredEnv();
   await server.start();
 
   const app = express();

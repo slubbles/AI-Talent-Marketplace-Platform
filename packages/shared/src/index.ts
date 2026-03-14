@@ -268,10 +268,19 @@ export const markNotificationReadInputSchema = z.object({
   notificationId: uuidSchema
 });
 
+const allowedMimeTypes = [
+  "application/pdf",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+] as const;
+
 export const uploadAssetInputSchema = z.object({
   fileName: z.string().min(1),
-  mimeType: z.string().min(1),
-  contentBase64: z.string().min(1),
+  mimeType: z.enum(allowedMimeTypes),
+  contentBase64: z.string().min(1).max(7_000_000),
   assetType: z.enum(uploadAssetTypes)
 });
 

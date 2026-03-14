@@ -4,7 +4,7 @@ export default withAuth({
   pages: {
     signIn: "/login"
   },
-  secret: process.env.NEXTAUTH_SECRET ?? "change-me"
+  secret: process.env.NEXTAUTH_SECRET || "dev-only-nextauth-secret"
 });
 
 export const config = {

@@ -73,6 +73,11 @@ export type RoleDescriptionResponse = {
 
 const aiEngineBaseUrl = () => process.env.AI_ENGINE_URL ?? "http://localhost:8000";
 
+const internalHeaders = (): Record<string, string> => {
+  const key = process.env.INTERNAL_API_KEY;
+  return key ? { "X-Internal-Api-Key": key } : {};
+};
+
 async function parseJsonResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const body = await response.text();
@@ -86,7 +91,8 @@ export const parseResumeFromUrl = async (resumeUrl: string): Promise<ParsedResum
   const response = await fetch(`${aiEngineBaseUrl()}/parse-resume`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      ...internalHeaders()
     },
     body: JSON.stringify({ resumeUrl })
   });
@@ -107,6 +113,7 @@ export const parseResumeFromUpload = async (
 
   const response = await fetch(`${aiEngineBaseUrl()}/parse-resume`, {
     method: "POST",
+    headers: internalHeaders(),
     body: formData
   });
 
@@ -117,7 +124,8 @@ export const generateShortlistMatches = async (demandId: string, limit: number):
   const response = await fetch(`${aiEngineBaseUrl()}/match-candidates`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      ...internalHeaders()
     },
     body: JSON.stringify({ demand_id: demandId, limit })
   });
@@ -133,7 +141,8 @@ export const semanticSearchProfiles = async (
   const response = await fetch(`${aiEngineBaseUrl()}/semantic-search`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      ...internalHeaders()
     },
     body: JSON.stringify({ query, filters, limit })
   });
@@ -151,7 +160,8 @@ export const generateRoleDescription = async (input: {
   const response = await fetch(`${aiEngineBaseUrl()}/generate-role-description`, {
     method: "POST",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      ...internalHeaders()
     },
     body: JSON.stringify({
       raw_description: input.rawDescription,
