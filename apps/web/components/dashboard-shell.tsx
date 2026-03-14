@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard, Briefcase, ListChecks, Sparkles,
-  CalendarDays, FileText, BarChart3, Settings, LogOut, Bell, Search,
+  CalendarDays, FileText, FileSignature, BarChart3, Settings, LogOut, Bell, Search,
 } from "lucide-react";
 import { NotificationPanel } from "@/components/notification-panel";
 import { CommandPalette } from "@/components/command-palette";
@@ -25,6 +25,7 @@ const navSections = [
     items: [
       { label: "Interviews", icon: CalendarDays, path: "/dashboard/interviews" },
       { label: "Offers", icon: FileText, path: "/dashboard/offers" },
+      { label: "Contracts", icon: FileSignature, path: "/dashboard/contracts" },
     ],
   },
   {

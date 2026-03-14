@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard, User, ShieldCheck, BadgeCheck, UserSearch,
-  Building2, BarChart3, Settings, LogOut, Bell, Search,
+  Building2, BarChart3, Settings, Plane, LogOut, Bell, Search,
 } from "lucide-react";
 import { NotificationPanel } from "@/components/notification-panel";
 import { CommandPalette } from "@/components/command-palette";
@@ -32,6 +32,7 @@ const navSections = [
       { label: "Companies", icon: Building2, path: "/admin/companies", badge: null },
       { label: "Analytics", icon: BarChart3, path: "/admin/analytics", badge: null },
       { label: "Billing", icon: Settings, path: "/admin/billing", badge: null },
+      { label: "Mobility", icon: Plane, path: "/admin/mobility", badge: null },
     ],
   },
 ];
