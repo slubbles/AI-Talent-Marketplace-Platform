@@ -1,6 +1,11 @@
 const { PrismaClient, Prisma } = require("@prisma/client");
+const bcrypt = require("bcryptjs");
 
 const prisma = new PrismaClient();
+
+// Pre-hash the demo password so login actually works
+const DEMO_PASSWORD = "Password1!";
+const DEMO_HASH = bcrypt.hashSync(DEMO_PASSWORD, 10);
 
 const skills = [
   ["python", "Python", "TECHNICAL"],
@@ -359,7 +364,7 @@ async function main() {
   const recruiter = await prisma.user.create({
     data: {
       email: "recruiter@marketplace.example",
-      passwordHash: "demo-hash",
+      passwordHash: DEMO_HASH,
       role: "RECRUITER",
       emailVerified: true
     }
@@ -368,7 +373,7 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       email: "admin@marketplace.example",
-      passwordHash: "demo-hash",
+      passwordHash: DEMO_HASH,
       role: "ADMIN",
       emailVerified: true
     }
@@ -377,7 +382,7 @@ async function main() {
   const headhunter = await prisma.user.create({
     data: {
       email: "headhunter@marketplace.example",
-      passwordHash: "demo-hash",
+      passwordHash: DEMO_HASH,
       role: "HEADHUNTER",
       emailVerified: true
     }
@@ -455,7 +460,7 @@ async function main() {
     const talentUser = await prisma.user.create({
       data: {
         email: makeEmail(talentSeed.firstName, talentSeed.lastName),
-        passwordHash: "demo-hash",
+        passwordHash: DEMO_HASH,
         role: "TALENT",
         emailVerified: true
       }
