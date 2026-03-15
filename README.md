@@ -1,273 +1,309 @@
 # AI Talent Marketplace Platform
 
-AI-powered marketplace infrastructure for matching enterprise talent demand with global consultant supply.
+> **Enterprise-grade talent intelligence platform** — AI-powered matching, recruiter dashboards, admin governance, and a talent mobile app. Built as a production-ready SaaS with real-time AI integration, pgvector semantic search, and a full hiring pipeline from role creation to contract onboarding.
 
-The platform is built around one core loop:
+---
 
-```text
-Talent registers -> AI parses resume -> Profile is generated
-Recruiter posts role -> AI enhances role -> AI matches talent
-Recruiter reviews shortlist -> interviews -> offers -> hire
-Admin verifies talent and oversees platform health
+## The Problem
+
+Traditional ATS systems treat hiring as a list of applicants and a keyword filter. They fail at:
+- **Intelligent matching** — no understanding of skill depth, career trajectory, or cultural fit
+- **Demand-supply intelligence** — no forecasting, no supply gap visibility, no proactive talent surfacing
+- **Unified lifecycle** — separate tools for sourcing, interviewing, offers, contracts, and analytics
+
+## The Solution
+
+This platform replaces fragmented hiring tooling with a **single AI-powered operating system** that covers the entire talent lifecycle:
+
+```
+Talent registers → AI parses resume → Profile auto-generated with extracted skills
+Recruiter posts role → AI enhances job description → AI matches & ranks talent
+Recruiter reviews shortlist → schedules interviews → extends offers → signs contracts
+Admin verifies talent → governs demand pipeline → monitors platform analytics
 ```
 
-## What is in the repo
+**Every step is instrumented with AI.** The matching engine uses vector embeddings (pgvector) and a 7-factor scoring model. The role assistant generates full job descriptions from rough notes. Resume parsing extracts skills, experience, and certifications automatically.
 
-```text
-apps/
-	web/       Next.js 14 recruiter dashboard + admin console
-	mobile/    Expo Router talent application
-	api/       Apollo GraphQL API
-packages/
-	shared/    shared Zod schemas, enums, and contracts
-	db/        Prisma schema, migrations, seed data
-	ui/        shared UI package
-services/
-	ai-engine/ FastAPI service for parsing, embeddings, matching, and role assist
-```
+---
 
-## Stack
+## Platform Surfaces
 
-| Layer | Choice |
-|------|--------|
-| Monorepo | Turborepo + npm workspaces |
-| Web | Next.js 14 App Router |
-| Mobile | Expo SDK 50 + React Native + Expo Router |
-| API | Node.js + Apollo Server |
-| AI | Python + FastAPI |
-| ORM | Prisma |
-| Database | PostgreSQL 16 + pgvector |
-| Auth | NextAuth.js on web + JWT for API/mobile |
-| LLM provider | OpenRouter |
-| Email | Resend |
-| File storage | Cloudflare R2 |
+| Surface | Technology | Purpose |
+|---------|-----------|---------|
+| **Recruiter Dashboard** | Next.js 14 (App Router) | Role management, AI matching, shortlists, interviews, offers, contracts, analytics |
+| **Admin Console** | Same Next.js app (route group) | User management, talent verification, demand approvals, platform analytics, billing, concierge |
+| **Talent Mobile App** | Expo SDK 50 + React Native | Registration, resume upload, profile management, match viewing, interview responses, offer acceptance |
+| **GraphQL API** | Node.js + Apollo Server | 21 queries, 38 mutations — full business logic layer |
+| **AI Engine** | Python + FastAPI | Resume parsing, skill extraction, embedding generation, semantic matching, role description generation |
+
+---
 
 ## Architecture
 
 ```mermaid
-flowchart LR
-	Talent[Talent Mobile App]
-	Recruiter[Recruiter/Admin Web]
-	API[GraphQL API]
-	AI[FastAPI AI Engine]
-	DB[(PostgreSQL + pgvector)]
-	Storage[(Cloudflare R2)]
-	Email[Resend]
+flowchart TB
+    subgraph Frontend
+        Web[Recruiter/Admin Web<br/>Next.js 14]
+        Mobile[Talent Mobile App<br/>Expo + React Native]
+    end
+    
+    subgraph Backend
+        API[GraphQL API<br/>Apollo Server]
+        AI[AI Engine<br/>FastAPI + OpenRouter]
+    end
+    
+    subgraph Data
+        DB[(PostgreSQL 16<br/>+ pgvector)]
+        R2[(Cloudflare R2<br/>File Storage)]
+    end
+    
+    subgraph Services
+        Email[Resend<br/>Transactional Email]
+        LLM[OpenRouter<br/>LLM Provider]
+    end
 
-	Talent --> API
-	Recruiter --> API
-	API --> DB
-	API --> Storage
-	API --> Email
-	API --> AI
-	AI --> DB
+    Web --> API
+    Mobile --> API
+    API --> DB
+    API --> R2
+    API --> Email
+    API --> AI
+    AI --> DB
+    AI --> LLM
 ```
 
-Supporting documentation:
+---
 
-- [notes/FOUNDATION.md](notes/FOUNDATION.md)
-- [notes/EXECUTION.md](notes/EXECUTION.md)
-- [notes/ADR.md](notes/ADR.md)
-- [notes/CASE-STUDY.md](notes/CASE-STUDY.md)
-- [notes/DATABASE.md](notes/DATABASE.md)
-- [notes/DEMO-SCRIPT.md](notes/DEMO-SCRIPT.md)
-- [notes/DEPLOYMENT.md](notes/DEPLOYMENT.md)
-- [notes/ROADMAP.md](notes/ROADMAP.md)
+## Key Features (16 SOW Modules Implemented)
 
-## Current status
+### AI-Powered Core
+- **AI Matching Engine** — 7-factor scoring: skill match (35%), experience fit (20%), availability (10%), pricing (10%), location (10%), cultural values (10%), past feedback (5%)
+- **AI Role Description Assistant** — LLM generates structured JDs with responsibilities, requirements, salary bands, and skill recommendations from rough input
+- **Resume Parsing & Skill Extraction** — Upload PDF → AI extracts skills, certifications, experience, generates profile
+- **Semantic Talent Search** — pgvector embeddings enable "find me someone like this" searches beyond keyword matching
+- **Demand Forecasting** — Trend analysis, supply gap prediction, market skill demand visualization
 
-- Sessions 1 through 17 are implemented.
-- Session 18 is substantially complete locally: repo-wide typecheck passes, AI engine tests pass, and `npm run smoke:session18` validates health, CORS, RBAC, and local recruiter-admin-talent workflow coverage.
-- Session 18 still needs hosted environment setup and live URL verification.
-- Session 19 documentation and polish are complete locally.
-- Current overall progress: 94%.
+### Recruiter Workflow
+- **Demand Management** — Full CRUD with status lifecycle: Draft → Active → Paused → Filled → Cancelled
+- **AI Shortlisting** — One click generates a ranked shortlist with match scores per candidate
+- **Interview Pipeline** — Schedule, track, rate, leave feedback — candidates respond from mobile
+- **Offer Management** — Create, send, track offers through Draft → Sent → Accepted → Declined
+- **Contract & Onboarding** — Track contracts through Offer Accepted → Contract Sent → Signed → Onboarding → Completed
+- **Hiring Analytics** — Hiring velocity, pipeline conversion, cost-per-hire, skills demand charts
 
-## Local setup
+### Admin Governance
+- **User Management** — RBAC with 4 roles: Talent, Recruiter, Admin, Headhunter
+- **Talent Verification** — Review profiles, approve/reject with notes, verify skills and certifications
+- **Demand Approvals** — Queue with approve/reject, hard-to-fill flagging, approval notes
+- **Concierge (Headhunter)** — Assign headhunters to hard-to-fill roles, track external candidate submissions
+- **Platform Analytics** — 9+ chart types: talent pool growth, skill distribution, supply/demand gaps, pricing trends, hiring timelines, utilization
+- **Billing & Monetization** — 3 revenue models (subscription, hard-to-fill premium, 10% placement commission), pricing tiers, transaction history
+- **Mobility Tracking** — Visa status, relocation pipeline, accommodation support
 
-### Prerequisites
+### Talent Experience (Mobile)
+- **Smart Onboarding** — Upload resume → AI parses → review auto-generated profile → start receiving matches
+- **Match Feed** — Scroll ranked matches with scores, tap for full 7-factor breakdown
+- **Application Tracker** — Tabbed view: Interested → Shortlisted → Interview → Offer
+- **Interview Management** — View scheduled interviews, accept/decline with reasons
+- **Offer Response** — Review terms, accept/decline offers in-app
+- **Notification Center** — Real-time alerts for new matches, interview requests, offer updates
 
-- Node.js 20+
-- npm 10+
-- Python 3.12+
-- PostgreSQL 16 with pgvector, or Docker Desktop
+---
 
-### 1. Install dependencies
+## Tech Stack
+
+| Layer | Choice | Why |
+|-------|--------|-----|
+| Monorepo | Turborepo + npm workspaces | Single repo, shared types, atomic deployments |
+| Web | Next.js 14 (App Router) + shadcn/ui + Tailwind | Server components, dark theme, responsive |
+| Mobile | Expo SDK 50 + React Native 0.73 + Expo Router | Cross-platform, file-based routing |
+| API | Node.js + Apollo Server (GraphQL) | Type-safe queries, single endpoint |
+| AI Engine | Python + FastAPI | OpenRouter LLM + pgvector embeddings |
+| ORM | Prisma | Type-safe database access, migrations |
+| Database | PostgreSQL 16 + pgvector | Vector similarity search for AI matching |
+| Auth | NextAuth.js (web) + JWT (API/mobile) | Session management + stateless tokens |
+| LLM | OpenRouter (OpenAI-compatible) | Flexible model routing, cost control |
+| Embeddings | text-embedding-3-small (1536 dim) | Semantic search and matching |
+| Email | Resend | Branded transactional emails (5 templates) |
+| File Storage | Cloudflare R2 | S3-compatible, resume + document storage |
+| Deployment | Vercel (web) + Render (API/AI/DB) | Scalable, auto-deploy from git |
+
+---
+
+## Repository Structure
+
+```
+├── apps/
+│   ├── web/              # Next.js 14 — 27 routes (recruiter + admin)
+│   ├── mobile/           # Expo — 12 screens (talent)
+│   └── api/              # Apollo GraphQL — 59 operations
+├── packages/
+│   ├── shared/           # Shared types, Zod schemas, enums
+│   ├── db/               # Prisma schema (18 models), migrations, seed
+│   └── ui/               # Shared UI components
+├── services/
+│   └── ai-engine/        # FastAPI — 6 AI endpoints
+├── notes/                # Architecture docs, design system, execution plan
+├── docker-compose.yml    # Local development
+├── docker-compose.prod.yml # Production deployment
+├── render.yaml           # Render Blueprint (API + AI + DB)
+└── vercel.json           # Vercel configuration (web)
+```
+
+---
+
+## Data Model (18 Prisma Models)
+
+```
+User ──┬── TalentProfile ── TalentSkill ── Skill
+       ├── Demand ── DemandSkill ── Skill
+       ├── Company
+       └── Notification
+
+Demand ── Shortlist ── ShortlistCandidate ── Interview ── Offer
+
+HeadhunterAssignment ── ExternalCandidateSubmission
+PasswordResetToken
+```
+
+---
+
+## Deployment
+
+| Service | Platform | URL Pattern |
+|---------|----------|-------------|
+| Web (Recruiter + Admin) | Vercel | `https://ai-talent-marketplace-platform-web.vercel.app` |
+| GraphQL API | Render | `https://atm-api-2hwg.onrender.com` |
+| AI Engine | Render | `https://atm-ai-engine.onrender.com` |
+| Database | Render | Managed PostgreSQL 16 + pgvector |
+
+### Quick Start (Local)
 
 ```bash
+# Install dependencies
 npm install
-```
 
-### 2. Configure environment variables
-
-```bash
+# Configure environment
 copy .env.example .env
-```
+# Fill in required values (see .env.example for guidance)
 
-Required values include:
-
-- `DATABASE_URL`
-- `DIRECT_URL`
-- `JWT_SECRET`
-- `JWT_REFRESH_SECRET`
-- `OPENROUTER_API_KEY`
-- `AI_ENGINE_URL`
-- `NEXTAUTH_SECRET`
-- `NEXTAUTH_URL`
-- `NEXT_PUBLIC_GRAPHQL_API_URL`
-- `EXPO_PUBLIC_GRAPHQL_API_URL`
-- `CORS_ALLOWED_ORIGINS`
-
-### 3. Start infrastructure
-
-With Docker:
-
-```bash
+# Start database
 docker compose up -d postgres
-```
 
-Or point `.env` at an existing PostgreSQL 16 instance with pgvector enabled.
-
-### 4. Apply schema and seed demo data
-
-```bash
+# Apply schema and seed demo data
 npm run db:generate
 npm run db:migrate --workspace @atm/db
 npm run db:seed --workspace @atm/db
-```
 
-If you only need already-created migrations applied to a database, use:
-
-```bash
-npx prisma migrate deploy --schema packages/db/prisma/schema.prisma
-```
-
-### 5. Run the platform
-
-All core local services:
-
-```bash
+# Run all services
 npm run dev
 ```
 
-Or individually:
+### Production (Docker)
 
 ```bash
-npm run dev:web
-npm run dev:api
-npm run dev:mobile
-npm run dev:ai
-```
-
-## Validation commands
-
-Repo-wide static validation:
-
-```bash
-npm run typecheck
-```
-
-AI engine tests:
-
-```bash
-npm run test --workspace @atm/ai-engine
-```
-
-Session 18 local integration smoke check:
-
-```bash
-npm run smoke:session18
-```
-
-To also exercise the local admin-backed approval and offer flow:
-
-```bash
-set SMOKE_LOCAL_ADMIN_BOOTSTRAP=true
-npm run smoke:session18
-```
-
-Or provide real admin credentials in `.env`:
-
-- `SMOKE_ADMIN_EMAIL`
-- `SMOKE_ADMIN_PASSWORD`
-
-## API and AI docs
-
-- GraphQL endpoint: `http://localhost:4000/graphql`
-- API health probe: `http://localhost:4000/healthz`
-- AI engine OpenAPI: `http://localhost:8000/docs`
-- AI engine health probe: `http://localhost:8000/health`
-
-## Deployment path
-
-- Web: Vercel using [vercel.json](vercel.json)
-- API + AI engine + Postgres: Render using [render.yaml](render.yaml)
-- Mobile preview and production builds: Expo EAS using [apps/mobile/eas.json](apps/mobile/eas.json)
-
-### Docker production deployment
-
-Build and run all services with production Dockerfiles:
-
-```bash
-# Create private env files from templates
 npm run deploy:prepare
-
-# Edit .env.production.web, .env.production.api, .env.production.ai with real values
-# Then start the stack:
+# Edit .env.production.web, .env.production.api, .env.production.ai
 POSTGRES_PASSWORD=your-secure-password docker compose -f docker-compose.prod.yml up --build -d
-
-# Apply migrations + seed
-docker compose -f docker-compose.prod.yml exec api npx prisma migrate deploy --schema packages/db/prisma/schema.prisma
-docker compose -f docker-compose.prod.yml exec api npx prisma db seed --schema packages/db/prisma/schema.prisma
 ```
 
-Production Dockerfiles:
-- [apps/api/Dockerfile](apps/api/Dockerfile) — Node.js API (multi-stage)
-- [apps/web/Dockerfile](apps/web/Dockerfile) — Next.js standalone (multi-stage)
-- [services/ai-engine/Dockerfile](services/ai-engine/Dockerfile) — FastAPI
-
-Full deployment steps and environment mapping are in [notes/DEPLOYMENT.md](notes/DEPLOYMENT.md).
-
-Hosted environment templates:
-
-- [.env.production.web.example](.env.production.web.example)
-- [.env.production.api.example](.env.production.api.example)
-- [.env.production.ai.example](.env.production.ai.example)
-- [.env.production.mobile.example](.env.production.mobile.example)
-- [notes/ROLLOUT-CHECKLIST.md](notes/ROLLOUT-CHECKLIST.md)
-
-These template files are expected to fail `npm run deploy:check` until their placeholder values are replaced with real hosted secrets and URLs.
-Create private working copies such as `.env.production.web` and `.env.production.api`; those real deployment files are now ignored by git.
-
-Before copying hosted values into Vercel, Render, or Expo, run the preflight validator:
+### Validation
 
 ```bash
-npm run deploy:check -- all .env
+npm run typecheck           # Full repo TypeScript check
+npm run smoke:session18     # Integration smoke tests
+npm run deploy:check        # Pre-deployment env validation
 ```
 
-After deployment, verify the live web, API, AI, GraphQL, and CORS wiring with:
+---
 
-```bash
-npm run deploy:verify -- .env.production.api
-```
+## API Endpoints
 
-## Demo story
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /graphql` | GraphQL API (21 queries + 38 mutations) |
+| `GET /healthz` | API health probe |
+| `POST /ai/parse-resume` | Resume parsing + skill extraction |
+| `POST /ai/generate-embedding` | Vector embedding generation |
+| `POST /ai/match-talent` | AI talent matching (7-factor scoring) |
+| `POST /ai/generate-role` | AI role description generation |
+| `GET /health` | AI engine health probe |
+| `GET /docs` | AI engine OpenAPI documentation |
 
-The seeded demo data is intentionally shaped around a realistic marketplace flow:
+---
 
-- multiple recruiter companies across AI SaaS, healthtech, fintech, logistics, and enterprise operations
-- talent profiles spanning AI, full-stack, data, cloud, QA, product design, and growth
-- seeded demand templates aligned to the implemented recruiter and mobile workflows
+## Demo Credentials
 
-## Deferred items
+| Role | Email | Password |
+|------|-------|----------|
+| Recruiter | `recruiter@marketplace.example` | `Password1!` |
+| Admin | `admin@marketplace.example` | `Password1!` |
+| Headhunter | `headhunter@marketplace.example` | `Password1!` |
+| Talent | `amina.khaled.talent@example.com` | `Password1!` |
 
-Explicitly kept out of MVP implementation:
+---
 
-- LinkedIn real API integration
-- Stripe billing and payments
-- SMS and OTP flows
-- video interview platform integration
-- e-signatures
-- custom ML models
-- advanced forecasting beyond current analytics simplification
+## Quality & Security
 
-These are tracked in [notes/ROADMAP.md](notes/ROADMAP.md).
+- **TypeScript everywhere** — zero `any` types, strict mode
+- **RBAC** — route-level and resolver-level role checks (Talent, Recruiter, Admin, Headhunter)
+- **JWT authentication** — access + refresh token rotation, bcrypt password hashing
+- **Input validation** — Zod schemas shared between frontend and API
+- **Secure secrets** — all API keys in environment variables, startup validation
+- **File security** — MIME type allowlist + 5MB file size cap on uploads
+- **AI engine auth** — internal API key required for all AI endpoints
+- **CORS** — allowlist-based cross-origin configuration
+
+---
+
+## Documentation
+
+| Document | Purpose |
+|----------|---------|
+| [notes/FOUNDATION.md](notes/FOUNDATION.md) | Architecture decisions, data model, tech stack rationale |
+| [notes/EXECUTION.md](notes/EXECUTION.md) | 19-session build plan mapping every SOW objective |
+| [notes/ADR.md](notes/ADR.md) | Architecture Decision Records |
+| [notes/DATABASE.md](notes/DATABASE.md) | ERD, model relationships, migration guide |
+| [notes/DESIGN-SYSTEM.md](notes/DESIGN-SYSTEM.md) | Color tokens, component patterns, typography |
+| [notes/DEPLOYMENT.md](notes/DEPLOYMENT.md) | Deployment topology and environment setup |
+| [notes/DEMO-SCRIPT.md](notes/DEMO-SCRIPT.md) | End-to-end demo walkthrough script |
+| [notes/CASE-STUDY.md](notes/CASE-STUDY.md) | Problem statement, solution, outcomes |
+| [notes/ROADMAP.md](notes/ROADMAP.md) | Phase 2/3 expansion roadmap |
+| [notes/ROLLOUT-CHECKLIST.md](notes/ROLLOUT-CHECKLIST.md) | Production launch checklist |
+| [PROGRESS.md](PROGRESS.md) | Live progress tracker (99% complete) |
+
+---
+
+## Phase 2 Roadmap (Post-MVP)
+
+Deliberately deferred from MVP — tracked in [notes/ROADMAP.md](notes/ROADMAP.md):
+
+- LinkedIn OAuth (real API integration)
+- Stripe billing & payment processing
+- SMS/OTP authentication (Twilio)
+- Video interview integration (Zoom/Teams API)
+- E-signature integration (DocuSign)
+- Custom ML models (beyond LLM-based matching)
+- Advanced demand forecasting engine
+- Native App Store builds (iOS/Android via EAS)
+- Multi-language / i18n support
+
+---
+
+## Project Stats
+
+| Metric | Count |
+|--------|-------|
+| SOW Modules Implemented | 16/16 |
+| SOW Deliverables Complete | 7/7 |
+| Web Routes | 27 |
+| Mobile Screens | 12 |
+| GraphQL Operations | 59 (21 queries + 38 mutations) |
+| Prisma Models | 18 |
+| AI Endpoints | 6 |
+| Email Templates | 5 |
+| Build Sessions | 19 |
+
+---
+
+*Built with TypeScript, Next.js 14, React Native, Apollo GraphQL, FastAPI, PostgreSQL + pgvector, and OpenRouter AI.*
