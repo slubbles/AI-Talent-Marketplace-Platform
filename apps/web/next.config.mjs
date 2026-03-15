@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: process.env.VERCEL ? undefined : "standalone",
+  output: "standalone",
   transpilePackages: ["@atm/shared", "@atm/ui"],
 };
 
