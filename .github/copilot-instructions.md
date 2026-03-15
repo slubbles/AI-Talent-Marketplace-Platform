@@ -8,8 +8,8 @@
 ## Project Identity
 
 - **What:** AI-powered Talent Marketplace Platform (web + mobile + AI engine)
-- **Who:** Built for Karim Oumran / SaaS King Ventures as a paid trial deliverable
-- **Goal:** Exceed expectations. Ship all 7 SOW deliverables. Get hired.
+- **Who:** Built for SaaS King Ventures
+- **Goal:** Ship all 7 SOW deliverables to production quality.
 - **Deadline:** March 31, 2026
 
 ## Source of Truth (Read These First)
