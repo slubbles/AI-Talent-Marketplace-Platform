@@ -2,10 +2,11 @@
 
 > Live progress on every session and deliverable.
 > Updated after each completed task.
-> Overall: **99%** (all sessions complete + security + E2E + SOW + Docker production + deployment)
+> Overall: **99%** (all sessions complete + security + E2E + SOW + Docker production + deployment + automated testing)
 
 ## Current Focus
 
+- Automated Testing Pass: **100%** — Jest test infrastructure + 53 passing tests + CI pipeline integration
 - UI Beautification Pass: **100%** — animations, glow effects, dark tooltips, LinkedIn stubs, billing page, landing CTA
 - UI Merge Build Fix Pass: **100%** — merged into `1st-execution`
 - Security Hardening Pass: **100%** — all HIGH/MEDIUM findings resolved
@@ -13,7 +14,7 @@
 - SOW Deliverable Completeness: **100%** — all 7 deliverables verified, all 16 modules implemented
 - Docker Production Deployment: **100%** — Dockerfiles + prod compose + env fix
 - Render Deployment: **100%** — API + AI Engine + PostgreSQL live on Render
-- Vercel Deployment: 🔄 In progress — configured with env vars, deploying
+- Vercel Deployment: **100%** — LIVE at ai-talent-marketplace-platform-web-mu.vercel.app
 - UI-SOW Audit: **100%** — full per-module audit with Gemini handoff priorities
 - README Rewrite: **100%** — production-grade README for stakeholder review
 - Session 18 — Integration, Testing + Deploy: **99%**
@@ -95,6 +96,27 @@ Commit: `2189026` on `1-with-UI-scaffolding`
 | Next.js standalone output + transpilePackages config | ✅ | 100 |
 | README updated with Docker production deployment docs | ✅ | 100 |
 | .env.example JWT_SECRET updated to non-crashing default | ✅ | 100 |
+
+## Automated Testing Infrastructure
+
+| Task | Status | % |
+|------|--------|---|
+| Install Jest + ts-jest + @types/jest in API, web, shared workspaces | ✅ | 100 |
+| Install @testing-library/react + jest-dom + user-event + jest-environment-jsdom for web | ✅ | 100 |
+| Create jest.config.mjs for API (ts-jest ESM, @atm/shared alias, setup file) | ✅ | 100 |
+| Create jest.config.mjs for web (jsdom, ts-jest JSX, path aliases) | ✅ | 100 |
+| Create jest.config.mjs for shared (ts-jest ESM) | ✅ | 100 |
+| Add `test` task to turbo.json (cache: false) | ✅ | 100 |
+| Add `test` script to API, web, shared package.json files | ✅ | 100 |
+| Write API JWT auth tests (7 tests — sign/verify access/refresh/reset tokens, tampering, roles) | ✅ | 100 |
+| Write API password hashing tests (3 tests — hash+verify, reject incorrect, unique salts) | ✅ | 100 |
+| Write API rate-limit tests (5 tests — under-limit, login/register/forgot blocks, separate scopes) | ✅ | 100 |
+| Write shared Zod schema tests (21 tests — register, login, profile, demand, interview, upload, search, enums) | ✅ | 100 |
+| Write web GraphQL client tests (5 tests — POST request, auth header, error handling, variables) | ✅ | 100 |
+| Verify existing Python AI engine tests (12 tests passing) | ✅ | 100 |
+| Add Jest steps to CI pipeline (.github/workflows/ci.yml) | ✅ | 100 |
+| Add pytest step to CI pipeline for AI engine | ✅ | 100 |
+| **Total: 53 tests across 4 workspaces, all passing** | ✅ | 100 |
 
 ## UI Merge Build Fix Snapshot
 
