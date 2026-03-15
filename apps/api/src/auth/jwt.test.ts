@@ -4,6 +4,7 @@ const mockUser = {
   id: "550e8400-e29b-41d4-a716-446655440000",
   email: "test@marketplace.example",
   role: "RECRUITER" as const,
+  emailVerified: true,
   isActive: true,
   firstName: "Test",
   lastName: "User"
